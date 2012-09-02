@@ -1,3 +1,16 @@
+Temp Note: I am uploading these files to test downloading and installing from a public repository
+
+You'll only have a ghost of a chance of getting this working I've done this. 
+
+Plus I'll have a list of the numerous libraries needed to install OneLine. 
+
+But it'll be really exciting then. 
+
+Hans
+
+----------------------------------------
+
+
 For installation instructions, please refer to the INSTALL.txt file.  
 
 Oneline Multibrowser/Application Launcher Alpha Release.
