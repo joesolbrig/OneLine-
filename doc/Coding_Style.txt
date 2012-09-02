@@ -1,0 +1,72 @@
+General:
+
+    This is the coding style of OneLine. It may not be a good style but consistancy has its
+    own virtue. 
+    
+    Try to avoid long functions and long files. 600 lines is where you have to think about
+    creating a new class or other changing things. 
+    Functions should fit on a single screen = 43 lines long. Lines should be <80 long but <90 
+    is tolerable occasionally. 
+    
+    Functions aim for a consistant return path. Series of "if" statements that each return on
+    success is good. Only returning at the end is good. 
+    
+    I have a lot of "header-only" classes. This is only from laziness and should be refactored. 
+    Doing stuff from laziness is OK as long as you refactor. 
+    
+    Every "module" should have a test but development isn't "Test driven". 
+    Use assert liberally but not radically. 
+    
+    Avoid multiple inheritance. Never multiple inheret from the 
+    
+    The code should be refactored regularly. Nothing should be so fragile you can't refactor. 
+    Tests help with this but we're not concerned with "100% code coverage" as such. 
+    Simple GUI code might need less, algorithms might require more. 
+    
+    Code should be self-documenting. Don't take comments too seriously since things
+    might have changed. The formatting of comments and documentation should take 
+    as little time as possible to allow it to happen and to allow it be rewritten. 
+    Don't use any "pretty" macro styles. Only the API parts of Oneline should have
+    embedded documentation (As of this MOMENT that's just plugin_interface.h but of
+    course that could change). 
+    
+    I have a weakness for multiline logic statement in if clauses. While these are 
+    nice to factor-out, when they exist, they should be indented one pseudo-tab longer
+    than the following line. 
+    
+    Use spaces instead of tabs, avoid trailing white space. Don't afraid to delete
+    trailing white space. Indent by 4 spaces. Do NOT pub a space between a function
+    name and a parenthesis EVER (hard to read, hard to grep, wastes time).
+    
+    It's OK to fork a library to include it is if the library is functional but advertises
+    itself as unstable or if you rip it out of a distribution that's large and unwieldy. 
+    (what I've done with gnome-menu-processing code and recol does with Binc)...
+    
+    Avoid conditional compilation if possible except for guards and such. 
+    
+    The only name prefixing to use is "m_myMember". Avoid public member variables
+    in checked-in code. I use "getMember" and "setMember" function names always. 
+    "getIsDone()" may be clunky but that's how it is. 
+    
+    It's OK to a pure structure with a constructor and 1-2 functions. 
+    
+    I have a few constructs with static member function being the way to access global
+    objects. If anyone call can tell me a better way, I'm to it but talk to me first. 
+    
+    I use c-style casts only. Avoid anything else. 
+    
+    No RTTI. 
+    
+    #defines, larger macros, const int's, and const QStrings are all signified by ALL CAPS. 
+    They should be interchangable with a naming convention following their use. Some may eventually
+    be replaced by enums and classes to enforce usage. Names are used accross projects but 
+    still should be refactorable to bring into consistant usage. 
+    
+    Use templates only if there's a complex abstract datatype you'd like to implement. 
+    Avoid STL as much as possible. Use the QT container classes or even roll you're own.
+    NEVER, never use BOOST. 
+    
+    
+    
+    
+    

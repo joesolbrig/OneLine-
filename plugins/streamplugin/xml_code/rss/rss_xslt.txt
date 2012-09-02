@@ -1,0 +1,33 @@
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+     xmlns:dc="http://purl.org/dc/elements/1.1/" version="1.0">
+
+  <xsl:output method="text"/>
+
+  <xsl:template match="*[local-name()='title']">
+    <xsl:text>title: </xsl:text>
+    <xsl:apply-templates/>
+  </xsl:template>
+
+  <xsl:template match="*[local-name()='link']">
+    <xsl:text>link: </xsl:text>
+    <xsl:apply-templates/>
+  </xsl:template>
+
+  <xsl:template match="*[local-name()='description']">
+    <xsl:text>description: </xsl:text>
+    <xsl:apply-templates/>
+  </xsl:template>
+
+  <xsl:template match="dc:creator">
+    <xsl:text>author: </xsl:text>
+    <xsl:apply-templates/>
+  </xsl:template>
+
+  <xsl:template match="dc:date">
+    <xsl:text>date: </xsl:text>
+    <xsl:apply-templates/>
+  </xsl:template>
+
+  <xsl:template match="language"/>  <!-- suppress -->
+
+</xsl:stylesheet>

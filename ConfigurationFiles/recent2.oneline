@@ -1,0 +1,7 @@
+
+Name="Recent Items2"
+Path="xslt_source://~/recently-used.xmel"
+XSL_File="oorecent_items.xsl"
+Source_Path="~/.recently-used"
+External_Weight=640
+Tag_Level=4

@@ -1,0 +1,120 @@
+#The full path is item's file name.
+Item_Path="custom_source://facebook/create_account"
+Item_Name="Facebook Account"
+Item_Description="Register Existing Facebook Account"
+Item_Description_Generator=" Add Facebook Account for $email:emailaddress+ to OneLine [$open:streamplugin:facebook++] "
+SourceTemplate=FacebookAccount
+childFillinData=FACE_ITEM_DATA
+
+[FacebookAccount]
+Item_Name="Facebook Action Of $user_name"
+access_url=$access_url
+child_gen_facebookSource=facebookSource
+Item_Path="feed://facebook_account/$user_name"
+Facebook_Source=1
+
+[facebookSource]
+Item_Name=$Item_Name
+Stream_Source_Path=$access_url
+Stream_key=$data_gen
+
+[FACE_ITEM_DATA]
+array_child_gen_facebookSource=FACE_ITEM_URLS
+
+[FACE_ITEM_URLS]
+1\access_url=https://graph.facebook.com/me/friends?access_token=$access_token
+1\Item_Name=Friends
+1\data_gen=FACEBOOK_FRIEND_GENERATOR
+2\access_url=https://graph.facebook.com/me/home?access_token=$access_token
+2\Item_Name="News feed"
+2\data_gen=FACEBOOK_NEWS_GENERATOR
+3\access_url=https://graph.facebook.com/me/feed?access_token=$access_token
+3\Item_Name="Profile feed (Wall)"
+3\data_gen=FACEBOOK_WALL_GENERATOR
+4\access_url=https://graph.facebook.com/me/likes?access_token=$access_token
+4\Item_Name=Likes
+4\data_gen=FACEBOOK_LIKE_GENERATOR
+5\access_url=https://graph.facebook.com/me/movies?access_token=$access_token
+5\Item_Name=Movies
+6\access_url=https://graph.facebook.com/me/music?access_token=$access_token
+6\Item_Name=Music:
+7\Item_Name=Books
+7\access_url=https://graph.facebook.com/me/books?access_token=$access_token
+8\Item_Name=Notes
+8\access_url=https://graph.facebook.com/me/notes?access_token=$access_token
+9\Item_Name=Permissions
+9\access_url=https://graph.facebook.com/me/permissions?access_token=$access_token
+10\Item_Name="Photo Tags"
+10\access_url=https://graph.facebook.com/me/photos?access_token=$access_token
+11\Item_Name="Photo Albums"
+11\access_url=https://graph.facebook.com/me/albums?access_token=$access_token
+12\Item_Name="Video Tags"
+12\access_url=https://graph.facebook.com/me/videos?access_token=$access_token
+13\Item_Name="Video Uploads"
+13\access_url=https://graph.facebook.com/me/videos/uploaded?access_token=$access_token
+14\Item_Name=Events
+14\access_url=https://graph.facebook.com/me/events?access_token=$access_token
+15\Item_Name=Groups
+15\access_url=https://graph.facebook.com/me/groups?access_token=$access_token
+16\Item_Name=Checkins
+16\access_url=https://graph.facebook.com/me/checkins?access_token=$access_token
+size=16
+
+
+[FACEBOOK_LINK_GENERATOR]
+;The comment with possible link, etc
+Item_Path="facebook://link/$id+"
+DESCRIPTION_KEY_STR=$message
+ICON_KEY_STR=$icon:url_icon
+ITEM_CREATION_TIME_KEY_STR=$created_time:IETF_RFC_3339_TIME
+Use_Description_Key_Str="1"
+child_gen_from=user
+child_gen_link=link
+child_gen_comments = comments
+
+[link]
+;The actual link
+CreatedFromParentAttribs=1
+Item_Path="$link"
+NAME_KEY_STR="$name"
+NAME_KEY_STR_ATTRIB_PRIORITY=1
+DESCRIPTION_KEY_STR="[$caption|$description]"
+USER_DESCRIPTION_KEY_STR=1
+LONG_TEXT_KEY_STR = $description
+ICON_KEY_STR=$picture:url_icon
+THUMBNAIL_KEY_STR=$picture:url_icon
+
+[comments]
+;this is a place-hold for its children
+Item_Path="builtin://comment_placeholder"
+TakesChildrenOf=1
+child_gen_data=data
+
+[data]
+Item_Path="facebook://comment/$id+"
+child_gen_from=user
+NAME_KEY_STR=$message#20
+DESCRIPTION_KEY_STR=$message
+ITEM_CREATION_TIME_KEY_STR=$created_time:IETF_RFC_3339_TIME
+
+[user]
+Item_Path="facebook://contact/$id+"
+NAME_KEY_STR=$name
+child_gen_person=person
+DESCRIPTION_KEY_STR=$name
+Use_Description_Key_Str="1"
+
+[person]
+IsParent=1
+Item_Path=person://$name
+Source=facebook
+NAME_KEY_STR=$name
+DESCRIPTION_KEY_STR=$name
+Use_Description_Key_Str="1"
+child_gen_tag=tag
+
+[tag]
+;Note that the tag is within "contacts"
+IsParent=1
+Item_Path="tag://contacts"
+

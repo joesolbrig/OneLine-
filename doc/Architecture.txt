@@ -1,0 +1,67 @@
+A Outline of The OneLine Architecture:
+
+Main Parts:
+    UI
+	Main User Window:
+	    --> parses keystrokes, creates background threads for updating sources and
+	    integrates all the rest of the application. Searching is done in the 
+	    background to maintain keyboard responsiveness. The UI does updating 
+	    since the items of user interest are those which need updating most. 
+	Edit Box
+	ListFrame
+	    Item List (we have multiple nested frame for animate and message bar etc)
+	Preview Box (contained in Item List)
+	Top Message Bar
+	Margin Window
+	    Holds everything together
+    "User Input Container" (Itemarglist, etc)
+	--> This keeps track of user input and UI state and lets the 
+	user navigate into subitems, tab between parts of an action, etc
+	Itemarglist - keeps track of an entire user "expression", that
+		    is a 
+    Item DB (catalog, cat_store, etc)
+	--> Stores scanned and downloaded information, manages the complex
+	contextual rules for finding items, organizes items by FRECENCY
+	by selectively reweighing recent items. Items ultimately stored
+	in a KyotoDB key-value store on disk. Btree-Indices are stored seperately on disk
+	in a custom format. A trie-based index is used to keep of item by keystroke.
+	This index is not currently stored. 
+    Background update and plugins (Catbuilder, PluginManager, etc)
+	The catalogue builder talks to the catalog directly as well as
+	starting update processes which talk to the plugin Manager. 
+	---> Oneline uses an update process which updates higher-weighted
+	sources more frequently as well as updating sources and items 
+	which become visible in the UI. Each plugin asigns its own 
+	weights to the items it return for the catalogue. The catalog
+	in turn weighs the overall result, compensating for the different
+	scales of the various sources with clever algorithms. 
+	
+    Plugins:
+	--> One line uses a plugin architecture. Plugins are themselves rather general purpose. The stream plugin
+	deals with RSS, on-disk XML files and the Facebook/twitter API. 
+	--> One Line aims to encapsulate most external source using either a simple config file or interfaces to standard
+	libraries. 
+	* Firefox (could semi-easily adapted to any SQLite application)
+	* Stream (parses XML, HTML and JSON sources, does Oauth 1.1 and Oauth 2.2 authentication)
+    
+Utilitie Classes:
+    CatItem: Catalogue item is a class that abstracts the properties of "standard information items": 
+	    files, emails, blog-posts, facebook-posts and so-forth. 
+	    CatItems are stored and uniquely identified as a path/URL.
+	    The *NAME* of an item is considered the main way in which it be recognized by the user. 
+	    An items name is a short, not-necessarily unique term, generally not containing slashes. 
+	    It's equivalent to the name of a file, the subject of an email, a tag or key word. 
+	    
+	    Catalog items in general are stored in a digraph. Each item can have many parents and children.
+	    Items have a cache of their children to avoid constantly going to the database. 
+	    
+	    ListItem, ItemRep, VerbItem:
+	    These Subclasses of this class exist for parsing, formatting and storage purposes. 
+	    Generally only catItem are passed from one part of the application to another. 
+    
+    
+    
+    
+    
+
+    

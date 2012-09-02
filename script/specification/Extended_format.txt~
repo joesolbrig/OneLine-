@@ -1,0 +1,19 @@
+Extending the ini format for my purposes:
+
+Why not Json?
+    A. Even the simple overhead of quotes around a key
+    hits readability a lot. 
+    B. I want something that gives an outline of objects
+    and this fills that in.
+
+Extension:
+    1. Arrays: 
+	A. Just use [key*] and repeat subkeys and this becomes
+	an array
+	B. Use: key==[V1, V2,...] and this is an array of keys
+    2. 
+
+
+Item-type-overlays:
+    Our basic types would involve something like:
+	

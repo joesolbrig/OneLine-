@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Parsing RSS with XSLT, in an iframe</title>
+<meta name="MSSmartTagsPreventParsing" content="true">
+<meta name="author" content="(c) Wieland 2005. Made available under the GNU Free Documentation License, version 1.2. See http://www.gnu.org/copyleft/fdl.html for details.">
+<style type="text/css">
+pre.code
+	{
+	margin-top: 20px;
+	margin-bottom: 20px;
+	font-family: monospace;
+	padding: 5px;
+	border: dashed 1px #000;
+	color: #000;
+	background: #ddd;
+	}
+.meta {font-size: 0.9em; font-style: italic;}
+.important {font-weight: bold;}
+</style>
+</head><body>
+<h1>Parsing RSS with XSLT, in an iframe</h1>
+<p class="meta">(c) Wieland, 2005. Published under the GNU Free Documentation License, version 1.2. See <a href="http://www.gnu.org/copyleft/fdl.html">here</a> for details.<br>Last modified: 09 Sept 2005</p>
+
+<p>Following <a href="http://www.alamagordo.org/multiblogfaq.html#q6">this question</a> in my FAQ on <a href="http://help.blogger.com/bin/answer.py?answer=127&amp;topic=29">Multiblogging</a>,
+I've been experimenting with parsing RSS in an iframe, using XSLT.
+Turns out it works perfectly, as long as your host serves XML with the
+correct MIME-type.</p>
+
+<p>Below, you can see my sample RSS 2.0 feed (yes, <a href="http://feedvalidator.org/check.cgi?url=http://www.alamagordo.org/rss/multiblog.rss">it's valid</a>).
+It's being parsed through XSLT and rendered as HTML. The feed is
+embedded in this page using an &lt;object&gt;-tag (the dashed border
+was added for clarity):</p>
+<p><em>Update (13 Oct 2007)</em>: Firefox 2+ and IE7 ignore XSL(T) in
+RSS, applying their own styles in stead. Regretfully, the only way
+around this is a lame hack, which I've applied below. For more info,
+view the RSS source or see <a href="http://www.ibm.com/developerworks/xml/library/x-think40/" title="IBM Developerworks - Thinking XML: Firefox 2.0 and XML">this article</a> and, of course, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=338621" title="Mozilla bug 338621: Feed View overrides XSLT stylesheet defined in XML document">bug #338621</a>. Safari shows the same behaviour, but the hack doesn't work. IMHO, RSS/XSTL in Safari is fundamentally broken.</p>
+<pre class="code">&lt;object name="mbrss" type="application/xml" width="500" height="450" data="./multiblog.rss" style="border: 1px dashed #ddd;"&gt;&lt;/object&gt;
+</pre>
+
+<object name="mbrss" type="application/xml" data="multiblog_rss_files/multiblog.rss" style="border: 1px dashed rgb(221, 221, 221);" width="500" height="450"></object>
+
+<p>Here's the source code for the RSS (multiblog.rss):</p>
+
+<pre class="code">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;!-- Firefox 2.0 and Internet Explorer 7 use simplistic feed sniffing to override desired presentation behavior 
+for this feed, and thus we are obliged to insert this comment, a bit of a waste of bandwidth, unfortunately.
+ This should ensure that the following stylesheet processing instruction is honored by these new browser versions. 
+For some more background you might want to visit the following bug report: https://bugzilla.mozilla.org/show_bug.cgi?id=338621
+--&gt;
+&lt;?xml-stylesheet type="text/xsl" href="multiblog.xsl"?&gt;
+&lt;rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;
+    &lt;channel&gt;
+    &lt;title&gt;RSS 2.0 Feed&lt;/title&gt;
+    &lt;link&gt;http://www.alamagordo.org/&lt;/link&gt;
+    &lt;description&gt;This is an experiment. I'm trying to parse an RSS feed using XSLT.&lt;/description&gt;
+    &lt;language&gt;en-us&lt;/language&gt;
+    &lt;item&gt;
+      &lt;title&gt;Multiblog&lt;/title&gt;
+      &lt;link&gt;http://www.alamagordo.org/multiblogfaq.html&lt;/link&gt;
+      &lt;description&gt;I got the idea while editing my Multiblog FAQ.&lt;/description&gt;
+      &lt;dc:creator&gt;Wieland&lt;/dc:creator&gt;
+      &lt;dc:date&gt;2005-09-09&lt;/dc:date&gt;    
+    &lt;/item&gt;
+    &lt;item&gt;
+      &lt;title&gt;In particular...&lt;/title&gt;
+      &lt;link&gt;http://www.alamagordo.org/multiblogfaq.html#q6&lt;/link&gt;
+      &lt;description&gt;...while writing this bit on RSS.&lt;/description&gt;
+      &lt;dc:creator&gt;Wieland&lt;/dc:creator&gt;
+      &lt;dc:date&gt;2005-09-09&lt;/dc:date&gt;    
+    &lt;/item&gt;
+  &lt;/channel&gt;
+&lt;/rss&gt;</pre>
+
+<p>And here's the XSLT (multiblog.xsl):</p>
+
+<pre class="code">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+     xmlns:dc="http://purl.org/dc/elements/1.1/" version="1.0"&gt;
+&lt;xsl:template match="//rss"&gt;
+  &lt;html&gt;
+  &lt;body&gt;
+    &lt;h1&gt;&lt;xsl:value-of select="/rss/channel/title"/&gt;&lt;/h1&gt;
+    &lt;p&gt;&lt;xsl:value-of select="/rss/channel/description"/&gt;&lt;/p&gt;
+    &lt;xsl:element name="a"&gt;
+      	&lt;xsl:attribute name="href"&gt;
+      		&lt;xsl:value-of select="link"/&gt;
+      	&lt;/xsl:attribute&gt;
+      	Read more...
+    &lt;/xsl:element&gt;
+    &lt;xsl:for-each select="/rss/channel/item"&gt;
+        &lt;h2&gt;&lt;xsl:value-of select="title"/&gt;&lt;/h2&gt;
+        &lt;p&gt;&lt;xsl:value-of select="description"/&gt;&lt;/p&gt;
+        &lt;p&gt;
+    &lt;xsl:element name="a"&gt;
+      	&lt;xsl:attribute name="href"&gt;
+        	&lt;xsl:value-of select="link"/&gt;
+      	&lt;/xsl:attribute&gt;
+      	Read more...
+    &lt;/xsl:element&gt;
+    &lt;/p&gt;
+    &lt;p style="color: #ccc; font-size: 0.7em;"&gt;&lt;xsl:value-of select="dc:creator"/&gt;&lt;/p&gt;
+    &lt;p style="color: #ccc; font-style: italic; font-size: 0.7em;"&gt;&lt;xsl:value-of select="dc:date"/&gt;&lt;/p&gt;
+    &lt;/xsl:for-each&gt;
+  &lt;/body&gt;
+  &lt;/html&gt;
+&lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;
+</pre>
+
+<p>If you have any questions or comments, please <a href="http://www.alamagordo.org/contactme.php">contact me</a>.</p>
+
+</body></html>

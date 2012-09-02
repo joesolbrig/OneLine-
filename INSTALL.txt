@@ -1,0 +1,6 @@
+Building on Linux:
+
+For debian and ubuntu:
+sudo apt-get install libqt4-dev libboost-dev g++
+make ; sudo make install
+

@@ -1,0 +1,8 @@
+<!ENTITY oneliness.label "Your localized menuitem">
+<!ENTITY onelinessContext.label "Your Menuitem">
+<!ENTITY onelinessContext.accesskey "Y">
+<!ENTITY onelinessToolbarButton.label "Your Toolbar Button">
+<!ENTITY onelinessToolbarButton.tooltip "This is your toolbar button!">
+<!ENTITY onelinessSidebar.label "Your Sidebar">
+<!ENTITY onelinessToolbar.name  "example">
+<!ENTITY onelinessToolbar.label "This is an example toolbar. You can hide it under View &gt; toolbars &gt; &onelinessToolbar.name;">

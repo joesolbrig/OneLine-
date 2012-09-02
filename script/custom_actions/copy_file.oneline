@@ -1,0 +1,5 @@
+Item_Name="Copy File"
+Item_Description_Generator=" copy $filename:file+ to $destination:filefolder+"
+command="cp $filename $destination" 
+Icon="/usr/share/icons/gnome/32x32/actions/stock_copy.png"
+

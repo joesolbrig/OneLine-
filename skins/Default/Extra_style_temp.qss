@@ -1,0 +1,8 @@
+QLabel#input { 
+    font:  12px "Verdana";
+    border-width: 0px;
+    background-color: rgba(0,244,120,0%);
+    border-style: solid;
+    color: #666666;
+}
+

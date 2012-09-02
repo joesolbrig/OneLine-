@@ -1,0 +1,31 @@
+#Base Item is created from the keyvalue outside any group
+
+#Standard Item Info - item is type "verb" automatically
+Name="Add Server Account"
+Path="custom_source://server/create_account"
+EXECUTE_IF_FULLFILLED=true;
+sort_key=message
+#contains the fields that will form our final goal
+Description_generator="Add Existing Server Account [$finalkey:remote:StreamPlugin+] [$user_name:remote:StreamPlugin+-]"
+
+#Specify URLs visited, results gotten and further url created and visited
+#pass1
+beginUrl= server.com?foo=$encrypt(storedResult)
+finishedURL=success.server.com
+result=$download_and_wait_user(beginUrl, finishedURL)
+#pass2
+URL= server.com?foo=$pass1.result
+finalRes=$reg($download(#url));
+finalKey=$finalRes:regex("(hj+)")
+#user2
+
+#data
+Server_ID=3241324
+Server_Key=98798345
+
+#child generation keys
+creatChildrenFromArray:ServerURLS=ServerAccount
+createChild=ServerEntry
+
+[ServerAccount]
+....

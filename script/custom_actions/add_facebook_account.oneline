@@ -1,0 +1,209 @@
+Item_Path="custom_source://facebook/create_account"
+Item_Name="Add Facebook Account"
+DESCRIPTION_KEY_STR="Add Existing Facebook Account To Runway"
+Item_Description_Generator="Add Facebook Account [$oathkey:FacebookId:StreamPlugin+] for [$user_name++]"
+EXECUTE_IF_FULLFILLED=1;
+SourceTemplate=FacebookAccount
+childFillinData=FACE_ITEM_DATA
+SPECIFICALLY_CHOSEN_KEY=1
+SORTING_TYPE_KEY=110
+ITEM_TYPE_KEY_STR=10
+
+FB_App_ID=152825198104910
+FB_API_Key=58e3d3263c86c52c82cbde48e0c62d5f
+FB_App_Secret=309749607205bf286435be6d9f38cc0
+FB_LOGIN_URL=https://www.facebook.com/dialog/oauth
+REDIRECT_URI=http://www.facebook.com/connect/login_success.html
+FB_PERMISSION_TOKEN_URL=?client_id=$FB_App_ID&redirect_uri=$REDIRECT_URI&scope=read_stream,publish_stream
+
+[FacebookAccount]
+Item_Name="Facebook Account of $user_name"
+Message_Source="Facebook Account of $user_name"
+child_gen_facebookSource=facebookSource
+Item_Path="feed://facebook_account/$user_name"
+JSON_ACCESS_TOKEN=$oathkey
+#external source, Facebook
+Facebook_Account_Key=1
+SOURCE_WEIGHT_KEY_STR=5120
+Item_Parent_Path0=type://100
+
+[facebookSource]
+Item_Path=feed://facebook_source/$FB_SOURCE_TYPE/$user_name/
+Item_Name=$FB_SOURCE_TYPE of $user_name
+DESCRIPTION_KEY_STR="$FB_SOURCE_TYPE for $user_name"
+USE_DESCRIPTION_KEY_STR=1
+Facebook_Source=1
+TAG_LEVEL_KEY_STR=6 
+UPDATEABLE_SOURCE_KEY=1
+Stream_Source_Path=$access_url
+Stream_key=$data_gen
+ITEM_TYPE_KEY_STR=20
+TAG_LEVEL_KEY_STR=6
+
+[FACE_ITEM_DATA]
+array_child_gen_facebookSource=FACE_ITEM_URLS
+
+[FACE_ITEM_URLS]
+1\access_url=https://graph.facebook.com/me/friends
+1\FB_SOURCE_TYPE=Friends
+1\data_gen=FACEBOOK_FRIEND_GENERATOR
+2\access_url=https://graph.facebook.com/me/home
+2\FB_SOURCE_TYPE="News feed"
+2\data_gen=FACEBOOK_NEWS_GENERATOR
+3\access_url=https://graph.facebook.com/me/feed
+3\FB_SOURCE_TYPE="Profile feed (Wall)"
+3\data_gen=FACEBOOK_WALL_GENERATOR
+4\access_url=https://graph.facebook.com/me/likes
+4\FB_SOURCE_TYPE=Likes
+4\data_gen=FACEBOOK_LIKE_GENERATOR
+5\access_url=https://graph.facebook.com/me/movies
+5\FB_SOURCE_TYPE=Movies
+5\data_gen=FACEBOOL_MOVIE_GENERATOR
+6\access_url=https://graph.facebook.com/me/music
+6\FB_SOURCE_TYPE=Music
+6\data_gen=FACEBOOL_MUSIC_GENERATOR
+7\access_url=https://graph.facebook.com/
+7\FB_SOURCE_TYPE=Post Update
+7\data_gen=FACEBOOL_UPDATE_GENERATOR
+size=7
+
+[FACEBOOK_FRIEND_GENERATOR]
+;this is a place-hold for its children
+Item_Path="builtin://friend_placeholder"
+TakesChildrenOf=1
+child_gen_data=user
+
+[FACEBOOK_NEWS_GENERATOR]
+Item_Path="builtin://news_placeholder"
+TakesChildrenOf=1
+child_gen_data=facebook_news_item
+
+[FACEBOOL_UPDATE_GENERATOR]
+Item_Path="verb://post_to_facebook"
+Item_Name="Post To Facebook Feed"
+command=curl -F 'access_token=$oathkey;' -F 'message=$$message:longtext+;'  https://graph.facebook.com/$user_name/feed
+USE_DESCRIPTION_KEY_STR=1
+ITEM_TYPE_KEY_STR=10
+
+[FACEBOOK_WALL_GENERATOR]
+Item_Path="builtin://wall_placeholder"
+TakesChildrenOf=1
+child_gen_data=facebook_news_item
+
+[facebook_news_item]
+;The comment with possible link, etc
+Item_Path="feed://facebook/news/$id+"
+Item_Name=[$message|$name]
+USE_DESCRIPTION_KEY_STR=1
+ITEM_TYPE_KEY_STR=100
+DESCRIPTION_KEY_STR="Facebook post from $from.name"
+ITEM_CREATION_TIME_KEY_STR=$created_time:IETF_RFC_3339_TIME
+USE_TYPE_DESCRIPTION_KEY_STR=1
+child_gen_from=user
+child_gen_link=link
+child_gen_action=action
+child_gen_comments=comments
+EXTERNAL_WEIGHT_KEY_STR=5120
+SUPPORT_SOURCE_UPDATE_TIME_KEY=1
+RELEVANCE_WEIGHT_KEY_STR="5120"
+SOURCE_WEIGHT_KEY_STR="1000000"
+SHOULD_CACHE_KEY=1
+UPDATEABLE_SOURCE_KEY=1
+IS_TIMELY_ITEM_KEY_STR=1
+command=http://www.facebook.com/$id'\d+'/posts/$id'_\d+'
+ICON_URL_KEY=$ico
+authenticate_str=$authenticate_str
+HTML_PREVIEW_KEY=<p>from:$from.name $created_time:IETF_RFC_3339_TIME<br>$message[<br>$name][<br>$caption][<br>$description]</p>
+
+[link]
+;The actual link
+CreatedFromParentAttribs=1
+Item_Path="$link"
+Item_Name="[$message|$name]"
+NAME_KEY_STR_ATTRIB_PRIORITY=1
+DESCRIPTION_KEY_STR="[$caption|$description]"
+USE_TYPE_DESCRIPTION_KEY_STR=1
+ITEM_TYPE_KEY_STR=100
+LONG_TEXT_KEY_STR = $description
+ICON_URL_KEY=$picture
+EXTERNAL_WEIGHT_KEY_STR=5120
+child_gen_link=action
+command=$link
+SHOULD_CACHE_KEY=1
+IS_TIMELY_ITEM_KEY_STR=1
+HTML_PREVIEW_KEY=<p>$created_time:IETF_RFC_3339_TIME<br>[$message|$name][<br>$name]<A href=$link>[<br>$caption][<br>$description]</h></p>
+
+[comments]
+;this is a place-hold for its children
+Item_Path="builtin://comment_placeholder"
+TakesChildrenOf=1
+child_gen_data=fb_comments
+EXTERNAL_WEIGHT_KEY_STR=5120
+SUPPORT_SOURCE_UPDATE_TIME_KEY=1
+RELEVANCE_WEIGHT_KEY_STR=5120
+UPDATEABLE_SOURCE_KEY=1
+ITEM_TYPE_KEY_STR=100
+SHOULD_CACHE_KEY=1
+IS_TIMELY_ITEM_KEY_STR=1
+
+[fb_comments]
+Item_Path="facebook://comment/$id+"
+child_gen_from=user
+Item_Name=$message#20
+USE_DESCRIPTION_KEY_STR=1
+DESCRIPTION_KEY_STR=$message
+ITEM_TYPE_KEY_STR=100
+ITEM_CREATION_TIME_KEY_STR=$created_time:IETF_RFC_3339_TIME
+EXTERNAL_WEIGHT_KEY_STR=40
+SUPPORT_SOURCE_UPDATE_TIME_KEY=1
+RELEVANCE_WEIGHT_KEY_STR=40
+SOURCE_WEIGHT_KEY_STR=40
+UPDATEABLE_SOURCE_KEY=1
+USE_TYPE_DESCRIPTION_KEY_STR=1
+IS_SUBORDINATE_KEY=1
+IS_TIMELY_ITEM_KEY_STR=1
+HTML_PREVIEW_KEY=<p>from:$from.name $created_time:IETF_RFC_3339_TIME<br>$message</p>
+command=http://www.facebook.com/$source/$sourceType/$id/?cmntid=$subid
+
+[user]
+IsParent=1
+RELATION_NAME_KEY=poster
+Item_Path="facebook://facebook_contact/$id+"
+Item_Name=$name
+Person_Posting=$name
+is_intermediate_source=1
+DESCRIPTION_KEY_STR="Facebook User"
+child_gen_person=person
+USE_DESCRIPTION_KEY_STR="1"
+ITEM_TYPE_KEY_STR=105
+EXTERNAL_WEIGHT_KEY_STR=5120
+SUPPORT_SOURCE_UPDATE_TIME_KEY=1
+RELEVANCE_WEIGHT_KEY_STR=5120
+SOURCE_WEIGHT_KEY_STR=5120
+UPDATEABLE_SOURCE_KEY=1
+USE_TYPE_DESCRIPTION_KEY_STR=1
+HTML_PREVIEW_KEY=<p><BR>name:$name <br>$message</p>
+command=http://www.facebook.com/home.php?#!/profile.php?id=$id
+
+[person]
+CreatedFromParentAttribs=1
+IsParent=1
+Item_Path=person://$name
+DESCRIPTION_KEY_STR="Facebook Friend"
+USE_DESCRIPTION_KEY_STR=1
+Source=facebook
+Item_Name=$name
+child_gen_tag=tag
+ITEM_TYPE_KEY_STR=105
+EXTERNAL_WEIGHT_KEY_STR=5120
+SUPPORT_SOURCE_UPDATE_TIME_KEY=1
+RELEVANCE_WEIGHT_KEY_STR=5120
+SOURCE_WEIGHT_KEY_STR=5120
+UPDATEABLE_SOURCE_KEY=1
+USE_TYPE_DESCRIPTION_KEY_STR=1
+
+[tag]
+;Note that the tag is within "contacts"
+IsParent=1
+Item_Path="tag://contacts"
+

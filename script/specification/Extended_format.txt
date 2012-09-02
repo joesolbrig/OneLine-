@@ -1,0 +1,45 @@
+Extending the ini format for my purposes:
+
+Why not Json?
+    A. Even the simple overhead of quotes around a key
+    hits readability a lot. 
+    B. I want something that gives an outline of objects
+    and this fills that in.
+    
+Introduction
+    * I'm haphazardly putting together a Domain Specific Language
+    for tree-manipulation and form-entry. 
+    * The first goal is to have statements which "cleaning"
+    express the structures we're aiming for. 
+    * A json key can go to:
+	1. A constant value/# or string
+	2. An array
+	3. A key-value array
+    * key = "$value1 and $value2" implies value1 and value2 are
+    keys with constant values
+    * key+=subkey implies subkey is an associative array or 
+	simple array of associative arrays
+    * key+=subkey+ implies the same except 
+    that subkey comes from the ini-file itself instead of the
+    input-object
+    * key+=[[subkey-]subkey1] --- some conditional expansion...
+    
+
+Extension:
+    1. Arrays: 
+	A. Just use [key*] and repeat subkeys and this becomes
+	an array
+	B. Use: key==[V1, V2,...] and this is an array of keys
+    2. Subkey Expansion
+	(key)+=subkey 
+	    instead of 
+	child_gen_key=subkey
+	
+	arraykey*=subkey
+	    expands subkey by arraykey
+    3. 
+
+Item-type-overlays:
+    Our basic types would involve a cascade of overlays:
+	If key1==v1 then key2=v2 by default, etc
+	

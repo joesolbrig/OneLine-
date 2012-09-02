@@ -1,0 +1,20 @@
+Source: oneline
+Section: unknown
+Priority: extra
+Maintainer: Hans Solbrig <jsolbrig@github.com>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: oneline
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Keystroke Launcher and Universal Browser
+    OneLine allows you to create a single "feed" of relevant
+    information items, setting the priority of each source
+    either automatically according to what you or manually,
+    as you choose. 
+        Runway extends the Keystroke Launcher
+    to be a file manager, email client, RSS Feeder
+    and client for private websites (Facebook, twitter)
+    letting you use the minimum keystrokes to get at
+    any piece of information. 

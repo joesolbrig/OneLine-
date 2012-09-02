@@ -1,0 +1,7 @@
+STREAM_FILTER_FILESOURCE= $dir.apphome/xsl_code/xbel.xsl
+Stream_Source_Path=$dir.home/.recently-used.xbel
+EXTERNAL_WEIGHT_KEY_STR=5120
+SOURCE_WEIGHT_KEY_STR="1000000"
+TAG_LEVEL_KEY_STR=5
+UPDATEABLE_SOURCE_KEY=1
+

@@ -1,0 +1,48 @@
+These queries can only be executed by an application with certain extended permissions, and the Test Console does not have any. To perform these queries on your own, you need to have a Facebook application you administer. You can then enable the needed permissions using the following two URIs, replacing "ffffffffffffffffffffffffffffffff" with the application's API key:
+
+    * http://www.facebook.com/authorize.php?api_key=ffffffffffffffffffffffffffffffff&v=1.0&ext_perm=read_mailbox
+    * http://www.facebook.com/authorize.php?api_key=ffffffffffffffffffffffffffffffff&v=1.0&ext_perm=read_stream
+    
+-----------------------------
+
+   1. Profile information of you and your friends: SELECT uid, first_name, last_name, name, pic_big, affiliations, religion, birthday, birthday_date, sex, hometown_location, political, current_location, activities, interests, music, tv, movies, books, quotes, about_me, hs_info, education_history, work_history, profile_url, profile_blurb, family, username, website FROM user WHERE uid = 00000000 OR uid IN (SELECT uid2 FROM friend WHERE uid1 = 00000000)
+   2. Your friend lists: SELECT flid, name FROM friendlist WHERE owner = 00000000
+   3. The members of your friend lists: SELECT flid, uid FROM friendlist WHERE flid IN (SELECT flid FROM friendlist WHERE owner = 00000000)
+   4. Pages you're a fan of: SELECT page_id, name, pic_big, website, type FROM page WHERE page_id IN (SELECT page_id FROM page_fan WHERE uid = 00000000)
+   5. Links you have posted: SELECT link_id, owner_comment, created_time, title, summary, url, image_urls FROM link WHERE owner = 00000000
+   6. Events you have attended: SELECT eid, name, tagline, pic_big, host, description, event_type, event_subtype, start_time, end_time, creator, location, venue FROM event WHERE eid IN (SELECT eid FROM event_member WHERE uid = 00000000 AND rsvp_status = "attending")
+   7. Your notes: SELECT note_id, title, created_time, content FROM note WHERE uid = 00000000
+   8. Comments on your notes: SELECT object_id, post_id, fromid, time, text FROM comment WHERE object_id IN (SELECT note_id FROM note WHERE uid = 00000000)
+   9. Your photo albums: SELECT aid, cover_pid, name, created, modified, description, location, size, link, visible, modified_major, type, object_id FROM album WHERE owner = 00000000
+  10. Comments on your photo albums: SELECT object_id, post_id, fromid, time, text FROM comment WHERE object_id IN (SELECT object_id FROM album WHERE owner = 00000000)
+  11. Your photos' metadata: SELECT pid, aid, src_big, src_big_height, src_big_width, link, caption, created, modified, object_id FROM photo WHERE aid IN (SELECT aid FROM album WHERE owner = 00000000)
+  12. Comments on your photos: SELECT object_id, post_id, fromid, time, text FROM comment WHERE object_id IN (SELECT object_id FROM photo WHERE aid IN (SELECT aid FROM album WHERE owner = 00000000))
+  13. People tagged in your photos: SELECT pid, subject, text, xcoord, ycoord, created FROM photo_tag WHERE pid IN (SELECT pid FROM photo WHERE aid IN (SELECT aid FROM album WHERE owner = 00000000))
+  14. Your videos' metadata: SELECT vid, title, description, thumbnail_link, embed_html, updated_time, created_time FROM video WHERE owner = 00000000
+  15. Comments on your videos: SELECT object_id, post_id, fromid, time, text FROM comment WHERE object_id IN (SELECT vid FROM video WHERE owner = 00000000)
+  16. People tagged in your videos: SELECT vid, subject FROM video_tag WHERE vid IN (SELECT vid FROM video WHERE owner = 00000000)
+  17. Groups you're a member of: SELECT gid, name, nid, pic_big, description, group_type, group_subtype, recent_news, creator, update_time, office, website, venue, privacy FROM group WHERE gid IN (SELECT gid FROM group_member WHERE uid = 00000000)
+
+Part 3: Extended FQL Queries
+
+Once these permissions are enabled, you can again use the API Test Console by setting the application field accordingly.
+
+   1. Threads in your inbox (requires "read_mailbox" permissions): SELECT thread_id, folder_id, subject, recipients, updated_time, parent_message_id, parent_thread_id, message_count, snippet, snippet_author, object_id FROM thread WHERE folder_id = 0
+   2. Threads in your outbox (requires "read_mailbox" permissions): SELECT thread_id, folder_id, subject, recipients, updated_time, parent_message_id, parent_thread_id, message_count, snippet, snippet_author, object_id FROM thread WHERE folder_id = 1
+   3. Messages in your inbox (requires "read_mailbox" permissions): SELECT message_id, thread_id, author_id, body, created_time, attachment FROM message WHERE thread_id IN (SELECT thread_id FROM thread WHERE folder_id = 0)
+   4. Messages in your outbox (requires "read_mailbox" permissions): SELECT message_id, thread_id, author_id, body, created_time, attachment FROM message WHERE thread_id IN (SELECT thread_id FROM thread WHERE folder_id = 0)
+   5. Your wall posts (requires "read_stream" permissions): SELECT post_id, app_id, source_id, updated_time, created_time, attribution, actor_id, target_id, message, app_data, action_links, attachment, comments, likes, privacy, permalink, tagged_ids, is_hidden FROM stream WHERE source_id = 00000000
+   6. Comments on your wall posts (requires "read_stream" permissions): SELECT post_id, fromid, time, text FROM comment WHERE post_id IN (SELECT post_id FROM stream WHERE source_id = 00000000)
+
+   1. Photos you're tagged in: SELECT pid, aid, src_big, src_big_height, src_big_width, link, caption, created, modified, object_id FROM photo WHERE pid IN (SELECT pid FROM photo_tag WHERE subject = 00000000)
+   2. Comments on photos you're tagged in: SELECT object_id, post_id, fromid, time, text FROM comment WHERE object_id IN (SELECT object_id FROM photo WHERE pid IN (SELECT pid FROM photo_tag WHERE subject = 00000000))
+   3. People tagged in photos you're tagged in: SELECT pid, subject, text, xcoord, ycoord, created FROM photo_tag WHERE pid IN (SELECT pid FROM photo WHERE pid IN (SELECT pid FROM photo_tag WHERE subject = 00000000))
+   4. Videos you're tagged in: SELECT vid, title, description, thumbnail_link, embed_html, updated_time, created_time FROM video WHERE vid IN (SELECT vid FROM video_tag WHERE subject = 00000000)
+   5. Comments on videos you're tagged in: SELECT object_id, post_id, fromid, time, text FROM comment WHERE object_id IN (SELECT vid FROM video WHERE vid IN (SELECT vid FROM video_tag WHERE subject = 00000000))
+   6. People tagged in your videos you're tagged in: SELECT vid, subject FROM video_tag WHERE vid IN (SELECT vid FROM video_tag WHERE subject = 00000000)
+   7. People who liked your notes: SELECT object_id, user_id FROM like WHERE object_id IN (SELECT note_id FROM note WHERE uid = 00000000)
+   8. People who liked your photos: SELECT object_id, user_id FROM like WHERE object_id IN (SELECT object_id FROM photo WHERE aid IN (SELECT aid FROM album WHERE owner = 00000000))
+   9. People who liked your videos: SELECT object_id, user_id FROM like WHERE object_id IN(SELECT vid FROM video WHERE owner = 00000000)
+  10. People who liked photos you're tagged in: SELECT object_id, user_id FROM like WHERE object_id IN (SELECT object_id FROM photo WHERE pid IN (SELECT pid FROM photo_tag WHERE subject = 00000000))
+  11. People who liked videos you're tagged in: SELECT object_id, user_id FROM like WHERE object_id IN (SELECT vid FROM video WHERE vid IN (SELECT vid FROM video_tag WHERE subject = 00000000))
+

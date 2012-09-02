@@ -1,0 +1,5 @@
+Item_Name="Open Terminal"
+Item_Description_Generator=" open terminal at $location:folder+"
+command="gnome-terminal $location" 
+Icon="/usr/share/icons/gnome/22x22/apps/terminal.png"
+

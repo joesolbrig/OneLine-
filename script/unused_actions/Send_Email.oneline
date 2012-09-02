@@ -1,0 +1,8 @@
+#The full path is item's file name.
+Item_Name="email"
+Item_Description="Send Email"
+Item_Description_Generator=" send email [Title:$title:shorttext-] $body:longtext#20+ to: $recepient:message/rfc822+ [$cc:longtext]"
+ICON_KEY_STR="mail_new"
+command=$body | mailx [$title|$body#20] -s "$recepient" 
+
+

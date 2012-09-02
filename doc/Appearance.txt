@@ -1,0 +1,69 @@
+Skins:
+    * Unify qss and the text files...
+    * Allow a skin to specify the format of 
+    test display:
+	%path (%action)
+	Allow formatting w/ html
+    * A bit of basic sanity checking:
+
+	
+
+Making It look like gnome do (only better, more explanation...):
+    * Rounded, transparent box
+	Mostly changing the 
+    * Scalable window
+    * Good icon finding
+    * Box below and above list
+	below: # of items > # of children (#actions, #items)
+	above: 
+	    keys press > Sources used (files, internet sites, full text...)
+    * Every action should have an icon AND a good English description. 
+    * Big icon for item, smaller icon for action...
+	+ small text for path... 
+	+ (action-description in parenthesis)
+	
+
+    
+	    
+"Informacity":
+    Showing the parts of a file and path that are most likely to show it's relevance
+	For the path, show the start and the end:
+	    /home ... /asan7/plans.txt
+	If we're showing full text, somehow distinguish different files...
+
+Timely Items:
+    Have a green-glowing-light icon to idicate sources that have recent updates...
+	Have the most recent item represent all the others...
+	If there are sources with timely update off-screen, show the top-square
+	    with a green 
+
+Launch-bar:
+    
+Multi-signify:
+    Certain sources would "summon" multiple windows for multiple 
+    update types:
+	A Facebook look would have multiple items spread through
+	    Each with a different base icon
+	    Some with list showing, some otherwise...
+
+Html?!?:
+    Create a browser-plugin which would:
+	Allow a oneline-window to be embedded WITHIN a page:
+	    ** Any content would be a SUGGESTION filtered with
+	    other existing content...
+	    ** Fonts, etc would be suggested
+	    ** Publishing would be suggested...
+	Ideally, allow a "peer-to-peer facebook"...
+	The XML/html format for content would be something like:
+	    <plugin:choicebar>
+		<font...>
+		<icon...>
+	    <source name="site"><item name="option"></source></plugin:choicebar>
+	    
+	There would be a case for making this browser-plugin/external-app rather than
+	a javascript item because it would be giving the external-app information rather
+	than just displaying information. 
+
+
+
+

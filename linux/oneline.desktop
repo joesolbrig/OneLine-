@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=OneLine
+Comment=Multi-Browser and App Launcher
+Exec=oneline %u
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=oneline
+Categories=Utility;
+
+

@@ -1,0 +1,11 @@
+#The full path is item's file name.
+Item_Name="email"
+Item_Description="Send Email"
+Item_Explanation_Generator=" email ['$body:longtext+' ][title: $title:shorttext ]to: $recepient:email+ $cc:longtext "
+
+command=$body | mailx [$title|$body#20] -s "$recepient" 
+
+# I just have to relax my criteria a bit - especially allow duplicates, add entries only if they don't exist
+
+# making a list of email address long-text makes sense for a while - ctrl+ = add items's text to your list...
+

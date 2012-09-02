@@ -1,0 +1,31 @@
+
+
+    qint64 getChosenness(){
+        if(!data.contains(CHOSENNESS_KEY)){return CHOSENNESS_DEFAULT;}
+        QByteArray ba = data[CHOSENNESS_KEY];
+	qint64 r=0;
+	memcpy(&r, ba.constData(),  sizeof(qint64));
+	
+    }
+    void setChosenness(long long v){
+	char* raw_data[sizeof(qint64)+1];
+	memcpy(&v, raw_data, sizeof(qint64));
+	QByteArray ba(raw_data, sizeof(qint64));
+        data[CHOSENNESS_KEY] = bar;
+	    
+	    
+    }
+    
+#define DEF_LONG_ATTRIBUTE(x)  qint64 get\n(x)(){ \
+        if(!data.contains(\n(x)_KEY)){return \n(x)_DEFAULT;} \
+        QByteArray ba = data[\n(x)_KEY]; \
+	qint64 r=0; \
+	memcpy(&r, ba.constData(),  sizeof(qint64)); \
+	\
+    } \
+    void setChosenness(long long v){ \
+	char* raw_data[sizeof(qint64)+1]; \
+	memcpy(&v, raw_data, sizeof(qint64)); \
+	QByteArray ba(raw_data, sizeof(qint64)); \
+        data[CHOSENNESS_KEY] = bar; \
+    } \ 

@@ -1,0 +1,112 @@
+    ** Paths/Nodes <=> CatItem **
+    
+    This is a many-to-many relationship:
+	Many Paths >>> single CatItem:
+	
+	Single Path >>> many CatItem:
+	
+	-----------------------------
+	
+	Normally, I would have node represent a path/partial string
+	    -- However, the total number of potential paths is huge, much 
+	    larger than the number of catItems
+	    ** For relatively long paths, I am likely to have only few 
+	    CatItems that fit the paths
+	    ** For relatively short paths, I am likely to have many CatItem
+	    that fit the paths but I should only 
+	    
+	------------------------------------------
+	
+	A simplistic way to do this is to not extend the thing IF there is 
+	
+	
+	
+
+
+
+
+
+
+
+
+--------------------------------------------------------
+
+
+So what is wrong with a "minor" modification of 
+
+	Node =:
+		An char-indexed qHash of
+			Lists of pointers to Lower Nodes;
+			++ The
+		A single CatItem hash value....
+	
+	
+	==> The big thing is to have the "standard" insertion of each CatItem a list of all the 
+		"Auxilury" nodes 
+	
+		==> Actually, "Primary" representation is the CONSONANT sequence....
+		  -- What if I just remove consonants and use a SIMPLE HASH??? ? 
+		  -- The only question is whether we want to get different results based 
+		  typing the whole word versus just the consonants...
+
+
+-----------------------------------------------------------------------
+
+OK, 
+
+struct CharBranchingNode {
+	bool Intersect_multiple_Strings;
+	NodeList SubNodes[10]; 
+}
+
+struct NodeLIst {
+	CharBranchingNode* (bestNodes[ MAX_NODES]);
+}
+
+
+So, we would like to have a Trie in which a list of subnodes is parameterized by characters...
+
+	- We don't want more Nodes than characters in all of our strings together
+	- We don't want a Node to be a large structure...
+	
+	
+-- We actually COULD have a catItem that's UNREACHABLE if it has a name that's short and it has a weight 
+much lower than many higher rated items. Though really we could just add a pointer to overflow....
+
+	-- IF we use a linked-list for our best nodes, we could quickly sort our items...
+		*Though QT claims QList is better...
+		
+-- With this approach, we wouldn't always cache key-matches
+	* In fact, it would simpler to not cache that at all, since it's not 
+	necessary. 
+	
+-- Item Rep would be an inherent part of this....
+	* It already more or less describes a match...
+	
+
+-- We would like to have two kinds of nodes:
+	* Represent single CatItem - point to the main sequence of item...
+		>> A single node would represent the depth to at which 
+		it's parent is represented...
+		>> It would have a pointer to the parent nodes...
+			This could be used to reconstruct the name...
+			Though this isn't necessary given that we'd node the HASH...
+		>> We could just skip further branch until we had another 
+		CatItem enter the node...
+		
+	* Multi-node - point to nodes representing multiple nodes - 
+		Either other multinodes or single nodes....
+		>> Would just represent a sequence of keys 
+		
+		>> When a second CatItem which generated 
+		the same keys was added
+		
+
+--- We could allocate our sequence of nodes from a single swatch of 
+raw memory of proportionate length to the size of the item..
+
+
+	
+
+
+

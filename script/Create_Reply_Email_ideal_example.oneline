@@ -1,0 +1,10 @@
+#The full path is item's file name.
+Path="custom_source://email/createreply"
+Name="Reply To Email"
+Description=="[$emailitem:message/rfc822^+] Create Reply [to: $recepient:use(emailitem.author)+] [Title:$title:shorttext:quote(emailitem.name)+] [$body:quote(emailitem.longtext)++]  [$cc:longtext]"
+SPECIFICALLY_CHOSEN=true
+SORTING_TYPE=Message
+RETURN_GENERATED=true
+command=[$emailitem:message/rfc822^+] $body | mailx [$title|$body#20] -s "$recepient" 
+
+

@@ -1,0 +1,23 @@
+Item_Path="custom_source://email/create_account"
+Item_Name="Add Existing Email Account"
+Item_Description="Enter Existing Email Account Information Into Oneline"
+Item_Description_Generator="Add Email Account $user_name+ $user_email+ $server_password+ $smtp_server+ $pop_server+"
+SourceTemplate=EmailAccount
+SPECIFICALLY_CHOSEN_KEY=1
+SORTING_TYPE_KEY=110
+ITEM_TYPE_KEY_STR=10
+
+[EmailAccount]
+Item_Name="Email For $user_name"
+child_gen_SendEmail=SendEmail
+#Command update when item selected... 
+external_extend_command=fetchmail -u$user_name -$pop_server
+
+[SendEmail]
+Item_Name="email"
+Item_Path=verb://mail/$user_name
+Item_Description="Send Email"
+Item_Description_Generator=" send email [Title:$title:shorttext-] $body:longtext#20+ to: $recepient:emailaddress+ [$cc:longtext]"
+ICON_KEY_STR="mail_new"
+command=$body | mailx [$title|$body#20] -s "$recepient" 
+

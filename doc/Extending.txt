@@ -1,0 +1,11 @@
+
+Oneline has a plugin architecture similar to Launchy or Quick Silver (actually taken and modified from Launchy). 
+
+However, the easiest way to extend Oneline is through ini-based scripts. 
+By the time of official release, the script format should be stable and allow you to 
+compactly specify the unique character of a given API, allowing datasources to be created
+and tuned quickly. 
+Eventually, a user would be able to download such source file when they 
+existing websites or any source that they are accessing. 
+
+See files in ./script/specification for details. 

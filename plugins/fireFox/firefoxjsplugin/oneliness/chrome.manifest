@@ -1,0 +1,6 @@
+content   oneliness                 chrome/content/
+skin      oneliness   classic/1.0   chrome/skin/
+locale    oneliness   en-US         chrome/locale/en-US/
+
+
+overlay   chrome://browser/content/browser.xul   chrome://oneliness/content/ff-overlay.xul

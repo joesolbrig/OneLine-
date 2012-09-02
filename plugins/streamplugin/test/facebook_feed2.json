@@ -1,0 +1,55 @@
+{
+   "data": [
+      {
+         "id": "65491870325_372962682758295",
+         "from": {
+            "name": "ReadWriteWeb",
+            "category": "Website",
+            "id": "65491870325"
+         },
+         "message": "HTC has become vulnerable in the patent battles that are being waged across the globe.",
+         "picture": "http://external.ak.fbcdn.net/safe_image.php?d=AQC28n3eS1nCOH9Q&w=90&h=90&url=http\u00253A\u00252F\u00252Fwww.readwriteweb.com\u00252Ffiles\u00252Fhtc_one_x.jpg",
+         "link": "http://rww.to/K2SoXC",
+         "name": "Apple is Trying its Best to Kill HTC (And Doing a Pretty Good Job)",
+         "caption": "www.readwriteweb.com",
+         "description": "There is blood in the water, and the big fish are circling to put the struggling, wounded little fish out of its misery. The little fish, which has some good qualities to offer the world, is having more and more trouble keeping the big fish away. This is happening now to smartphone manufacturer HTC ...",
+         "icon": "http://static.ak.fbcdn.net/rsrc.php/v2/yD/r/aS8ecmYRys0.gif",
+         "actions": [
+            {
+               "name": "Comment",
+               "link": "http://www.facebook.com/65491870325/posts/372962682758295"
+            },
+            {
+               "name": "Like",
+               "link": "http://www.facebook.com/65491870325/posts/372962682758295"
+            }
+         ],
+         "type": "link",
+         "created_time": "2012-06-08T02:20:04+0000",
+         "updated_time": "2012-06-08T03:12:22+0000",
+         "likes": {
+            "data": [
+               {
+                  "name": "Sam Weng",
+                  "id": "100000100857216"
+               }
+            ],
+            "count": 6
+         },
+         "comments": {
+            "data": [
+               {
+                  "id": "65491870325_372962682758295_3935893",
+                  "from": {
+                     "name": "Hans Solbrig",
+                     "id": "100002054609991"
+                  },
+                  "message": "Jeesh, this has the tone of that \"Google is patently weak\" hit-piece a while back. I don't know who'll win but reports of any littleness on HTC's part exaggerate. Che Wang, HTC owner, is reported the richest person in Taiwan. \nhttp://en.wikipedia.org/wiki/Cher_Wang",
+                  "created_time": "2012-06-08T03:12:22+0000"
+               }
+            ],
+            "count": 1
+         }
+      }
+      ]
+}

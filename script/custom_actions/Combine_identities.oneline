@@ -1,0 +1,14 @@
+#Combine
+Item_Path="custom_source://builtin/combine_identities"
+Item_Name="Combine With"
+DESCRIPTION_KEY_STR="Combine messages from this identity with those from another"
+Item_Description_Generator="Combine messages from $person1:person+ with those of $person2:person+"
+EXECUTE_IF_FULLFILLED=1;
+childFillinData=TheCombining
+SORTING_TYPE_KEY=105
+
+[TheCombining]
+Item_Path=$person2
+Item_Synonym_Path=$person1
+
+

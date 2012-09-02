@@ -1,0 +1,61 @@
+# This needs lots for its reading process... within, within... 
+# I may want to use item/path/to/object as a syntax shortcut
+
+Item_Path="custom_source://reddit_comments_source"
+Item_Name="Reddit Comments"
+Item_Description="Reddit Comments"
+TAG_LEVEL_KEY_STR=6 
+childFillinData=subreddit
+EXTERNAL_GEN_SOURCE_KEY=1
+StreamPlugin="StreamPlugin"
+html_processed_key=1
+child_gen_GEN_ITEM=GEN_ITEM
+LABEL_FILTERING_KEY=FirefoxPlugin	
+
+[ARRAY_OF_REDDITS]
+1/section=politics
+2/section=science
+3/section=technology
+4/section=worldnews
+5/section=movies
+6/section=Music
+7/section=""
+size=7
+
+[subreddit]
+array_child_gen_GEN_ITEM=ARRAY_OF_REDDITS
+
+[GEN_ITEM]
+#:urlencode
+variableDownloadPath=http://www.reddit.com[/r/$section]/api/info.json?url=$sourceArg
+EXTEND_IMMEDIATELY_EXTERNALLY_KEY=1
+JSON_SOURCE_LABEL=1
+Item_Path="custom_source://subredit_comments_source/$section"
+Stream_key=redditidgen
+
+[redditidgen]
+Stream_Source_Path=http://www.reddit.com/$data.children.data.permalink/.json
+redditItemId=$data.children.data.permalink
+Item_Path=builtin://reddit/id/$sourceArg
+Stream_key=redditcomments
+EXTEND_IMMEDIATELY_EXTERNALLY_KEY=1
+JSON_SOURCE_LABEL=1
+
+[redditcomments]
+Item_Path=$link_path
+Item_Description=$description
+child_gen_data.children.data=redditchild
+JSON_SOURCE_LABEL=1
+
+#Get children but not grand children
+[redditchild]
+Item_Path=reddit_comment://$link_id/$id
+Item_Description=$body:longText
+Item_Name=$body:shortText
+html_Description=$body_html
+Stream_Source_Path=firefox $redditItemId#$subreddit_id
+JSON_SOURCE_LABEL=1
+long_description_key=1
+Stream_Source_Path=http://www.reddit.com/$redditItemId/$subreddit_id/.json
+
+

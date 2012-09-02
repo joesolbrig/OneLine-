@@ -1,0 +1,62 @@
+#The full path is item's file name.
+Item_Path="custom_source://twitter/create_account"
+Item_Name="Minibloging Account"
+Item_Description="Register Existing Micoblogging"
+Item_Description_Generator=" [$acount_provider | Twitter] for $email:emailaddress+ "
+SourceTemplate=twitterurls
+childFillinData=TWITTER_ITEM_DATA
+
+[twitterurls]
+Item_Name="tweets Of $user_name"
+access_url=$access_url
+child_gen_twitterSource=twitterSource
+Item_Path="feed://twitter_account/$user_name"
+Twitter_Source=1
+
+[twitterSource]
+Item_Name=$Item_Name
+Stream_Source_Path=$access_url
+Stream_key=$data_gen
+
+[TWITTER_ITEM_DATA]
+array_child_gen_twitterSource=TWITTER_ITEM_URLS
+
+[TWITTER_ITEM_URLS]
+1\access_url=http://api.twitter.com/1/statuses/user_timeline.json?user_id=$user_id
+1\Item_Name=User Timeline
+1\data_gen=TWITTER_USER_TIME_LINE
+2\access_url=http://api.twitter.com/1/statuses/followers.json?user_id=$user_id
+2\Item_Name=Follower Statuses
+2\data_gen=TWITTER_FOLLOWERS
+3\access_url=http://twitter.com/statuses/public_timeline.json?user_id=$user_id
+3\Item_Name=Twitter Timeline
+3\data_gen=TWITTER_TIMELINE
+size=3
+
+[TWITTER_USER_TIME_LINE]
+Item_Path="twitter://twitter_time_line/$id+"
+#Item_Name=$text#20
+#DESCRIPTION_KEY_STR=$text#50
+#eventually use "entities"
+LONG_TEXT_KEY_STR=$text
+ITEM_CREATION_TIME_KEY_STR=$created_time:IETF_RFC_3339_TIME
+Use_Description_Key_Str="1"
+child_gen_from=TWITTER_USER_GENERATOR
+
+[TWITTER_USER_GENERATOR]
+Item_Path="twitter://twitter_time_line/$id+"
+Item_Name=$name
+ICON_KEY_STR=$profile_image_url:url_icon
+child_gen_person=person
+DESCRIPTION_KEY_STR=$name
+Use_Description_Key_Str="1"
+
+[person]
+IsParent=1
+Item_Path=person://$name
+Source=twitter
+NAME_KEY_STR=$name
+DESCRIPTION_KEY_STR=$name
+Use_Description_Key_Str="1"
+child_gen_tag=tag
+

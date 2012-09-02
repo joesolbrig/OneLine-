@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Firefox 2.0 and Internet Explorer 7 use simplistic feed sniffing to override desired presentation behavior for this feed, and thus we are obliged to insert this comment, a bit of a waste of bandwidth, unfortunately. This should ensure that the following stylesheet processing instruction is honored by these new browser versions. For some more background you might want to visit the following bug report: https://bugzilla.mozilla.org/show_bug.cgi?id=338621
+-->
+<?xml-stylesheet type="text/xsl" href="multiblog.xsl"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+    <title>RSS 2.0 Feed</title>
+    <link>http://www.alamagordo.org/</link>
+    <description>This is an experiment. I'm trying to parse an RSS feed using XSLT.</description>
+    <language>en-us</language>
+    <item>
+      <title>Multiblog</title>
+      <link>http://www.alamagordo.org/multiblogfaq.html</link>
+      <description>I got the idea while editing my Multiblog FAQ.</description>
+      <dc:creator>Wieland</dc:creator>
+      <dc:date>2005-09-09</dc:date>    
+    </item>
+    <item>
+      <title>In particular...</title>
+      <link>http://www.alamagordo.org/multiblogfaq.html#q6</link>
+      <description>...while writing this bit on RSS.</description>
+      <dc:creator>Wieland</dc:creator>
+      <dc:date>2005-09-09</dc:date>    
+    </item>
+  </channel>
+</rss>

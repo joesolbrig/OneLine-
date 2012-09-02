@@ -1,0 +1,13 @@
+MultiTextDisplay {
+    qproperty-backgroundImage: url(GreenLongTextBox.png);
+    qproperty-backgroundCutHeight: 50;
+    qproperty-topMargin: 20;
+}
+    
+MyFullTextEdit#EditLine {
+    font:  12px "Verdana";
+    border-width: 0px;
+    color: green;
+}
+
+

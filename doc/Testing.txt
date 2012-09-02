@@ -1,0 +1,33 @@
+For further testing:
+
+Catalog Testing
+    partial-keys >> full Items
+    sources get updated by use
+    Items' values degrade over time...
+    (implement testable timing...)
+	File Catalog
+	Firefox
+	Xslt...
+    
+
+---------------------------
+
+Firefox plugin:
+	Make sure we get certain objects:
+		Make sure they have external weight
+		and full weight
+
+Mail Plugin:
+	Not yet...
+
+Tags:
+	Create Tag
+	Tags and semi-tags have children
+
+XsltPlugin
+	Transpose existing test...
+	I'll just have to be satisfied with a test that doesn't stay good...
+	Test Twitter...
+
+
+

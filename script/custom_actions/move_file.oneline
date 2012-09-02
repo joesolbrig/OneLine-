@@ -1,0 +1,6 @@
+Item_Name="Move File"
+Item_Description_Generator=" move $filename:fileitem+ to $destination:filefolder+ $options:shorttext"
+command="mv [$options] $filename $destination" 
+#There's no fricken move icon!
+Icon="/usr/share/icons/gnome/32x32/actions/stock_cut.png"
+
