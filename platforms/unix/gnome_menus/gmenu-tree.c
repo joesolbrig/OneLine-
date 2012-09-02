@@ -561,8 +561,8 @@ gmenu_tree_canonicalize_path (GMenuTree *tree)
         menu_verbose ("Successfully looked up menu_file for \"%s\": %s\n",
                       tree->basename, tree->canonical_path);
       else
-        menu_verbose ("Failed to look up menu_file for \"%s\"\n",
-                      tree->basename);
+      {menu_verbose ("Failed to look up menu_file for \"%s\"\n",
+                     tree->basename);}
     }
   else /* if (tree->type == GMENU_TREE_ABSOLUTE) */
     {

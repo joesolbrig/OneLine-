@@ -81,7 +81,7 @@ void addPixBuffSize(QIcon* ic, GAppInfo *app_info ,
                   GtkIconTheme * curIconTheme, int size){
 
     GError* err_ptr = NULL;
-    GtkIconLookupFlags flags;
+    GtkIconLookupFlags flags = GTK_ICON_LOOKUP_NO_SVG;
     GIcon * appGIcon = g_app_info_get_icon(app_info );
     if( !appGIcon){
         qDebug() << " error getting gicon";
@@ -277,7 +277,7 @@ CatItem PlatformGnome::alterItem(CatItem* item, bool addIcon) {
             gdk_threads_leave();
             return CatItem();
         }
-        GFileQueryInfoFlags gf;
+        GFileQueryInfoFlags gf = G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS;
         GFileInfo *file_info = g_file_query_info( file, "standard::*", gf, NULL, &error);
         if(file_info && !error){
             content_type = g_file_info_get_content_type(file_info);

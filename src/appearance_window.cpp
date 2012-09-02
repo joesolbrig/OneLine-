@@ -1,5 +1,5 @@
 /*
-Oneline: Multibrower and Application Launcher
+Oneline: Multi-Browser and Application Launcher
 Copyright (C) 2012 Hans Solbrig
 
 This program is free software; you can redistribute it and/or

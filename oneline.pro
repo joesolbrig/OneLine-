@@ -15,6 +15,8 @@ INCLUDEPATH += /usr/include/glib-2.2/
 INCLUDEPATH += /usr/include/glib-2.0/
 INCLUDEPATH += /usr/include/libwnck-1.0/
 INCLUDEPATH += /usr/include/gnome-vfs-2.0/
+INCLUDEPATH += /usr/local/lib/include/qjson/
+
 CONFIG += link_pkgconfig
 PKGCONFIG += gtk+-2.0 \
     libgnomeui-2.0 \
@@ -137,7 +139,7 @@ unix {
     if(!debug_and_release|build_pass):CONFIG(debug, debug|release):DESTDIR = debug/
     if(!debug_and_release|build_pass):CONFIG(release, debug|release):DESTDIR = release/
     LIBS += -lkyotocabinet \
-        /usr/local/lib/lib/libqjson.so.0 \
+        /usr/local/lib/lib/libqjson.so \
         -lstdc++ \
         -lpthread
     LIBS += -lX11 \

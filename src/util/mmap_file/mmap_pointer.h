@@ -284,7 +284,7 @@ public:
         Q_ASSERT(file.isOpen());
         char data[sizeof(qint64)+4];
         sprintf(data,"%lld",m_pageCount);
-        data[sizeof(qint64)+4]=0;
+        data[sizeof(qint64)+3]=0;
         qint64 res;
         sscanf(data,"%lld", &res);
         qDebug() << "res: " << res << "m_pageCount: " << m_pageCount << "data" << data;
@@ -378,6 +378,7 @@ public:
         qint64 nextI = nextPos(index);
         if(prevI>=MIN_INDEX){
             qint64 k = nextPos(prevI);
+            k = k;
             Q_ASSERT(k==index);
             nextPos(prevI)= nextI;
         }

@@ -4,16 +4,13 @@ CONFIG += plugin \
 CONFIG += oauth
 CONFIG += link_pkgconfig
 PKGCONFIG += QJson
-VPATH += ../../thirdparty/qoath/qoauth/lib/
-VPATH += ../../thirdparty/qjson/lib/
+VPATH += /usr/local/lib/
 INCLUDEPATH += ../../src/ \
     QtXmlPatterns \
-    ../../thirdparty/qoauth \
-    ../../thirdparty/twitterapi \
-    ../../thirdparty/qoath/qoauth/src \
-    ../../thirdparty/qoath/qoauth/include \
-    ../../thirdparty/qjson/src
-
+    /usr/include/QtOAuth \
+    /usr/include/QtOAuth/include \
+    /usr/local/lib/include/qjson \
+    /usr/local/include/QtCrypto
 # qoauth requires the appropriate qca plugin TOO but loads this **at runtime**
 # from the qt directory
 LIBS += -L/usr/lib \
@@ -49,17 +46,11 @@ SOURCES = ../../src/plugin_interface.cpp \
     ../../src/dataTreeInstances.cpp \
     recursive_json.cpp \
     iconfromurl_reader.cpp
-win32:LIBS += ../../thirdparty/qoath/qoauth/lib/libqca.a
-win32:LIBS += ../../thirdparty/qoath/qoauth/lib/libqca-ossl.a
-win32:LIBS += ../../thirdparty/qoath/qoauth/lib/libqoauth.a
-win32:LIBS += ../../thirdparty/qjson/lib/libqjson.a
-unix:LIBS += ../../thirdparty/qoath/qoauth/lib/libqca.so
+#win32:LIBS += /usr/local/lib/libqca.so
+unix:LIBS += /usr/local/lib/libqca.so
+unix:LIBS += /usr/lib/qt4/plugins/crypto/libqca-ossl.so
 
-# unix:LIBS += ../../thirdparty/qoath/qoauth/lib/libqca-ossl.so
-unix:LIBS += /home/hansj/qtsdk-2010.01/qt/plugins/crypto/libqca-ossl.so
-
-# unix:LIBS += libqca-ossl.so
-unix:LIBS += ../../thirdparty/qoath/qoauth/lib/libqoauth.so
+unix:LIBS += /usr/lib/libqoauth.so
 unix:LIBS += /usr/local/lib/lib/libqjson.so.0
 TARGET = streamplugin
 if(!debug_and_release|build_pass):CONFIG(debug, debug|release):DESTDIR = ../../debug/plugins

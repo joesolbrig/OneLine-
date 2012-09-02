@@ -111,6 +111,7 @@ bool TrieNode::addItem(ItemRep ir, QList<ItemRep>* expelledList, bool* used){
     Tuple itemId = ir.getInternalId();
 
     int l = m_bestItems.count();
+    l = l;
     Q_ASSERT(l <= n_to_keep);
 
     QLinkedList<ItemRep>::iterator i = m_bestItems.begin();

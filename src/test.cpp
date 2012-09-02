@@ -196,6 +196,7 @@ TheApplicationTester::TheApplicationTester(){
     qDebug() << "Another little detail ... this is SIZEOF TrieNode: " << sizeof(TrieNode);
 
     Catalog* c = CatBuilder::getOrCreateCatalog(*gDirs);
+    c = c;
     Q_ASSERT(c  != NULL );
 }
 

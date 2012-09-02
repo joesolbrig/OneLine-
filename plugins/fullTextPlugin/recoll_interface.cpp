@@ -221,7 +221,7 @@ bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& pare
 
     //receiver objects!
     Rcl::Doc doc;
-    FileInterner::Status fis;
+    FileInterner::Status fis = FileInterner::FIError;
     //ipath.clear();
 
     if(!m_indexingJustParent){

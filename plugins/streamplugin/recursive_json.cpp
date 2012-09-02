@@ -105,7 +105,7 @@ QList<CatItem> RecursiveStream::extendItem(CatItem& item, CatItem arg,  bool* ha
     res.append(item);
 
     if(!m_extendedURLS.contains(urlStr)){
-        AbstractFeedReader* ar;
+        AbstractFeedReader* ar=0;
         if(downloadItem.hasLabel(JSON_SOURCE_LABEL)){
             m_extendedURLS.insert(urlStr);
             qDebug() << "creating json downloader: " ;
