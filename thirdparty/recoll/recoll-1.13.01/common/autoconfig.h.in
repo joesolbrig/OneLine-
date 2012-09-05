@@ -1,0 +1,51 @@
+/* common/autoconfig.h.in.  Generated from configure.ac by autoheader.  */
+
+/* Compile the aspell interface */
+#undef RCL_USE_ASPELL
+
+/* Path to the aspell api include file */
+#undef ASPELL_INCLUDE
+
+/* Path to the aspell program */
+#undef ASPELL_PROG
+
+/* Path to the file program */
+#undef FILE_PROG
+
+/* Enable using the system's 'file' command to id mime if we fail internally */
+#undef USE_SYSTEM_FILE_COMMAND
+
+/* Real time monitoring option */
+#undef RCL_MONITOR
+
+/* Compile the fam interface */
+#undef RCL_USE_FAM
+
+/* Path to the fam api include file */
+#undef FAM_INCLUDE
+
+/* Compile the inotify interface */
+#undef RCL_USE_INOTIFY
+
+/* iconv parameter 2 is const char** */
+#undef RCL_ICONV_INBUF_CONST
+
+/* putenv parameter is const */
+#undef PUTENV_ARG_CONST
+
+/* mkdtemp availability */
+#undef HAVE_MKDTEMP
+
+#undef HAVE_SYS_MOUNT_H 
+#undef HAVE_SYS_STATFS_H 
+#undef HAVE_SYS_STATVFS_H 
+#undef HAVE_SYS_VFS_H 
+
+/* Use file extended attributes */
+#undef RCL_USE_XATTR
+
+/* Split camelCase words */
+#undef RCL_SPLIT_CAMELCASE
+
+/* No X11 */
+#undef WITHOUT_X11
