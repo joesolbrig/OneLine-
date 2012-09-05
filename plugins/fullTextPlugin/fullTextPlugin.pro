@@ -37,14 +37,14 @@ unix {
         PLUGINS_PATH=$(PLUGINS_PATH) \
         PLATFORMS_PATH=$(PLATFORMS_PATH)
     OBJECTS_DIR = .obj
-    LIBS += ../../thirdparty/recoll/recoll-1.13.01/lib/librcl.a \
+    LIBS += /usr/local/lib/librcl.a \
         $(BSTATIC) \
         -L/usr/local/lib \
         -lxapian \
         -lz \
         $(BDYNAMIC) \
         -lz
-    POST_TARGETDEPS = ../../thirdparty/recoll/recoll-1.13.01/lib/librcl.a
+    POST_TARGETDEPS = /usr/local/lib/librcl.a
 }
 win32 { 
     CONFIG -= embed_manifest_dll

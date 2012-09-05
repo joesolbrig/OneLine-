@@ -196,11 +196,21 @@ QHash<QString, QList<QString> > PlatformGnome::GetDirectories(QString base) {
     QDir d;
     d.mkdir(QDir::homePath() + base);
 
+    QString shareBase = "/usr/share/oneline/";
+    QString libBase = "/usr/lib/oneline/";
+
+
+    out["skins"] += shareBase + "/skins";
     out["skins"] += qApp->applicationDirPath() + "/skins";
     out["skins"] += QDir::homePath() + base +"/skins";
 
+    out["plugins"] += libBase + "/plugins";
     out["plugins"] += qApp->applicationDirPath() + "/plugins";
     out["plugins"] += QDir::homePath() + base +"/plugins";
+
+    out["script"] += shareBase +"/script";
+//    out["script"] += qApp->applicationDirPath() +"/script";;
+//    out["script"] += QDir::homePath() + base +"/script";;
 
     out["config"] += QDir::homePath() + base + "oneline.ini";
     out[APP_HOME_KEY_DIRS] += QDir::homePath() + base + "";

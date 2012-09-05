@@ -1,6 +1,18 @@
-Building on Linux:
 
-For debian and ubuntu:
-sudo apt-get install libqt4-dev libboost-dev g++
-make ; sudo make install
+Written For Linux (Ubuntu 8+ or whatever)
 
+Required Packages:
+QTCreator or libqt4-dev/GCC (see:http://qt-project.org/ or sudo apt-get install libqt4-dev libboost-dev g++)
+Kyoto Cabinet (required for database, ie everything, see: http://fallabs.com/kyotocabinet/)
+Recoll 1.13+ [SOURCE FILES] (required for Fulltext Plugin, see: http://www.lesbonscomptes.com/recoll/)
+QJson 0.6.3+ (require for streamplugin, see:qjson.sourceforge.net) 
+QOauth 1.0.1+ (require for streamplugiin, see:https://github.com/ayoy/qoauth)
+
+Pre-Build:
+After building goto (Recoll install)/lib
+sudo cp lib/librcl.a /usr/local/lib
+(even doing make install doesn't add this static library, sadly)
+
+Building:
+make 
+sudo make install 

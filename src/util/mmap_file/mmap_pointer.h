@@ -76,6 +76,7 @@ public:
             qint64 topAlocatdLinkedList =m_innerAllocator->i_topAlocatdLinkedList;
             qint64 topIndexMemItems =m_innerAllocator->i_topIndexMemItems;
             qint64 memSize = m_innerAllocator->memLength();
+            memSize = memSize;
             qint64 pageCount= m_innerAllocator->m_pageCount;
 
             qint64 newPageCount= pageCount*(1.5) + 10;

@@ -11,7 +11,7 @@ using namespace std;
 
 //Of all the stupid things to have to include...
 //but at least the test file requires this
-#include "address.cc"
+//#include "address.cc"
 
 #include <QThread>
 #include "plugin_interface.h"

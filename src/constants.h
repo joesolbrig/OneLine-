@@ -888,14 +888,18 @@ const QString GOTO_CHILDREN_MESSAGE("expand item");
 
 const QString JAVA_FILTER_FILESOURCE("Webview_js_filter_path");
 #ifndef STANDALONE_CMDLINE
-#define JAVA_SCRIPT_DEFAULT_PATH (gSettings->value("GenOps/reader_path","")).toString() + "/reader.js"
+#define JAVA_SCRIPT_DEFAULT_PATH \
+    gSettings->value("GenOps/reader_path", gDirs->value("script")[0]).toString() \
+            + "js/reader.js"
 #else
 #define JAVA_SCRIPT_DEFAULT_PATH "../../script"
 #endif
 
 const QString CSS_FILTER_PATH_KEY("CSS_FILTER_PATH_KEY");
 #ifndef STANDALONE_CMDLINE
-#define PREVIEW_CSS_DEFAULT_PATH (gSettings->value("GenOps/reader_path","")).toString() + "/reader.css"
+#define PREVIEW_CSS_DEFAULT_PATH \
+    gSettings->value("GenOps/reader_path", gDirs->value("script")[0]).toString() \
+    + "js/reader.css"
 #else
 #define PREVIEW_CSS_DEFAULT_PATH "../../script"
 #endif

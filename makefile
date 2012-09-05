@@ -75,26 +75,29 @@ install:: release
 	-install -d $(DESTDIR)$(SCRIPT_PATH)/custom_actions
 	-install -d $(DESTDIR)$(SCRIPT_PATH)/js
 	-install -d $(DESTDIR)$(SCRIPT_PATH)/shell
-	install -m 644 script/custom_actions/*.oneline $(DESTDIR)$(SCRIPT_PATH)/ 
-	install -m 644 script/js/*.js $(DESTDIR)$(SCRIPT_PATH)/js
-	install -m 644 script/js/*.css $(DESTDIR)$(SCRIPT_PATH)/js 
-	install -m 644 script/shell/*.sh $(DESTDIR)$(SCRIPT_PATH)/shell
+	install -m 666 script/custom_actions/*.oneline $(DESTDIR)$(SCRIPT_PATH)/ 
+	install -m 666 script/js/*.js $(DESTDIR)$(SCRIPT_PATH)/js
+	install -m 666 script/js/*.css $(DESTDIR)$(SCRIPT_PATH)/js 
+	install -m 666 script/shell/*.sh $(DESTDIR)$(SCRIPT_PATH)/shell
 	-install -d $(DESTDIR)$(PLUGINS_PATH)
-	install -m 644 release/plugins/*.so $(DESTDIR)$(PLUGINS_PATH)/ 
+	install -m 666 release/plugins/*.so $(DESTDIR)$(PLUGINS_PATH)/ 
 	-install -d $(DESTDIR)$(PLUGINS_PATH)/icons
 	-install -d $(DESTDIR)$(SKINS_PATH)
 	cp -r skins $(DESTDIR)$(PREFIX)/share/oneline/
 	cp -r script $(DESTDIR)$(PREFIX)/share/oneline/
 	install -d $(DESTDIR)$(DESKTOP_PATH)/
-	install -m 644 linux/oneline.desktop $(DESTDIR)$(DESKTOP_PATH)/
+	install -m 666 linux/oneline.desktop $(DESTDIR)$(DESKTOP_PATH)/
 	install -d $(DESTDIR)$(ICON_PATH)/
-	-install -m 644 "misc/icon/oneline.png" $(DESTDIR)$(ICON_PATH)/oneline.png
-	install -d ~/$(ONELINE_DIR)
-	install -d ~/$(ONELINE_DIR)/generated_icons
-	install -d ~/$(ONELINE_DIR)/generated_items
-	install -d ~/$(ONELINE_DIR)/temp_for_preview
-	install -d ~/$(ONELINE_DIR)/item_cache
-	install -d ~/$(ONELINE_DIR)/cached_feeds
+	-install -m 666 "oneline.ico" $(DESTDIR)$(ICON_PATH)/oneline.ico
+	install -d -o`logname` ~/$(ONELINE_DIR)
+	install -d -o`logname` ~/$(ONELINE_DIR)/generated_icons
+	install -d -o`logname` ~/$(ONELINE_DIR)/generated_items
+	install -d -o`logname` ~/$(ONELINE_DIR)/temp_for_preview
+	install -d -o`logname` ~/$(ONELINE_DIR)/item_cache
+	install -d -o`logname` ~/$(ONELINE_DIR)/styles
+	install -m 666 -o`logname` styles/*.* ~/$(ONELINE_DIR)/styles
+	install -m 666 -o`logname` ConfigurationFiles/*.ini ~/$(ONELINE_DIR)
+	install -d -o`logname` ~/$(ONELINE_DIR)/cached_feeds
 
 uninstall::
 	-rm $(PREFIX)/bin/oneline
@@ -102,4 +105,6 @@ uninstall::
 	-rm -rf $(PLATFORMS_PATH)
 	-rm -rf $(SKINS_PATH)
 	-rm $(DESTDIR)$(DESKTOP_PATH)/oneline.desktop
-	-rm $(DESTDIR)$(ICON_PATH)/oneline.png	
+	-rm $(DESTDIR)$(ICON_PATH)/oneline.ico
+	-rm -rf ~/$(ONELINE_DIR)
+	

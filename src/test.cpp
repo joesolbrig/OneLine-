@@ -339,7 +339,9 @@ void TheApplicationTester::testInputListAsHash(){
     argList2=inputList.getRemainingCustomArgs();
     Q_ASSERT(argList2.count()==0);
     int nB = inputList.nounBeginSlot();
+    nB = nB;
     int nE = inputList.fullfilledFieldsEnd();
+    nE = nE;
     Q_ASSERT(nE-nB ==1);
     testHash=inputList.asFieldValueHash();
     Q_ASSERT(testHash.count()==2);
@@ -569,7 +571,9 @@ void TheApplicationTester::testCoalateItems2(){
         for(int i=0; i< res.count(); i++){
             if(i >0){
                 int v1 = f.getCustomValue(tk);
+                v1=v1;
                 int v2 = res[i].getCustomValue(tk);
+                v2 = v2;
                 Q_ASSERT( v1 < v2 );
             }
             f = res[i];
@@ -632,6 +636,7 @@ void TheApplicationTester::testCoalateItems2(){
         Q_ASSERT(inCat2.hasChild(b7));
         Q_ASSERT(inCat2.hasChild(b8));
         int catC = inCat2.getChildren().count();
+        catC= catC;
         Q_ASSERT( catC==4);
 
         b9.setCustomPluginValue(tk,145);
@@ -949,8 +954,11 @@ void TheApplicationTester::testUpdateUsage(){
 //    long rw3 = ri3.getRelevanceWeight();
 
     long dw1 = ri1.getFullWeight();
+    dw1 = dw1;
     long dw2 = ri2.getFullWeight();
+    dw2 = dw2;
     long dw3 = ri3.getFullWeight();
+    dw3 = dw3;
 
     Q_ASSERT(dw1 > dw2);
     Q_ASSERT(dw2 > dw3);
@@ -971,9 +979,11 @@ void TheApplicationTester::testUpdateUsage(){
     ri3 = CatBuilder::getCatalog()->getItem("now_old");
 
     long fw1 = ri1.getFullWeight();
+    fw1 = fw1;
     long fw2 = ri2.getFullWeight();
+    fw2 = fw2;
     long fw3 = ri3.getFullWeight();
-
+    fw3 = fw3;
 
     //Check they are now in frequency order
     Q_ASSERT(fw1 < fw2);
@@ -1475,7 +1485,9 @@ void TheApplicationTester::test_cat_store2(){
         CatItem res1 = item_store.getItemByPath(search_list[i].getPath());
         CatItem res2 = item_store.getItemByPath(search_list[i+1].getPath());
         qint32 wres1 = res1.getFullWeight();
+        wres1=wres1;
         qint32 wres2 = res2.getFullWeight();
+        wres2 =wres2;
         Q_ASSERT( wres1 < wres2 );
         QList<CatItem> childs = item_store.getItemChildren(&dummyList, res1);
         Q_ASSERT(childs.count() == 3 || i ==0);
@@ -1578,6 +1590,7 @@ void TheApplicationTester::test_MultiTree2(){
     //Remove every third item
     for (int i=0; i<ITEM_LIMIT; i+=3) {
         bool b = index.removeObject(search_vect[i]);
+        b = b;
         Q_ASSERT(b);
     }
 
@@ -1630,6 +1643,7 @@ void TheApplicationTester::testCreateFacebookSources(){
     QString errString;
     Q_ASSERT((iList.canRun(&errString)));
     int res= CatBuilder::launchObject(iList, outputList, &errString);
+    res = res;
     Q_ASSERT(res);
     //I could also check for
 
@@ -2346,6 +2360,7 @@ void TheApplicationTester::testFireFoxPlugin(){
     //Mozilla plugin - obvious not portable
     //Just choose a common site in your list
     bool r = verifyCatHasItemName(QString("craigslist.org"));
+    r = r;
     Q_ASSERT(r);
     verifyChildItem("customTestItem", "testChildItem");
 }
@@ -2460,6 +2475,7 @@ void TheApplicationTester::subTestDoAction(){
 
     CatItem it2 = CatBuilder::getCatalog()->getItem(it.getPath());
     int newWeight = it2.getFullWeight();
+    newWeight = newWeight;
     Q_ASSERT(newWeight  < oldWeight );
 }
 

@@ -1,5 +1,0 @@
-Item_Name="Add To Todo"
-Item_Description_Generator="Delete $filename:file++"
-command="del $filename" 
-Icon="/usr/share/icons/gnome/32x32/status/task-due.png"
-
