@@ -239,7 +239,7 @@ void FullTextPlugin::itemsLoaded(SearchInfo* inf, QList<CatItem>* res){
 //The only extras we might add on files on the "edge" of our index
 QString FullTextPlugin::cachePath(){
     QDir baseDir(PUSER_APP_DIR);
-    QString cacheItemPath = baseDir.absoluteFilePath(ITEM_CACHE_NAME);
+    QString cacheItemPath = baseDir.absoluteFilePath(PUSER_APP_DIR +"/"+ITEM_CACHE_NAME);
     QDir d(cacheItemPath);
     if(!d.exists()){ d.mkdir(cacheItemPath); }
     return cacheItemPath;

@@ -290,7 +290,9 @@ int TextMessageBar::getMessageSpaceAvailable(){
 }
 
 void TextMessageBar::addBackground(){
-    QPixmap pm(UI_MINI_BAR_BACKGROUND);
+    QString backgroundPath(UI_MINI_BAR_BACKGROUND);
+    qDebug() << backgroundPath;
+    QPixmap pm(backgroundPath);
     Q_ASSERT(!pm.isNull());
     Q_ASSERT(m_backgroundItem == 0);
     m_backgroundItem = new QGraphicsPixmapItem(pm);

@@ -106,7 +106,7 @@ MainUserWindow::MainUserWindow(QWidget *parent,  PlatformBase * plat, bool rescu
 
     setFocusPolicy(Qt::StrongFocus);
 
-    gSettings = new QSettings(USER_APP_INI, QSettings::IniFormat);
+    //gSettings = new QSettings(USER_APP_INI, QSettings::IniFormat);
     QString stylePath = USER_APP_DIR + STYLE_DIR + STYLE_INI_FILE;
     gStyleSettings = new QSettings(stylePath, QSettings::IniFormat);
 

@@ -26,7 +26,9 @@ MultiTextDisplay::MultiTextDisplay(QWidget* parent): QWidget(parent,Qt::Frameles
     m_horizontalMargin = MAX(m_iconSize, UI_LEFT_MARGIN);
     m_imageMidsectionWidth = UI_IMAGE_MIDSECTION_WIDTH;
     m_backgroundCutHeight = UI_BACKGROUND_CUT_HEIGHT;
-    m_backgroundImage = QImage(UI_IMAGE_FILE);
+    QString imageFile(UI_IMAGE_FILE);
+    qDebug() << "MultiTextDisplay imageFile: " << imageFile;
+    m_backgroundImage = QImage(imageFile);
     setMargin(UI_BORDER_WINDOW_TOP_MARGIN);
 
     m_backgroundLabel.setupImage(getBackgroundImage(),getBackgroundCutHeight(),getImageMidsectionWidth());

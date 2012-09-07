@@ -131,8 +131,15 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setApplicationName(APPLICATION_NAME);
     QCoreApplication::setOrganizationDomain(ORGANIZATION_NAME);
     QString baseDir = getBaseDir(app);
+    gSettings = new QSettings(baseDir + "/oneline.ini", QSettings::IniFormat);
 
-    QHash<QString, QList<QString> > theDirs = (plat)->GetDirectories(baseDir);
+    QHash<QString, QList<QString> > theDirs = (plat)->GetDirectories(baseDir,
+                                                                     gSettings);
+    qDebug() << "----------------" ;
+    qDebug() << "got dirs:" << theDirs;
+    qDebug() << "----------------" ;
+
+
     qDebug() << "config dir: " << theDirs.value("config")[0];
     gDirs = &theDirs;
     app->setQuitOnLastWindowClosed(false);

@@ -380,7 +380,7 @@ void PluginHandler::preExecute(InputList* id) {
 void PluginHandler::saveCreatedItem(CatItem item) {
     QString fileName = item.getName() + QString::number(item.getItemId());
     fileName += QString(".") + ONELINE_FILE_EXTENSION;
-    QString filePath =  USER_APP_DIR + GENERATED_ITEM_DIR + fileName;
+    QString filePath =  USER_APP_DIR + "/"+ GENERATED_ITEM_DIR + fileName;
     QSettings set(filePath,QSettings::IniFormat);
     item.saveToSettings(&set);
     set.sync();

@@ -65,7 +65,6 @@ install_debug:: debug
 	install -d $(DESTDIR)$(DESKTOP_PATH)/
 	install -m 644 linux/oneline.desktop $(DESTDIR)$(DESKTOP_PATH)/
 	install -d $(DESTDIR)$(ICON_PATH)/
-	-install -m 644 "misc/Icon/oneline.png" $(DESTDIR)$(ICON_PATH)/oneline.png
 
 install:: release
 	-install -d $(DESTDIR)$(PREFIX)/bin/

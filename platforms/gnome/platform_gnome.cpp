@@ -190,18 +190,23 @@ QList<Directory> PlatformGnome::GetInitialDirs() {
     return list;
 }
 
-QHash<QString, QList<QString> > PlatformGnome::GetDirectories(QString base) {
+QHash<QString, QList<QString> > PlatformGnome::GetDirectories(QString base, QSettings*
+                                                              setPtr) {
 
     QHash<QString, QList<QString> > out;
     QDir d;
     d.mkdir(QDir::homePath() + base);
+    Q_ASSERT(d.exists());
 
-    QString shareBase = "/usr/share/oneline/";
-    QString libBase = "/usr/lib/oneline/";
+    Q_ASSERT(setPtr);
+    QString shareBase =
+            setPtr->value("GenOps/shared_code_base", "/usr/share/oneline/").toString();
+    QString libBase =
+            setPtr->value("GenOps/lib_base", "/usr/lib/oneline/").toString();
 
-
+    out[LOCAL_DIR] += QDir::homePath() + base;
     out["skins"] += shareBase + "/skins";
-    out["skins"] += qApp->applicationDirPath() + "/skins";
+    //out["skins"] += qApp->applicationDirPath() + "/skins";
     out["skins"] += QDir::homePath() + base +"/skins";
 
     out["plugins"] += libBase + "/plugins";
@@ -213,15 +218,15 @@ QHash<QString, QList<QString> > PlatformGnome::GetDirectories(QString base) {
 //    out["script"] += QDir::homePath() + base +"/script";;
 
     out["config"] += QDir::homePath() + base + "oneline.ini";
-    out[APP_HOME_KEY_DIRS] += QDir::homePath() + base + "";
     out["portConfig"] += qApp->applicationDirPath() + "/oneline.ini";
     out["db"] += QDir::homePath() + base + "oneline.db";
     out["portDB"] += qApp->applicationDirPath() + "/oneline.db";
 
-    if (QFile::exists(out["skins"].last() + "/Default"))
-        out["defSkin"] += out["skins"].last() + "/Default";
-    else
-      out["defSkin"] += out["skins"].first() + "/Default";
+    if (QFile::exists(out["skins"].last() + "/Default")){
+        out["defSkin"] += out["skins"].last() + "/Default/";
+    } else {
+        out["defSkin"] += out["skins"].first() + "/Default/";
+    }
 
     out["platforms"] += qApp->applicationDirPath();
 

@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'fileCatalog.h'
 **
-** Created: Tue Sep 4 17:04:39 2012
+** Created: Fri Sep 7 09:42:45 2012
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.6.2)
 **
 ** WARNING! All changes made in this file will be lost!

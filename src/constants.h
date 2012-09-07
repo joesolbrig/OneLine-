@@ -42,8 +42,9 @@
 
 #define DEFAULT_APP_DIR "/.oneline/"
 #define APP_HOME_KEY_DIRS "apphome"
+#define LOCAL_DIR "localDir"
 #ifndef STANDALONE_CMDLINE
-#define USER_APP_DIR (gDirs->value( "apphome" )[0])
+#define USER_APP_DIR (gDirs->value( LOCAL_DIR )[0])
 #else
 #define USER_APP_DIR QString(QDir::homePath() + DEFAULT_APP_DIR)
 #endif
@@ -904,6 +905,15 @@ const QString CSS_FILTER_PATH_KEY("CSS_FILTER_PATH_KEY");
 #define PREVIEW_CSS_DEFAULT_PATH "../../script"
 #endif
 
+#ifndef STANDALONE_CMDLINE
+#define JAVA_SCRIPT_DEFAULT_PATH \
+    gSettings->value("GenOps/reader_path", gDirs->value("script")[0]).toString() \
+            + "js/reader.js"
+#else
+#define JAVA_SCRIPT_DEFAULT_PATH "../../script"
+#endif
+
+
 
 //Item constants
 #define TAG_LEVEL_DEFAULT CatItem::ATOMIC_ELEMENT
@@ -972,7 +982,7 @@ const QString NO_ASSOCIATED_APP_MESSAGE(" I don't know what to do with this ");
 
 const QString CUSTOM_FIELD_DESCRIPTION_PREFIX("Enter ");
 
-#define UI_STYLE_DIR gSettings->value("GenOps/skin", gDirs["defSkin"][0]).toString()
+#define UI_STYLE_DIR gSettings->value("GenOps/defSkin", gDirs["defSkin"][0]).toString()
 
 #define RECOL_DB_DIR (settings->value("FullTextPlugin/recol_db_dir", QDir::homePath() + "/.recoll").toString())
 
@@ -1189,13 +1199,16 @@ const int UI_DEFAULT_SECTION_WIDTH = 10;
 
 const int UI_IMAGE_MIDSECTION_WIDTH=6;
 const int UI_BACKGROUND_CUT_HEIGHT=50;
-const QString UI_SKIN_DIR ="./skins/Default/";
-const QString UI_IMAGE_FILE =UI_SKIN_DIR + "DefaultBox.png";
-const QString TASK_IMAGE_FILE =UI_SKIN_DIR + "DefaultBox.png";
-const QString UI_MINI_BAR_BACKGROUND =UI_SKIN_DIR + "DarkBar.png";
-const QString UI_LIST_BACKGROUND =UI_SKIN_DIR + "lightTexture.png";
 
-const QString UI_BORDER_TEXTURE_FILE =UI_SKIN_DIR +  "defaultbackground.png";
+//const QString UI_SKIN_DIR ="./skins/Default/";
+//#define UI_SKIN_DIR (gDirs->value( "skins" )[0])
+#define UI_SKIN_DIR (gDirs->value( "defSkin" )[0])
+#define UI_IMAGE_FILE (UI_SKIN_DIR + "/DefaultBox.png")
+#define TASK_IMAGE_FILE (UI_SKIN_DIR + "/DefaultBox.png")
+#define UI_MINI_BAR_BACKGROUND  (UI_SKIN_DIR + "/DarkBar.png")
+#define UI_LIST_BACKGROUND  (UI_SKIN_DIR + "/lightTexture.png")
+#define UI_BORDER_TEXTURE_FILE (UI_SKIN_DIR +  "/defaultbackground.png")
+
 #define UI_TASKBAR_LABEL TASK_IMAGE_FILE
 #define UI_LIST_RESIZE_TIME  ((1000*(STANDARD_MOMENT))/SIGNAL_MOMENT_RATIO)
 #define UI_ICONSWITCH_TIME  ((1000*(STANDARD_MOMENT))/SIGNAL_MOMENT_RATIO)

@@ -223,7 +223,7 @@ public:
                 } else if(e.valRef.funct == DIR_FUNCTION){
                     if(e.valRef.accessValue=="home"){
                         val = QDir::homePath();
-                    } else if(e.valRef.accessValue=="apphome"){
+                    } else if(e.valRef.accessValue==APP_HOME_KEY_DIRS){
                         val = USER_APP_DIR;
                     } else if(gDirs->contains(e.valRef.accessValue) ){
                         //empty string return 0 in toInt..

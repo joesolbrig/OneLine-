@@ -90,7 +90,8 @@ public:
     //QList<CatItem> getActiveWindows();
     CatItem associatedApp(QString );
 
-    QHash<QString, QList<QString> > GetDirectories(QString base);
+    QHash<QString, QList<QString> > GetDirectories(QString base,
+                                                   QSettings* set=0);
 
     virtual void registerToGetActiveWindows(QWidget* mainWin){
         g_gsr = new GnomeSignalReceiver();

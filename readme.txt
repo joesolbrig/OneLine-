@@ -1,6 +1,6 @@
 OneLine Multibrowser/Application Launcher Alpha Release.
 
-What: This a keystroke application Launcher that also lets you check email, do a full-text search of your hard disk, browse Facebook, receive RSS feeds and browse the web. It's similar to Quick Silver for the Macintosh and even more similar to GnomeDo for Linux, especially the now-discontinued "Docky view" (though the Dock part isn't done yet). 
+What: This is a keystroke application Launcher that also lets you check email, do a full-text search of your hard disk, scan Facebook, receive RSS feeds and browse the web. It's similar to Quick Silver for the Macintosh and even more similar to GnomeDo for Linux, especially the now-discontinued "Docky view" (though the Dock part isn't done yet). 
 
 For installation instructions: please refer to the INSTALL.txt file.  
 To begin: Launch OneLine. Type something, click on it or use the arrow-keys. It should be clear how you can browse files and other items. Pressing the alt-key shows which hotkeys activate which items. 
@@ -13,7 +13,7 @@ OneLine is a tool to let you own your information.
 
 License: GPL 2.0+
 Credits: I taken various bits of open source code from the web as need. 
-* I began with the Launchy Application by Josh Karlin but the present code bares only the slight resemblance to it (for good or ill). 
+* I began with the Launchy Application by Josh Karlin but the present code bares only a modest resemblance to it (for good or ill). 
 * I incorporated the gnome-desktop item parsing code into my Gnome platform library since it's not distributed as a stable library. 
 * I used code by toucan@textelectric.net as the starting point for the btree-based custom database
 * I copied and modified code from the Recol application to write the full text search plugin which interfaces with Recol. 
