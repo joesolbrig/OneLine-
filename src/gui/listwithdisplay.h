@@ -39,6 +39,7 @@ class ListInnerLayout;
 class ListWithDisplay : public QWidget {
     Q_OBJECT
     Q_PROPERTY(QRect baseGeometry READ getBaseGeometry WRITE setBaseGeometry)
+    Q_PROPERTY(QRect animatedHeight READ getAnimatedHeight WRITE setAnimatedHeight)
     //Q_PROPERTY(int miniBarPosition READ getMiniBarPosition WRITE setMiniBarPosition)
 
     TextMessageBar* m_miniIconBar;
@@ -71,12 +72,10 @@ class ListWithDisplay : public QWidget {
     QString m_bottomMessage;
 
     MultiInputDisplayer* m_multiInputDisplayer;
-
     QMutex m_previewMutex;
 
 public:
     ListWithFrame * m_previewFrame;
-
 
     void setGeometry(QRect r=QRect()){
         if(r.height() > UI_RECT_YRADIUS*2 &&
@@ -137,6 +136,11 @@ public:
         }
 
         return r;
+    }
+
+    void setAnimatedHeight(QRect r);
+    QRect getAnimatedHeight(){
+        return geometry();
     }
 
     QRect getFocusRect();
@@ -350,6 +354,7 @@ public slots:
             setVisible(false);
         }
         //showMiniIconBar(UI_MINI_ICON_BAR_HEIGHT);
+        setBaseGeometry();
     }
 
     void sideAnimationDone();

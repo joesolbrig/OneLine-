@@ -211,9 +211,7 @@ QList<CatItem> Catalog::parseRequest(InputList & inputData, int itemsDesired, in
     if(inputData.getUserKeys().length() >0){
         QString userKeys = inputData.getUserKeys();
         res.append(cat_store.getItemsByKey(userKeys, &inputData, itemsDesired, beginPos));
-    } else if(inputData.slotCount() ==1 ){
-        res.append(cat_store.getInitialItems(&inputData, itemsDesired, beginPos));
-    } else if(inputData.isOperationChosen() ){
+    } else if(inputData.slotCount() ==1 || inputData.isOperationChosen()){
         res.append(cat_store.getInitialItems(&inputData, itemsDesired, beginPos));
     }
     if(res.count()>0 && beginPos){ (*beginPos)++; }

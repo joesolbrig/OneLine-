@@ -131,7 +131,9 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setApplicationName(APPLICATION_NAME);
     QCoreApplication::setOrganizationDomain(ORGANIZATION_NAME);
     QString baseDir = getBaseDir(app);
-    gSettings = new QSettings(baseDir + "/oneline.ini", QSettings::IniFormat);
+    QString iniBase = QDir::homePath() + "/" + baseDir + "/oneline.ini";
+    qDebug() << "main:: loading: " << iniBase;
+    gSettings = new QSettings(iniBase, QSettings::IniFormat);
 
     QHash<QString, QList<QString> > theDirs = (plat)->GetDirectories(baseDir,
                                                                      gSettings);

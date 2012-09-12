@@ -71,9 +71,12 @@ QList<CatItem> PluginHandler::loadPlugins(QHash<QString, QList<QString> > dirs, 
     gSettings->beginWriteArray(PLUGIN_SETTINGS_ARRAY_KEY);
     int arrayCounter =0;
 
+    qDebug() << "PluginHandler::loadPlugins loading libraries";
     foreach(QString szDir, dirs["plugins"]) {
         QDir pluginsDir(szDir);
+        qDebug() << "at dir: " << szDir;
         foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
+            qDebug() << "at file: " << fileName;
             gSettings->setArrayIndex(arrayCounter);
             gSettings->setValue(PLUGIN_SETTINGS_NAME_KEY,fileName);
             if(!pluginsDir.exists(fileName)){
@@ -85,6 +88,7 @@ QList<CatItem> PluginHandler::loadPlugins(QHash<QString, QList<QString> > dirs, 
                 LoadPluginFromFile(pluginsDir, fileName);
                 gSettings->setValue(PLUGIN_SETTINGS_LOAD_KEY,true);
             } else {
+                qDebug() << "skipping file: " << fileName;
                 gSettings->setValue(PLUGIN_SETTINGS_LOAD_KEY,false);
             }
             arrayCounter++;
@@ -343,8 +347,9 @@ void PluginHandler::stopExtending(SearchInfo* items) {
 bool PluginHandler::itemLoading(CatItem* item, UserEvent::LoadType lt) {
     bool modified= false;
     foreach(PluginInfo info, plugins) {
-        if (info.loaded) {
-            modified = (info.obj->msg(MSG_ITEM_LOADING, (void*) item, (void*) lt));
+        if (info.loaded &&
+                (info.obj->msg(MSG_ITEM_LOADING, (void*) item, (void*) lt))){
+            modified = true;
         }
     }
     return modified;

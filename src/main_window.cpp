@@ -187,11 +187,6 @@ void MainUserWindow::startTasks(){
     CatBuilder::getItemsFromQuery(il, outItems, MAX_ITEMS);
     gMarginWidget->gSetAppPos();
 
-    //AddListItems(outItems);
-//    st_ListFilled = false;
-//    st_showItemList = false;
-//    st_TakeItemFromList = false;
-//    m_inputList.clearAll();
 }
 
 void MainUserWindow::preloadIcons(){
@@ -231,6 +226,15 @@ void MainUserWindow::choiceUnderstoodTimeout(){
                 lastupdate = now;
             }
         }}
+
+        //explicit searching - this is the fastest thing
+        { static int lastupdate=0;
+            if(abs(now - lastupdate) > (FORGROUND_SEARCH_DELAY*5)){
+
+                if(searchFurtherItems()) {
+                    lastupdate = now;
+                }
+            }}
 
         { static int lastupdate=0;
         if(abs(now - lastupdate) > (SHOW_PREVIEW_DELAY)){
@@ -519,35 +523,42 @@ bool MainUserWindow::foregroundSearch(){
         st_UserChoiceChanged = false;
         m_oldSearchLevel=0;
         return true;
-    } else if(!m_inputList.isExpanded()){
-        int row = m_itemChoiceList->getCurrentRow();
-        int itemCount = m_inputList.getListItemCount();
-        if(m_inputList.getUserKeys().length()> 30 || m_inputList.getKeyWords().count()>1){
-            return true;
-        }
-        QString currentKeys = m_inputList.getUserKeys();
-        int searchLevel = m_inputList.getSearchLevel();
-        if(row > (itemCount-2) && searchLevel > m_oldSearchLevel) {
-            m_oldSearchLevel = searchLevel;
-            searchOnInput(&searchLevel);
-            //This should increment searchLevel if we found anything...
-            if(currentKeys == m_inputList.getUserKeys()){
-                m_inputList.setSearchLevel(searchLevel);
-            }
-            if(itemCount > m_inputList.getListItemCount()){
-                updateDisplay();
-                st_UserChoiceChanged = false;
-            }
-            return true;
-        }
     }
-
-
-
-
-
-
     return false;
+}
+
+bool MainUserWindow::searchFurtherItems(){
+
+    if(!m_inputList.isExpanded() || !st_showItemList)
+        { return false; }
+
+    int row = m_itemChoiceList->getCurrentRow();
+    int itemCount = m_inputList.getListItemCount();
+    if(row<=0 || itemCount <=0){ return false;}
+
+    if(m_inputList.getUserKeys().length()> 15 || m_inputList.getKeyWords().count()>1)
+        { return true; }
+
+    QString currentKeys = m_inputList.getUserKeys();
+    int searchLevel = m_inputList.getSearchLevel();
+    if(searchLevel <= m_oldSearchLevel){ return false;}
+    if(row < (itemCount-2) ){ return false;}
+
+    m_oldSearchLevel = searchLevel;
+    searchOnInput(&searchLevel);
+    //This should increment searchLevel if we found anything...
+    if(currentKeys == m_inputList.getUserKeys()){
+        m_inputList.setSearchLevel(searchLevel);
+    }
+    if(itemCount > m_inputList.getListItemCount()){
+        updateDisplay();
+        st_UserChoiceChanged = false;
+    } else {
+        //ends the search loop!!
+        m_inputList.setSearchLevel(m_oldSearchLevel);
+    }
+    return true;
+
 }
 
 bool MainUserWindow::tryShowPreview(){
@@ -795,21 +806,11 @@ QList<CatItem> MainUserWindow::getItemContextOptions(CatItem item) {
 
 void MainUserWindow::addListItems(QList<CatItem> inItems) {
     m_inputList.addListItemList(inItems);
-//    if(m_inputList.getSearchLevel()==0){
-//        m_inputList.addListItemList(inItems);
-//    } else {
-//    }
 
 }
 
 void MainUserWindow::appendListItems(QList<CatItem> inItems){
     m_inputList.appendListItemList(inItems);
-//    int currentRow = this->m_itemChoiceList->getCurrentRow();
-//    for(int i=0; i< inItems.count(); i++){
-//        CatItem it = inItems[i];
-//        m_inputList.addSingleListItem(it,currentRow+1);
-//    }
-
 }
 
 
@@ -956,10 +957,10 @@ void MainUserWindow::fillList(){
             //Some defensive programming but oh well...
             if(!m_desiredParentPath.isEmpty()){
                 QListWidgetItem *it = m_itemChoiceList->currentItem();
-                if(m_desiredParentPath !=it->data(ROLE_ITEM_PATH).toString()){
+                if(it && m_desiredParentPath !=it->data(ROLE_ITEM_PATH).toString()){
                     for(int i=0; i< m_itemChoiceList->count(); i++){
                         it = m_itemChoiceList->getItem(i);
-                        if(m_desiredParentPath ==it->data(ROLE_ITEM_PATH).toString()){
+                        if(it && m_desiredParentPath ==it->data(ROLE_ITEM_PATH).toString()){
                             m_itemChoiceList->setCurrentRow(i);
                             break;
                         }
@@ -1546,19 +1547,6 @@ bool MainUserWindow::goBackFrom(int , QKeyEvent* ){
 bool MainUserWindow::arrowUpDown(int , QKeyEvent* controlKey){
     if(m_inputList.isExpanded()){
         m_itemChoiceList->parentKeyPress(controlKey);
-//        if(k == Qt::Key_Up){
-//            m_itemChoiceList->moveUp();
-//        }else if(k == Qt::Key_Down){
-//            m_itemChoiceList->moveDown();
-//        } else { return false;}
-//        st_ListFilled = false;
-//        QListWidgetItem* it = m_itemChoiceList->currentItem();
-//        if(it){
-//            qDebug() << "setItem for preview: " << it->text();
-//            QString itemPath = it->data(ROLE_ITEM_PATH).toString();
-//            qDebug() << "item path:" << itemPath;
-//            m_inputList.setItem(itemPath);
-//        }
     } else {
         // The menu control handles the differences and state changes
         if(st_showItemList) {

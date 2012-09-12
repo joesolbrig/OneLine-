@@ -22,6 +22,7 @@ ListWithDisplay::ListWithDisplay()
     currentViewRef()->setGeometry(this->geometry());
     currentViewRef()->setVisible(true);
     currentViewRef()->raise();
+    //m_upDownAnimation = new QPropertyAnimation(this, "animatedHeight");
     m_upDownAnimation = new QPropertyAnimation(this, "baseGeometry");
     connect(m_upDownAnimation, SIGNAL(finished()), this,SLOT(upDownAnimationDone()));
     m_currentlyShowing = false;
@@ -122,6 +123,56 @@ void ListWithDisplay::setBaseAndOrientation(QPoint base, bool isTopOriented, int
     setBaseGeometry(g);
     move(m_base);
     update();
+}
+
+void ListWithDisplay::setAnimatedHeight(QRect r){
+    int height = r.height();
+    int topPosition=0;
+    if(!m_isTopOriented)
+        { topPosition = m_height - height; }
+    QRect area = geometry();
+    area.setHeight(height);
+
+    //Adjust for Icon bar
+    if(m_miniIconBar && m_miniIconBar->isVisible()){
+        QRect iconBarRect(
+            QPoint(area.right(),topPosition),
+            QSize(m_width, UI_MINI_ICON_BAR_HEIGHT));
+        m_miniIconBar->setGeometry(iconBarRect);
+        topPosition +=UI_MINI_ICON_BAR_HEIGHT;
+        Q_ASSERT(m_miniIconBar->geometry().height() == UI_MINI_ICON_BAR_HEIGHT);
+    }
+    area.moveTop(topPosition);
+
+    //Get total Width
+    int minWidth=0;
+    for(int i=0; i< m_viewStack.count();i++){
+        QRect r = m_viewStack[i]->geometry();
+        minWidth += r.width();
+        r.setTop(topPosition + UI_MINI_ICON_BAR_HEIGHT);
+        r.setHeight(height -UI_MINI_ICON_BAR_HEIGHT);
+        m_viewStack[i]->setGeometry(r);
+    }
+    if(minWidth>0){
+        m_width = minWidth;
+    }
+    area.setWidth(m_width);
+
+    //Adjust for multi-input and adjust multi-input
+    if(m_multiInputDisplayer){
+        m_formHeight = m_multiInputDisplayer->sizeOrPaint(0,height).height();
+        if(m_miniIconBar && m_miniIconBar->isVisible()){
+            m_formHeight += m_miniIconBar->geometry().height();
+        }
+        area.setHeight(m_formHeight);
+    }
+
+    //Adjust for screen size...
+    if(area.right() > m_screenEdge){
+        area.moveRight(m_screenEdge);
+    }
+
+    QWidget::setGeometry(area);
 }
 
 void ListWithDisplay::setBaseGeometry(QRect area){
@@ -517,8 +568,16 @@ void ListWithDisplay::showAnimated(){
 void ListWithDisplay::animateToLocation(QRect r){
     qDebug() << "animateToLocation begin" << r;
     m_upDownAnimation->setDuration(UI_LIST_RESIZE_TIME);
-    QRect startR = this->geometry();
-    m_upDownAnimation->setStartValue(startR);
+    int startHeight = geometry().height();
+    if(r.height() == startHeight && r.width() == m_width){
+        return;
+    }
+
+    //resizes main windows
+    //setHeight(startHeight);
+    m_width = r.width();
+    setBaseGeometry();
+    m_upDownAnimation->setStartValue(geometry());
     m_upDownAnimation->setEndValue(r);
     m_upDownAnimation->start();
 }

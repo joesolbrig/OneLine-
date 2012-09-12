@@ -57,7 +57,9 @@ public:
     QString getIcon();
 
 protected:
-    void indexDirectory(QSet<QString> &extendedTypes, CatItem& parentItem, QList<CatItem>* output, UserEvent::LoadType lt=UserEvent::IGNORE);
+    void indexDirectory(QSet<QString> &extendedTypes, CatItem& parentItem,
+        QList<CatItem>* output, UserEvent::LoadType lt=UserEvent::IGNORE,
+        bool addChild=false);
     void alterItem(CatItem* item);
     CatItem createFileItem(QSet<QString> &extendedTypes, QFileInfo fileInfo, CatItem& parent, int depth, UserEvent::LoadType lt=UserEvent::IGNORE);
     CatItem parseOnelineFile(QFileInfo fileInfo);

@@ -252,6 +252,7 @@ public:
     void processKey();
     bool backgroundSearch();
     bool foregroundSearch();
+    bool searchFurtherItems();
     bool tryShowPreview();
     bool tryHidePreview();
     void hidePreview();

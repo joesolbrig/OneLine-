@@ -180,7 +180,9 @@ QList<Directory> FilecatalogPlugin::getInitialDirs(){
 
 
 //One thing to explore is looking deeper into any directory with a higher rating...
-void FilecatalogPlugin::indexDirectory(QSet<QString> &extendedTypes, CatItem& parentItem, QList<CatItem>* output,UserEvent::LoadType lt)
+void FilecatalogPlugin::indexDirectory(QSet<QString> &extendedTypes,
+    CatItem& parentItem, QList<CatItem>* output,UserEvent::LoadType lt,
+    bool addChild)
 {
     int depth=parentItem.getCustomValue(FILECAT_SEARCH_DEPTH);
     if(depth ==0){
@@ -208,7 +210,8 @@ void FilecatalogPlugin::indexDirectory(QSet<QString> &extendedTypes, CatItem& pa
     int i = 0;
     for (; i < dirsInfo.count() && passCount <maxPasses; ++i) {
         fileInfo = dirsInfo[i];
-        Q_ASSERT(fileTime.isNull() || fileTime <= fileInfo.created());
+        //Ordering by directory is not quite strict but we'll just live with skipped files given this error
+        //Q_ASSERT(fileTime.isNull() || fileTime <= fileInfo.created());
         fileTime = fileInfo.lastModified();
         if(scanTime > (int) fileTime.toTime_t()) { continue;}
         passCount++;
@@ -223,6 +226,9 @@ void FilecatalogPlugin::indexDirectory(QSet<QString> &extendedTypes, CatItem& pa
         if(fileInfo.isDir())
             { indexDirectory(extendedTypes, item, output,lt);}
         output->append(item);
+        if(addChild){
+            parentItem.addChild(item);
+        }
     }
     if(i < dirsInfo.count()){
         parentItem.setChildScanTime(fileTime.toTime_t());
@@ -410,7 +416,8 @@ bool FilecatalogPlugin::modifyItem(CatItem* it , UserEvent::LoadType lt) {
             }
             it->setCustomPluginValue(FILECAT_SEARCH_DEPTH, 1);
             QList<CatItem> itemsAdded;
-            indexDirectory(extendedTypes,*it, &itemsAdded,lt);
+            indexDirectory(extendedTypes,*it,
+                &itemsAdded, lt, true);
             Q_ASSERT(!it->isStub());
             return true;
         }

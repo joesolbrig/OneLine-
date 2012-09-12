@@ -507,6 +507,7 @@ CatItem Recoll_Interface::makeCatItem(Rcl::Doc doc, CatItem& parentIt){
             if(!addr.name.empty()){
                 emailAccount.setName(EMAIL_ACCOUNT_NAME_DESCRIPTION + QString(addr.name.c_str()));
             }
+            emailAccount.setSourceWeight(MAX_EXTERNAL_WEIGHT, CatItem::createTypeParent(CatItem::MESSAGE));
             res.addParent(emailAccount,FILE_CATALOG_PLUGIN_STR,BaseChildRelation::MESSAGE_SOURCE_PARENT);
         }
     }

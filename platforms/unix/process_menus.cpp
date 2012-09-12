@@ -39,9 +39,12 @@ proclaims that it can't be used as stable API/ABI.. */
 
 CatItem gnomeMenuBaseItem(){
     CatItem gm(BASE_GNOME_MENU_PATH, GNOME_MENUS_NAME);
-    gm.setSourceWeight(MAX_MAX_EXTERNAL_WEIGHT);
+    gm.setItemType(CatItem::ORGANIZING_TYPE);
+    gm.setSourceWeight(MAX_MAX_EXTERNAL_WEIGHT,
+                       CatItem::createTypeParent(CatItem::LOCAL_DATA_DOCUMENT));
     CatItem typeParent(addPrefix(TYPE_PREFIX,QString::number(CatItem::LOCAL)));
     gm.addParent(typeParent);
+    Q_ASSERT(gm.hasSourceWeight());
     return gm;
 }
 
@@ -77,7 +80,10 @@ static CatItem process_entry(GMenuTreeEntry *entry, int impliedWeight)
   childItem.setCustomPluginInfo(DESKTOP_ITEM_LABEL, item_path);
   childItem.setName(name);
 
-  childItem.setExternalWeight(impliedWeight, gnomeMenuBaseItem());
+  CatItem parent = gnomeMenuBaseItem();
+  childItem.setExternalWeight(impliedWeight, parent);
+  Q_ASSERT(childItem.hasParent(parent));
+  Q_ASSERT(childItem.getTypeParent(CatItem::ORGANIZING_TYPE).hasSourceWeight());
   childItem.setItemType(CatItem::VERB);
 
   childItem.setTagLevel(CatItem::ATOMIC_ELEMENT);
@@ -93,7 +99,6 @@ static CatItem process_entry(GMenuTreeEntry *entry, int impliedWeight)
   QString description(descriptionChars);
   childItem.setDescription(description);
 
-  
   Q_ASSERT(childItem.getUseDescription());
 
 //  g_free (utf8_file_id);

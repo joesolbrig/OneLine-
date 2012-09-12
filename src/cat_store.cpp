@@ -1463,6 +1463,10 @@ int Cat_Store::restoreRelationByIndex(CatItem& it, QString index, int depth){
 }
 
 CatItem Cat_Store::addItemProtected(CatItem itemToAdd, int recur){
+    if(itemToAdd.hasSourceWeight()){
+        qDebug() << "got source: " << itemToAdd.getPath();
+
+    }
     if(m_insertedPaths.contains(itemToAdd.getPath())){
         CatItem re = item_index.getValue(itemToAdd.getPath());
         if(recur > 0 || itemToAdd.getName() ==re.getName()){
@@ -1633,7 +1637,6 @@ void Cat_Store::addTypePseudoRelationsToItem(CatItem& item){
         CatItem par = CatItem::createTypeParent(item.getSortingType());
         item.addParent(par);
     }
-
 }
 
 void Cat_Store::removeRelation(DbChildRelation rel){
@@ -1662,7 +1665,7 @@ void Cat_Store::addRelation(DetachedChildRelation cr, int recur){
     qint32 scaleW = MIN(cr.getExternalWeight()*((int)DOUBLE_SCALE_FACTOR),MAX_TOTAL_WEIGHT );
     Tuple ewTuple(parentId, scaleW);
     child_index.addEntry( ewTuple, dbR, C_BY_PARENTID_CHILDW);
-    child_index.addEntry( parentId, (long)(cr.getTotalWeight()), dbR, C_BY_PARENTID_RELW);
+    child_index.addEntry( parentId, (long)(child.getTotalWeight()), dbR, C_BY_PARENTID_RELW);
     child_index.addEntry( parentId, (long)(cr.getIsDefault()), dbR, C_BY_PARENTID_RELT_W);
     child_index.addEntry( parentId, dbR,C_BY_PARENDID);
     child_index.addEntry( childId, dbR, C_BY_CHILDID);
@@ -1682,8 +1685,12 @@ void Cat_Store::addRelation(DetachedChildRelation cr, int recur){
 
     if(cr.getChildType() == BaseChildRelation::WEIGHT_SOURCE
        ||( child.hasSourceWeight())){
-        if(cr.getSourceWeight()>=0){
+        if(cr.getSourceWeight()>=0 ){
             Tuple swTuple(parentId, cr.getSourceWeight());
+            child_index.addEntry( swTuple, dbR, C_SOURCE_BY_PARENT_TYPE);
+        } else if(child.getSourceWeight()>0){
+            Tuple swTuple(parentId, child.getSourceWeight());
+            qDebug() << "added source parent: " << child.getPath();
             child_index.addEntry( swTuple, dbR, C_SOURCE_BY_PARENT_TYPE);
         }
     }

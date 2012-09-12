@@ -230,6 +230,8 @@ QHash<QString, QList<QString> > PlatformGnome::GetDirectories(QString base, QSet
 
     out["platforms"] += qApp->applicationDirPath();
 
+    qDebug() << "got dirs:" << out;
+
     return out;
 }
 
