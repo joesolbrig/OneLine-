@@ -23,8 +23,7 @@
 #include <X11/Xlib.h>
 
 
-
-
+#define GNOME_PLUGIN_DEFINE 1
 
 PlatformUnix::PlatformUnix() : PlatformBase() 		
 {

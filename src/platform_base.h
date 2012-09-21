@@ -62,8 +62,11 @@ public:
     virtual CatItem associatedApp(QString )= 0;
 
 
-    virtual QHash<QString, QList<QString> > GetDirectories(QString base,
-                                                            QSettings* set=0) = 0;
+    virtual QHash<QString, QList<QString> > GetDirectories(QString ,
+                                                           QSettings* set=0) {
+        set=set;
+        return QHash<QString, QList<QString> >();
+    };
     virtual void registerToGetActiveWindows(QWidget*){Q_ASSERT(false);};
     virtual void scanActiveWindowsNow(){Q_ASSERT(false);};
 

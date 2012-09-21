@@ -43,6 +43,7 @@ void AbstractFeedReader::run(){
         sendRequest();
         QEventLoop loop;
         connect(m_reply, SIGNAL(finished()), &loop, SLOT(quit()));
+        connect(m_reply, SIGNAL(error()), &loop, SLOT(quit()));
         loop.exec();
         processRequestResult();
         m_finished = true;

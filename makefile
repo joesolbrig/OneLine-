@@ -65,6 +65,17 @@ install_debug:: debug
 	install -d $(DESTDIR)$(DESKTOP_PATH)/
 	install -m 644 linux/oneline.desktop $(DESTDIR)$(DESKTOP_PATH)/
 	install -d $(DESTDIR)$(ICON_PATH)/
+	-install -m 666 "oneline.ico" $(DESTDIR)$(ICON_PATH)/oneline.ico
+	-install -m 644 "misc/icons/icon.png" $(DESTDIR)$(ICON_PATH)/oneline.png
+	install -d -o`logname` ~/$(ONELINE_DIR)
+	install -d -o`logname` ~/$(ONELINE_DIR)/generated_icons
+	install -d -o`logname` ~/$(ONELINE_DIR)/generated_items
+	install -d -o`logname` ~/$(ONELINE_DIR)/temp_for_preview
+	install -d -o`logname` ~/$(ONELINE_DIR)/item_cache
+	install -d -o`logname` ~/$(ONELINE_DIR)/styles
+	install -m 666 -o`logname` styles/*.* ~/$(ONELINE_DIR)/styles
+	install -m 666 -o`logname` ConfigurationFiles/*.ini ~/$(ONELINE_DIR)
+	install -d -o`logname` ~/$(ONELINE_DIR)/cached_feeds
 
 install:: release
 	-install -d $(DESTDIR)$(PREFIX)/bin/
@@ -88,6 +99,7 @@ install:: release
 	install -m 666 linux/oneline.desktop $(DESTDIR)$(DESKTOP_PATH)/
 	install -d $(DESTDIR)$(ICON_PATH)/
 	-install -m 666 "oneline.ico" $(DESTDIR)$(ICON_PATH)/oneline.ico
+	-install -m 644 "misc/icons/icon.png" $(DESTDIR)$(ICON_PATH)/oneline.png
 	install -d -o`logname` ~/$(ONELINE_DIR)
 	install -d -o`logname` ~/$(ONELINE_DIR)/generated_icons
 	install -d -o`logname` ~/$(ONELINE_DIR)/generated_items

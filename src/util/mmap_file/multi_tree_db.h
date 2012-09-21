@@ -742,10 +742,10 @@ template <class VALUE, class INDEX_TYPE>   class MultiTree {
                                 long limit=-1, long offset=-1){
             vector<VALUE> res;
 
-            typename QHash<INDEX_TYPE,Tuple >::iterator i;
-            refnodePtr base_node = m_subtrees[subkey]->get_base();
+            Q_ASSERT(m_subtrees.find(subkey)!= m_subtrees.end());
 
             if(m_subtrees.find(subkey)!= m_subtrees.end() ){
+                refnodePtr base_node = m_subtrees[subkey]->get_base();
                 vector<Tuple> v =  base_node->get_range(start, end_bound,limit, offset);
                 for(unsigned int i=0;i < v.size();i++){
                     res.push_back(m_itemList.get(v[i]));

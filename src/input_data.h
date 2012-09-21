@@ -88,7 +88,7 @@ public:
         QString keys = getUserKeys();
 
         m_matched_to_add.clear();
-        if(!keys.isEmpty() && !keys[keys.count()-1].isSpace()){
+        if(keys.length()>2 && !keys[keys.count()-1].isSpace()){
             for(int i=0;i< m_formattedItems.size();i++){
                 ListItem& li = m_formattedItems.at(i);
                 //li.hasKeyChar() &&  li.hotkeyChar() == keys[keys.length()-1]

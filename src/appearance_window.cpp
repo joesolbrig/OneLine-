@@ -617,7 +617,9 @@ void MainUserWindow::showApp(bool now) {
     qApp->syncX();
     // Let the plugins know
     Catalog::showTheApp();
+    gMarginWidget->gSetAppPos();
     setFocus();
+
 }
 
 void MainUserWindow::hideApp(bool/* now*/) {

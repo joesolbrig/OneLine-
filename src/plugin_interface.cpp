@@ -666,20 +666,7 @@ CatItem CatItem::createFileItem(QSet<QString> &extendedTypes, QFileInfo initialI
 }
 
 
-long CatItem::getTotalExternalWeight(){
-    long w = this->getCustomValue(EXTERNAL_WEIGHT_KEY_STR, -1);
-    for(int i=0;i<d->children_detached_list.count();i++){
-        if(!d->children_detached_list[i].getExternalWeight() !=MEDIUM_EXTERNAL_WEIGHT&&
-           !d->children_detached_list[i].isForDelete()){
-            w = MAX(d->children_detached_list[i].getExternalWeight(), w);
-        }
-    }
-    if(w>-1){
-        return w;
-    } else {
-        return MEDIUM_EXTERNAL_WEIGHT;
-    }
-}
+
 
 
 void CatItem::clearExternalWeight(){
@@ -707,41 +694,7 @@ int CatItem::getChildCount() const {
     return count;
 }
 
-void CatItem::setExternalWeight(long weight, CatItem par){
-    Q_ASSERT(!par.getPath().isEmpty());
-//    if(par.getPath().isEmpty()){
-//        if(getPluginId()==0){
-//            setCustomPluginValue(EXTERNAL_WEIGHT_KEY_STR, weight);
-//            return;
-//        }
-//    }
-    QString parentPath = par.getPath();
-    bool merged = false;
-    for(int i=0;i<d->children_detached_list.count();i++){
-        if(d->children_detached_list[i].getParentPath()==parentPath){
-            d->children_detached_list[i].setExternalWeight(weight);
-            d->children_detached_list[i].setChildType(BaseChildRelation::WEIGHT_SOURCE);;
-            merged = true;
-        }
-        if(d->children_detached_list[i].getChildPath()==parentPath){
-            d->children_detached_list[i].setExternalWeight(weight);
-            d->children_detached_list[i].setChildType(BaseChildRelation::REVERSE_WEIGHT_SOURCE);
-            merged = true;
-            Q_ASSERT(false);
-        }
-    }
-    if(!merged){
-        DetachedChildRelation dcr(par,*this);
-        dcr.setExternalWeight(weight);
-        Q_ASSERT(dcr.getExternalWeight() == weight);
-        d->children_detached_list.append(dcr);
-        Q_ASSERT(d->children_detached_list[d->children_detached_list.count()-1].getExternalWeight() == weight);
-        //Q_ASSERT(d->children_detached_list[d->children_detached_list.count()-1].getParentId() == parentId);
-    }
 
-    Q_ASSERT(getExternalWeight(par.getItemId()) == weight);
-    Q_ASSERT(getTotalExternalWeight() >= weight);
-}
 
 qint32 CatItem::getScaledSourceWeight(){
     if(hasSourceWeight()){
@@ -824,7 +777,10 @@ void CatItem::setSourceWeight(qint32 weight, CatItem par){
         d->children_detached_list.append(dcr);
         Q_ASSERT(d->children_detached_list[d->children_detached_list.count()-1].getSourceWeight() == weight);
     }
-    Q_ASSERT(getWeightFromSources() >= weight);
+    qint32 maxW = getWeightFromSources();
+    setCustomPluginValue(SOURCE_WEIGHT_KEY_STR,maxW);
+    Q_ASSERT(maxW >= weight);
+    Q_ASSERT(hasSourceWeight());
 }
 
 qint32 CatItem::getUpdatingSourceWeight(){
@@ -880,6 +836,72 @@ long CatItem::getExternalWeight(qint32 parentId){
     return MEDIUM_EXTERNAL_WEIGHT;
 }
 
+CatItem CatItem::getWeightParent(){
+    long w = this->getCustomValue(EXTERNAL_WEIGHT_KEY_STR, -1);
+    CatItem maxParent;
+    for(int i=0;i<d->children_detached_list.count();i++){
+        if(!d->children_detached_list[i].getExternalWeight() !=MEDIUM_EXTERNAL_WEIGHT&&
+           !d->children_detached_list[i].isForDelete()){
+            if(d->children_detached_list[i].getExternalWeight() >w){
+                maxParent = d->children_detached_list[i].getParent();
+                w = d->children_detached_list[i].getExternalWeight();
+            }
+        }
+    }
+    return maxParent;
+}
+
+
+long CatItem::getTotalExternalWeight(){
+    long w = this->getCustomValue(EXTERNAL_WEIGHT_KEY_STR, -1);
+    for(int i=0;i<d->children_detached_list.count();i++){
+        if(!d->children_detached_list[i].getExternalWeight() !=MEDIUM_EXTERNAL_WEIGHT&&
+           !d->children_detached_list[i].isForDelete()){
+            w = MAX(d->children_detached_list[i].getExternalWeight(), w);
+        }
+    }
+    if(w>-1){
+        return w;
+    } else {
+        return MEDIUM_EXTERNAL_WEIGHT;
+    }
+}
+
+void CatItem::setExternalWeight(long weight, CatItem par){
+    Q_ASSERT(!par.getPath().isEmpty());
+//    if(par.getPath().isEmpty()){
+//        if(getPluginId()==0){
+//            setCustomPluginValue(EXTERNAL_WEIGHT_KEY_STR, weight);
+//            return;
+//        }
+//    }
+    QString parentPath = par.getPath();
+    bool merged = false;
+    for(int i=0;i<d->children_detached_list.count();i++){
+        if(d->children_detached_list[i].getParentPath()==parentPath){
+            d->children_detached_list[i].setExternalWeight(weight);
+            d->children_detached_list[i].setChildType(BaseChildRelation::WEIGHT_SOURCE);;
+            merged = true;
+        }
+        if(d->children_detached_list[i].getChildPath()==parentPath){
+            d->children_detached_list[i].setExternalWeight(weight);
+            d->children_detached_list[i].setChildType(BaseChildRelation::REVERSE_WEIGHT_SOURCE);
+            merged = true;
+            Q_ASSERT(false);
+        }
+    }
+    if(!merged){
+        DetachedChildRelation dcr(par,*this);
+        dcr.setExternalWeight(weight);
+        Q_ASSERT(dcr.getExternalWeight() == weight);
+        d->children_detached_list.append(dcr);
+        Q_ASSERT(d->children_detached_list[d->children_detached_list.count()-1].getExternalWeight() == weight);
+        //Q_ASSERT(d->children_detached_list[d->children_detached_list.count()-1].getParentId() == parentId);
+    }
+
+    Q_ASSERT(getExternalWeight(par.getItemId()) == weight);
+    Q_ASSERT(getTotalExternalWeight() >= weight);
+}
 
 void CatItem::clearRelations() {
     long w = getExternalWeight();

@@ -1022,6 +1022,7 @@ public:
 
     void setExternalWeight(long i, CatItem par);
     long getExternalWeight(qint32 parentId=0);
+    CatItem getWeightParent();
 
     long getTotalExternalWeight();
     void clearExternalWeight();
@@ -1904,7 +1905,6 @@ public:
         setCustomPluginValue(TOTAL_WEIGHT_KEY_STR,v);
     }
 
-
     qint32 getSourceWeight(){
         return getCustomValue(SOURCE_WEIGHT_KEY_STR,0);
     }
@@ -1913,6 +1913,7 @@ public:
     }
 
     bool hasSourceWeight(){
+        Q_ASSERT(!isEmpty());
         return hasLabel(SOURCE_WEIGHT_KEY_STR);
     }
     bool hasWeightInfo(){

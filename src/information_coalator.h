@@ -286,7 +286,7 @@ public:
                 remove(at(i));
             }
         }
-        //OHash::clearListItems();
+        OHash::clearListItems();
         m_hotKeys.clear();
         m_itemsByUserDescription.clear();
     }

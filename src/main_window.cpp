@@ -451,7 +451,7 @@ void MainUserWindow::catalogBuilt() {
         }
 
         //Update files and list
-        fillList();
+        //fillList();
         showitemList();
         m_itemChoiceList->update();
     }

@@ -103,7 +103,8 @@ bool PreviewPane::setItem(CatItem it, bool justTesting) {
             loadingStart();
         }
         return true;
-    } else if(it.hasLabel(FIREFOX_PLUGIN_NAME)){
+    } else if(it.hasLabel(FIREFOX_PLUGIN_NAME)
+        && !it.hasLabel(STREAM_SOURCE_PATH)){
         if(!justTesting){
             setHtml (HTTP_CONTENT_LOADING_MSG);
             QUrl url = it.previewUrl();

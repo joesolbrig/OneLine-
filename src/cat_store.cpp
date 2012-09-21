@@ -39,6 +39,7 @@ Cat_Store::Cat_Store(bool shouldRestore) :
     I_BY_MESSAGETIME("Messages By Frecency"),
     I_BY_TYPE_NAME("Items by type then partial name"),
     I_BY_PIN_KEYS("Items by pinning keys"),
+    I_BY_SOURCECHOSENNESS("Source Chosen frequencey By Source"),
 
     C_BY_PARENDID("Child Relations By Parents"),
     C_BY_CHILDID("Child Relations By Children"),
@@ -48,7 +49,6 @@ Cat_Store::Cat_Store(bool shouldRestore) :
     C_BY_PARENTID_UNSEEN_CHILDS("Relation Weights By Parent - unseen children ordering"),
     C_BY_PARENTID_SIBLING_CHILDS("Sibling ordered childrend By Parents by sibling order"),
     C_SOURCE_BY_PARENT_TYPE("Source Weight By Source Type"),
-    C_BY_SOURCECHOSENNESS("Source Chosen frequencey By Source"),
     C_VERB_BY_ACTIONPARENT("Verb Children By Parent Action Types"),
     C_SYNONYMS("List Of Synonyms Not Children Otherwise"),
     H_BY_TIME("History entries by time: Main Index"),
@@ -73,10 +73,10 @@ Cat_Store::Cat_Store(bool shouldRestore) :
     item_index.addIndex(I_BY_SOURCEWEIGHT);
     item_index.addIndex(I_BY_SOURCEUPDATABILITY);
     item_index.addIndex(I_BY_SOURCEVISIBILITY);
-    item_index.addIndex(C_BY_SOURCECHOSENNESS);
     item_index.addIndex(I_BY_MESSAGETIME);
     item_index.addIndex(I_BY_TYPE_NAME);
     item_index.addIndex(I_BY_PIN_KEYS);
+    item_index.addIndex(I_BY_SOURCECHOSENNESS);
 
     child_index.addIndex(C_BY_PARENDID);
     child_index.addIndex(C_BY_CHILDID);
@@ -88,6 +88,7 @@ Cat_Store::Cat_Store(bool shouldRestore) :
     child_index.addIndex(C_VERB_BY_ACTIONPARENT);
     child_index.addIndex(C_SYNONYMS);
     child_index.addIndex(C_SOURCE_BY_PARENT_TYPE);
+    //child_index.addIndex(I_BY_SOURCECHOSENNESS);
 
     history_index.addIndex(H_BY_TIME);
     history_index.addIndex(H_BY_ITEMTIME);
@@ -952,6 +953,24 @@ CatItem Cat_Store::addItem(CatItem it){
     return res;
 }
 
+void Cat_Store::addItemForWeigh(CatItem item){
+    if(item.getIsTempItem())
+        { return; }
+
+    QMutexLocker locker(&catalogMutex);
+    CatItem oldItem = item_index.getValue(item.getPath());
+    if(!oldItem.isEmpty()){
+        int w = oldItem.getExternalWeight();
+        int oldWeight = oldItem.getFullWeight();
+        if(w >HIGH_EXTERNAL_WEIGHT || w < MEDIUM_EXTERNAL_WEIGHT){ return; }
+        CatItem weightParent = oldItem.getWeightParent();
+        oldItem.setExternalWeight(w*ITEM_SEEN_REDUCTION_RATIO, weightParent);
+        reweightItemProtected(oldItem);
+        Q_ASSERT(oldWeight<=oldItem.getFullWeight());
+    }
+
+}
+
 //Keeps track of group Addition
 
 void Cat_Store::beginAddGroup(){
@@ -1036,19 +1055,35 @@ void Cat_Store::reweightItems(QList<CatItem>* forExtension){
 
 //This could be called often,
 //So perhaps we should do source reweighting elsewhere
-void Cat_Store::addVisibilityEvent(CatItem it, UserEvent evt){
+void Cat_Store::addVisibilityEvent(CatItem item, UserEvent evt){
     QMutexLocker locker(&catalogMutex);
 
     time_t n = appGlobalTime();
     if(evt.event_type == UserEvent::NEW_MESSAGES_NOTED){
         lastViewUpdate = n;
-    } else {
-        HistoryEvent he(it.getName(), QHash<QString, QString>(), it.getPath(), evt, n);
-        Tuple(it.getItemId(),n);
+    } else  if(evt.event_type == UserEvent::SHOWN_LIST || evt.event_type == UserEvent::SHOWN_EDITLINE){
+        HistoryEvent he(item.getName(), QHash<QString, QString>(), item.getPath(), evt, n);
+        Tuple(item.getItemId(),n);
         history_index.addEntry(n,he, V_BY_ITEMTIME);
         //history_index.addEntry(n,he, H_BY_TIME);
-        reweightItemProtected(it);
 
+        CatItem oldItem = item_index.getValue(item.getPath());
+        if(!oldItem.isEmpty()){
+            int w = oldItem.getExternalWeight();
+            int oldWeight = oldItem.getFullWeight();
+            if(w >HIGH_EXTERNAL_WEIGHT || w < MEDIUM_EXTERNAL_WEIGHT){ return; }
+            CatItem weightParent = oldItem.getWeightParent();
+            if(weightParent.isEmpty()){
+                weightParent = CatItem::createTypeParent(item.getItemType());
+            }
+            oldItem.setExternalWeight(w*ITEM_SEEN_REDUCTION_RATIO, weightParent);
+            Q_ASSERT(oldWeight<=oldItem.getFullWeight());
+            reweightItemProtected(oldItem);
+            addItemEntryProtected(oldItem);
+        } else {
+            reweightItemProtected(item);
+            addItemEntryProtected(item);
+        }
     }
 }
 
@@ -1728,7 +1763,7 @@ CatItem Cat_Store::addHistoryEvent(CatItem it, UserEvent evt, time_t n ){
         CatItem parent = CatItem(parents.at(i).getParentPath());
         if(evt.getIsChosen()){
             parent.setChosenness(parent.getChosenness()+1);
-            item_index.addEntry(parent.getChosenness(), parent, C_BY_SOURCECHOSENNESS);
+            item_index.addEntry(parent.getChosenness(), parent, I_BY_SOURCECHOSENNESS);
         } else {
             parent.setVisibility(parent.getVisibility()+1);
             item_index.addEntry(parent.getChosenness(), parent, I_BY_SOURCEVISIBILITY);
@@ -1971,7 +2006,7 @@ QStringList Cat_Store::getParentChildInices(){
     pIndices.append(C_BY_PARENTID_RELT_W);
 
     pIndices.append(C_BY_CHILDID);
-    pIndices.append(C_BY_SOURCECHOSENNESS);
+    //pIndices.append(I_BY_SOURCECHOSENNESS);
     pIndices.append(C_VERB_BY_ACTIONPARENT);
     return pIndices;
 }

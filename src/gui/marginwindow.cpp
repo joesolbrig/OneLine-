@@ -78,10 +78,14 @@ void MarginWindow::gSetAppPos(int vOrient, int hOrient){
 
     int invisibleMargin = gMainWidget->invisibleAreaHeight();
 
+    outSideRect.setWidth((outSideRect.width()/2)*2);
+
     listRect.setWidth(outSideRect.width()-(
             UI_BORDER_WINDOW_LEFT_MARGIN+UI_BORDER_WINDOW_RIGHT_MARGIN));
 
     //Margin for sub-windows
+    listRect.setWidth((listRect.width()/2)*2);
+
     m_marginRect = outSideRect;
     m_marginRect.setWidth(editRect.width() + UI_BORDER_WINDOW_LEFT_MARGIN + UI_BORDER_WINDOW_RIGHT_MARGIN);
     if(!listRect.isEmpty()){
@@ -123,8 +127,10 @@ void MarginWindow::gSetAppPos(int vOrient, int hOrient){
     }
 
     editRect.moveLeft(UI_BORDER_WINDOW_LEFT_MARGIN);
-    //listRect.moveLeft(UI_BORDER_WINDOW_LEFT_MARGIN);
-    listRect.moveLeft((m_marginRect.width() - listRect.width())/2);
+    listRect.moveLeft(UI_BORDER_WINDOW_LEFT_MARGIN);
+    //listRect.moveLeft((m_marginRect.width() - listRect.width())/2);
+    listRect.setWidth(m_marginRect.width()-(
+            UI_BORDER_WINDOW_LEFT_MARGIN+UI_BORDER_WINDOW_RIGHT_MARGIN));
 
     if(outSideRect.right() > scr.right()){
         outSideRect.moveRight(scr.right());
@@ -134,7 +140,6 @@ void MarginWindow::gSetAppPos(int vOrient, int hOrient){
         outSideRect.left()  + UI_BORDER_WINDOW_LEFT_MARGIN +
             listRect.width() + previewRect.width()));
         previewRect.moveLeft(listRect.right()+UI_BORDER_WINDOW_LEFT_MARGIN+UI_PREVIEW_RIGHT_OFFSET);
-
     }
 
     if(outSideRect.right() > scr.right()){
@@ -143,6 +148,8 @@ void MarginWindow::gSetAppPos(int vOrient, int hOrient){
     }
 
     move(outSideRect.topLeft());
+
+
     setGeometry(outSideRect);
     if(!gMainWidget){return;}
     gMainWidget->move(editRect.topLeft());

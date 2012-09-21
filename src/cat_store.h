@@ -55,6 +55,8 @@ class Cat_Store {
         const QString I_BY_MESSAGETIME;
         const QString I_BY_TYPE_NAME;
         const QString I_BY_PIN_KEYS;
+        const QString I_BY_SOURCECHOSENNESS;
+
         const QString C_BY_PARENDID;
         const QString C_BY_CHILDID;
         const QString C_BY_PARENTID_CHILDW;
@@ -63,7 +65,6 @@ class Cat_Store {
         const QString C_BY_PARENTID_UNSEEN_CHILDS;
         const QString C_BY_PARENTID_SIBLING_CHILDS;
         const QString C_SOURCE_BY_PARENT_TYPE;
-        const QString C_BY_SOURCECHOSENNESS;
         const QString C_VERB_BY_ACTIONPARENT;
         const QString C_SYNONYMS;
         const QString H_BY_TIME;
@@ -139,6 +140,7 @@ class Cat_Store {
 
         //Now items should not have so many children that this operation is slow...
         CatItem addItem(CatItem it);
+        void addItemForWeigh(CatItem it);
 
         //Keeps track of group Addition
 
