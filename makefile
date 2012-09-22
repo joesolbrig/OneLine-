@@ -1,5 +1,8 @@
 PREFIX=/usr
-SKINS_PATH=$(PREFIX)/share/oneline/skins
+ONELINE_DIR=.oneline
+
+#SKINS_PATH=$(PREFIX)/share/oneline/skins
+SKINS_PATH=~/$(ONELINE_DIR)/skins
 PLUGINS_PATH=$(PREFIX)/lib/oneline/plugins
 SCRIPT_PATH=$(PREFIX)/lib/oneline/scripts
 PLATFORMS_PATH=$(PREFIX)/lib/oneline/
@@ -7,7 +10,6 @@ DESKTOP_PATH=$(PREFIX)/share/applications
 ICON_PATH=$(PREFIX)/share/pixmaps
 #QMAKE=qmake-qt4
 QMAKE=qmake
-ONELINE_DIR=.oneline
 
 DEFS=SKINS_PATH=\\\"$(SKINS_PATH)\\\" PLUGINS_PATH=\\\"$(PLUGINS_PATH)\\\" \
 	PLATFORMS_PATH=\\\"$(PLATFORMS_PATH)\\\" SCRIPT_PATH=\\\"$(SCRIPT_PATH)\\\"
@@ -60,8 +62,9 @@ install_debug:: debug
 	-install -d $(DESTDIR)$(PLUGINS_PATH)
 	install -m 644 debug/plugins/*.so $(DESTDIR)$(PLUGINS_PATH)/ 
 	-install -d $(DESTDIR)$(PLUGINS_PATH)/icons
-	-install -d $(DESTDIR)$(SKINS_PATH)
-	cp -r skins $(DESTDIR)$(PREFIX)/share/oneline/
+	-install -d $(SKINS_PATH)
+	#cp -r skins $(DESTDIR)$(PREFIX)/share/oneline/
+	cp -r skins ~/$(ONELINE_DIR)
 	install -d $(DESTDIR)$(DESKTOP_PATH)/
 	install -m 644 linux/oneline.desktop $(DESTDIR)$(DESKTOP_PATH)/
 	install -d $(DESTDIR)$(ICON_PATH)/
@@ -92,8 +95,9 @@ install:: release
 	-install -d $(DESTDIR)$(PLUGINS_PATH)
 	install -m 666 release/plugins/*.so $(DESTDIR)$(PLUGINS_PATH)/ 
 	-install -d $(DESTDIR)$(PLUGINS_PATH)/icons
-	-install -d $(DESTDIR)$(SKINS_PATH)
-	cp -r skins $(DESTDIR)$(PREFIX)/share/oneline/
+	-install -d -o`logname` $(SKINS_PATH)
+	#cp -r skins $(DESTDIR)$(PREFIX)/share/oneline/
+	cp -r skins ~/$(ONELINE_DIR)
 	cp -r script $(DESTDIR)$(PREFIX)/share/oneline/
 	install -d $(DESTDIR)$(DESKTOP_PATH)/
 	install -m 666 linux/oneline.desktop $(DESTDIR)$(DESKTOP_PATH)/

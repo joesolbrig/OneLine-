@@ -231,6 +231,12 @@ QHash<QString, QList<QString> > PlatformGnome::GetDirectories(QString base, QSet
     out["platforms"] += qApp->applicationDirPath();
 
     qDebug() << "got dirs:" << out;
+    
+//    QList<QString> skins = out["skins"];
+//    for(int i=0; i<skins.count(); i++){
+//        QDir::setSearchPaths("icons", skins[i]);
+//    }
+    
 
     return out;
 }
