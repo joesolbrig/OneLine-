@@ -1895,6 +1895,10 @@ public:
         inputData[m_itemPosition].filterByItem(filterItem);
     }
 
+    void setSubFilterItem(ListItem filterItem){
+        inputData[m_itemPosition].subFilterByItem(filterItem);
+    }
+
     int getListItemCount()
         { return inputData[m_itemPosition].getListItemCount(); }
 

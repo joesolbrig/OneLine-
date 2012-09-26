@@ -71,6 +71,14 @@ int ListWithDisplay::getMessageSpaceAvailable(){
     }
 }
 
+int ListWithDisplay::getMessageItemCount(){
+    if(m_miniIconBar){
+        return m_miniIconBar->getTextButtonCount();
+    } else {
+        return 0;
+    }
+}
+
 
 bool ListWithDisplay::setMultiInput(InputList* il){
     if(!m_multiInputDisplayer){
@@ -268,7 +276,7 @@ void ListWithDisplay::addMiniIconList(QList<ListItem> items){
         m_miniIconBar->raise();
         m_miniIconBar->update();
     } else {
-        m_showIconList = false;
+        m_showIconList = true;
         //m_miniIconBar->setVisible(false);
         m_miniIconBar->addItems(items);
     }

@@ -111,7 +111,7 @@ class Cat_Store {
         QList<ListItem> getBaseSources();
         QList<ListItem> getCondensedSources();
         QList<ListItem> getOrganizingSources(ItemFilter* inputList);
-        QList<ListItem> getSourceFromType(CatItem::ItemType type, int limit=UI_MINI_COUNT_LIMIT);
+        QList<ListItem> getSubSourcesFromType(CatItem::ItemType type, int limit=UI_MINI_COUNT_LIMIT);
         QList<ListItem> coalatedSources(ItemFilter* inputList);
         QList<CatItem> getMainApps();
         QList<CatItem> getInitialItems(ItemFilter* filter, long limit = MAX_SOURCE_COUNT, int* initialPos=0);

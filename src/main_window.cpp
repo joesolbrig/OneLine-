@@ -204,9 +204,8 @@ void MainUserWindow::startTimers(){
     m_choicesUnderstoodTimer->start(500);
 
 }
-// We want a single "control center" to start updates,
-// and do explicit searches - this guarantee
 
+// We want a single "control center" to start updates,
 //Runs every "1/N moments - fast enough to make search seem
 //"instant" but slow enough to guarantee no bogging the system down
 void MainUserWindow::choiceUnderstoodTimeout(){
@@ -468,7 +467,7 @@ void MainUserWindow::setItemsSeen(){
 
     QList<CatItem> searchResults = m_inputList.getListItems();
     if(st_showItemList){
-        int visNumber = MIN(m_inputList.getListItems().count(),
+        int visNumber = MIN(searchResults.count(),
             gSettings->value("GenOps/numviewable", "4").toInt());
         visNumber = MIN(searchResults.count(), visNumber);
         for(int i=0;i < visNumber; i++){
@@ -653,9 +652,19 @@ void MainUserWindow::hidePreview(){
 void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
 
     if(setTheItem){
-        m_inputList.setFilterItem(it);
+        if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
+            m_inputList.setSubFilterItem(it);
+        } else {
+            m_inputList.setFilterItem(it);
+            CatBuilder::getMiniIcons(m_inputList);
+            }
     } else {
-        m_inputList.setFilterItem(ListItem());
+        if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
+            m_inputList.setSubFilterItem(ListItem());
+        } else {
+            m_inputList.setFilterItem(ListItem());
+        }
+        CatBuilder::getMiniIcons(m_inputList);
     }
     st_ListFilled = false;
     m_inputList.setExpanded(false);
@@ -669,6 +678,8 @@ void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
         m_itemOrigin = FROM_SEARCH;
         st_SearchResultsChanged = true;
     }
+
+
     updateDisplay();
 }
 
@@ -741,7 +752,7 @@ void MainUserWindow::backgroundSearchDone(QString searchString)
             (m_inputList.fieldInputType()!=InputList::USER_TEXT) && m_inputList.slotCount()==1){
         Q_ASSERT(m_searcher);
         m_searcher->wait();
-        m_inputList.filterItems();
+        //m_inputList.filterItems();
         appendListItems(m_searcher->m_extension_results);
 
         st_SearchResultsChanged = true;
@@ -780,9 +791,13 @@ void MainUserWindow::searchOnInput(int* beginPos) {
 
     QList<CatItem> outItems;
     //int visibleItems = this->m_itemChoiceList->getCurrentRow();
+    if(m_itemChoiceList->getMessageItemCount()==0){
+        CatBuilder::getMiniIcons(m_inputList);
+    }
+
     m_inputList.filterItems();
     CatBuilder::getItemsFromQuery(m_inputList, outItems, MAX_ITEMS, beginPos);
-    CatBuilder::getMiniIcons(m_inputList);
+
 
     st_SearchResultsChanged = true;
     st_ListFilled = false;
@@ -993,6 +1008,11 @@ void MainUserWindow::fillList(){
 }
 
 void MainUserWindow::addMiniIcons(){
+
+//    if(m_inputList.slotPosition()>1 && !m_inputList.customVerbChosen()){
+//        m_itemChoiceList->hideIconList();
+//
+//    }
 
     if(!m_inputList.isExpanded()){
         int charsAvail;
@@ -1450,6 +1470,8 @@ bool MainUserWindow::tryExecuteCurrentItem(){
 
             case MSG_TAKE_OUTPUT:
                 st_TakeItemFromList=true;
+                m_inputList.clearAll();
+                m_inputList.addListItemList(outputList);
                 st_Visible = true;
                 return true;
 
@@ -1458,8 +1480,10 @@ bool MainUserWindow::tryExecuteCurrentItem(){
                 break;
 
             case MSG_CONTROL_REBUILD:
+                m_inputList.clearAll();
                 searchOnInput();
                 refreshExtendCatalog(true);
+                m_inputList.addListItemList(outputList);
                 break;
 
             case MSG_NO_ACTION:
@@ -1509,8 +1533,6 @@ bool MainUserWindow::expandInto(int , QKeyEvent* controlKey){
             if(m_inputList.slotCount()>1){return false;}
             st_TakeItemFromList = false;
             searchOnInput();
-        } else {
-            CatBuilder::getMiniIcons(m_inputList);
         }
 
         if(controlKey && controlKey->modifiers() == Qt::ControlModifier){
@@ -1555,7 +1577,9 @@ bool MainUserWindow::arrowUpDown(int , QKeyEvent* controlKey){
             && !m_inputList.isExploringChildren()){
             m_itemChoiceList->setCurrentRow(0);
         }
+
         st_showItemList = true;
+
         st_TakeItemFromList = true;
         st_SearchResultsChanged  = false;
         st_UserChoiceChanged = true;
@@ -1942,7 +1966,8 @@ bool MainUserWindow::processControlKey(QKeyEvent* controlKey){
                     CatBuilder::updateItem(actionItem,2);
                 }
                 if(controlKey->modifiers() == Qt::ControlModifier){
-                    if(m_itemChoiceList->testIf_I_CanPreviewItem(actionItem) && !m_inputList.isExpanded()){
+                    if(m_itemChoiceList->testIf_I_CanPreviewItem(actionItem)
+                        && !m_inputList.isExpanded()){
                         m_inputList.setExpanded();
                         st_ListFilled = false;
                         st_showItemList = true;

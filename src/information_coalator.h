@@ -275,21 +275,11 @@ protected:
     QList<QString> m_organizingSubItems;
     QList<QString> m_sortedItems;
     QString m_organizingItemPath;
+    QString m_organizingSubItemPath;
 
 public:
 
-    void clearListItems(){
-        for(int i=0;i< count();i++){
-            if(!m_organizingItems.contains(at(i).getPath())
-                && !m_organizingSubItems.contains(at(i).getPath())
-                && m_organizingItemPath !=at(i).getPath()){
-                remove(at(i));
-            }
-        }
-        OHash::clearListItems();
-        m_hotKeys.clear();
-        m_itemsByUserDescription.clear();
-    }
+
 
     ItemListCondessor(){ }
 
@@ -584,10 +574,10 @@ public:
         return atStringRef(path);
     }
 
-    void clearListItems(){
-        ItemListCondessor::clearListItems();
-        //m_filterItem = ListItem();
-    }
+//    void clearListItems(){
+//        ItemListCondessor::clearListItems();
+//        //m_filterItem = ListItem();
+//    }
 
     void sortByKeys(QString keys){
 
@@ -613,8 +603,26 @@ public:
         }
     }
 
+    void sortFilterBySubItem(ListItem cItm){
+        if(!cItm.isEmpty()){
+            if(!cItm.getOrganizingCharacteristic().isEmpty()){
+                QList<ListItem> oldList = this->toList();
+                QList<ListItem> li = sortListItems(oldList, cItm.getOrganizingCharacteristic(), false);
+                reorderToList(li);
+            }
+            m_organizingItems.append(cItm.getPath());
+            addToStore(cItm);
+            m_organizingSubItemPath = cItm.getId();
+        } else {
+            m_organizingSubItemPath.clear();
+        }
+
+    }
+
     ListItem getFilterItem(){
-        if(!m_organizingItemPath.isEmpty()){
+        if(!m_organizingSubItemPath.isEmpty()){
+            return atString(m_organizingSubItemPath);
+        } else if(!m_organizingItemPath.isEmpty()){
             return atString(m_organizingItemPath);
         } else {
             return ListItem();
@@ -659,6 +667,17 @@ public:
     ListItem getOrganizingItem(){
         ListItem li = atStringRef(m_organizingItemPath);
         return li;
+    }
+
+    void clearListItems(){
+        QList<ListItem> filterItems = getFilterItems(100,100,100);
+
+        OHash::clearListItems();
+        for(int i=0;i< filterItems.count();i++){
+            append(filterItems[i]);
+        }
+        m_hotKeys.clear();
+        m_itemsByUserDescription.clear();
     }
 
     QList<ListItem> getFilterItems(int , int charsAvail, int ){

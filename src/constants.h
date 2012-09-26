@@ -465,10 +465,10 @@ const QString KEYWORD_PREFIX("keyword://");
 const QString OPERATION_PREFIX("operation://");
 const QString ACTION_NAME(ACTION_TYPE_DEF);
 const QString ACTION_TYPE_PREFIX(ACTION_TYPE_DEF "://");
-const QString TYPE_PREFIX("type://");
+//const QString TYPE_PREFIX("type://");
+const QString TYPE_PREFIX(ACTION_TYPE_DEF "://");
 const QString PERSON_PREFIX("person://");
 const QString SYNONYM_PREFIX("synonym://");
-
 
 const QString TASK_PREFIX("task://");
 
@@ -990,11 +990,14 @@ const QString CUSTOM_FIELD_DESCRIPTION_PREFIX("Enter ");
 
 const QString VERB_NAME("Apps");
 const QString FILES_NAME("Files");
-const QString WEBPAGE_NAME("Web");
+const QString WEBPAGE_NAME("Web Sites");
 const QString MESSAGES_NAME("Messages");
 const QString PEOPLE_NAME("People");
 const QString NEW_POSTS_NAME("Feed");
 const QString CATEGORY_NAME("Categories");
+const QString TAGS_NAME("Tags");
+const QString OPERATIONS_NAME("Operations");
+const QString FOLDERS_NAME("Folders");
 
 const QString LOCAL_NAME("Local");
 const QString FEED_NAME("Feed");

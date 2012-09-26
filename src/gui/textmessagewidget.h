@@ -216,6 +216,10 @@ public:
         return m_scene->items().count();
     }
 
+    int getTextButtonCount(){
+        return m_textButtons.count();
+    }
+
     int desiredHeight(){
         return m_icon_size + getTextHeight() + 2*getInnerPadding() + 2*m_horzPadding +30;
     }

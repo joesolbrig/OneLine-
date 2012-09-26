@@ -413,7 +413,8 @@ int PluginHandler::execute(InputList* inputInfo, QList<CatItem>* results,
             tag.addChild(toTag,TAG_LABEL,BaseChildRelation::TAG_PARENT);
             CatBuilder::addItem(tag);
             Q_ASSERT(tag.canNavigateTo());
-            return MSG_NO_ACTION;
+            results->append(tag);
+            return MSG_CONTROL_REBUILD;
         }
         if(actionItem.getPath()==OP_REMOVE_PATH){
             Q_ASSERT(!tag.isEmpty());

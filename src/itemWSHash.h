@@ -1718,10 +1718,91 @@ public:
     }
 
     static CatItem createTypeParent(CatItem::ItemType type){
+        QString name;
+        QString icon;
+        switch(type){
+            case MIN_TYPE:
+                name = "Everything";
+                icon = FILE_TYPE_ICON;
+                break;
+            case VERB:
+                name = VERB_NAME;
+                icon = UI_NEXTACTION_PLACEHOLDER_ICON;
+                break;
+            case TAG:
+                name = TAGS_NAME;
+                icon = TAG_TYPE_ICON;
+                break;
+            case OPERATION:
+                name = OPERATIONS_NAME;
+                icon = FILE_TYPE_ICON;
+                break;
+            case LOCAL_DATA_DOCUMENT:
+                name = FILES_NAME;
+                icon = FILE_TYPE_ICON;
+                break;
+            case LOCAL:
+                name = LOCAL_NAME;
+                icon = FILE_TYPE_ICON;
+                break;
+            case LOCAL_DATA_FOLDER:
+                name = FOLDERS_NAME;
+                icon = FILE_TYPE_ICON;
+                break;
+            case ACTION_TYPE:
+                name = "Mime Types";
+                icon = TAG_TYPE_ICON;
+                break;
+            case ORGANIZING_TYPE:
+                name = "Types";
+                icon = TAG_TYPE_ICON;
+                break;
+            case PLUGIN_TYPE:
+                name = "Plugins";
+                icon = TAG_TYPE_ICON;
+                break;
+            case PUBLIC_DOCUMENT:
+                name = WEBPAGE_NAME;
+                icon = SITE_TYPE_ICON;
+                break;
+            case PUBLIC_FEED:
+                name = FEED_NAME;
+                icon = FEED_TYPE_ICON;
+                break;
+            case PUBLIC_POST:
+                name = NEW_POSTS_NAME;
+                icon = FEED_TYPE_ICON;
+                break;
+            case PERSON:
+                name = PEOPLE_NAME;
+                icon = PERSON_TYPE_ICON;
+                break;
+            case MESSAGE:
+                name = MESSAGES_NAME;
+                icon = MESSAGE_TYPE_ICON;
+                break;
+            case ALERT:
+                name = "Alerts";
+                icon = FILE_TYPE_ICON;
+                break;
+            case VALUE:
+                name = "Values";
+                icon = FILE_TYPE_ICON;
+                break;
+            case MAX_TYPE:
+                name = "Shouldn't Appear";
+                icon = FILE_TYPE_ICON;
+                break;
+        }
+
         QString path = addPrefix(TYPE_PREFIX,QString::number(type));
-        CatItem res(path, QString::number(type));
+        CatItem res(path, name);
+        res.setItemType(CatItem::ORGANIZING_TYPE);
+        res.setOrganizingType(type);
         res.setLabel(TYPE_PARENT_KEY);
+        res.setSourceWeight(HIGH_EXTERNAL_WEIGHT);
         return res;
+
     }
 
 

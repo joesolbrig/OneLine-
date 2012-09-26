@@ -310,44 +310,26 @@ QList<ListItem> Cat_Store::getCondensedSources(){
     time_t now = ::appGlobalTime();
     QList<ListItem> results;
 
-    CatItem local_i(LOCAL_TYPE_PATH,LOCAL_NAME);
-    ListItem locals(local_i);
-    locals.setOrganizingType(CatItem::LOCAL);
-    locals.setItemType(CatItem::ORGANIZING_TYPE);
-    locals.setIcon(FILE_TYPE_ICON);
+    ListItem locals(CatItem::createTypeParent(CatItem::LOCAL));
     results.append(locals);
 
-    CatItem messages_i(UNSEEN_MSG_ITEMS_PATH, MESSAGES_NAME);
-    ListItem messages(messages_i);
-    messages.setOrganizingType(CatItem::MESSAGE);
-    messages.setItemType(CatItem::ORGANIZING_TYPE);
-    messages.setIcon(MESSAGE_TYPE_ICON);
-
-    CatItem newsItems_i(UNSEEN_ITEMS_PATH, FEED_NAME);
-    ListItem newsItems(newsItems_i);
-    newsItems.setOrganizingType(CatItem::PUBLIC_FEED);
-    newsItems.setItemType(CatItem::ORGANIZING_TYPE);
-    newsItems.setIcon(FEED_TYPE_ICON);
-
-    CatItem categories_i(CATEGORY_TYPE_PATH, CATEGORY_NAME);
-    ListItem categories(categories_i);
-    categories.setOrganizingType(CatItem::TAG);
-    categories.setItemType(CatItem::ORGANIZING_TYPE);
-    categories.setIcon(TAG_TYPE_ICON);
-
-    Tuple endMessageTuple((CatItem::MESSAGE),now);
+    ListItem messages(CatItem::createTypeParent(CatItem::MESSAGE));
     Tuple startMessageTuple((CatItem::MESSAGE),now-lastViewUpdate);
+    Tuple endMessageTuple((CatItem::MESSAGE),now);
     int unseenMessages=item_index.get_range_count(
             startMessageTuple,endMessageTuple, I_BY_MESSAGETIME);
+    messages.setCustomPluginValue(NEW_ITEM_OF_TYPE_KEY,unseenMessages);
+    results.append(messages);
+
+    ListItem newsItems(CatItem::createTypeParent(CatItem::PUBLIC_FEED));
     Tuple endWebTuple((CatItem::PUBLIC_DOCUMENT),now);
     Tuple startWebTuple((CatItem::PUBLIC_DOCUMENT),now-lastViewUpdate);
     int unseenItems=item_index.get_range_count(
             startWebTuple,endWebTuple, I_BY_MESSAGETIME);
-
-    messages.setCustomPluginValue(NEW_ITEM_OF_TYPE_KEY,unseenMessages);
     newsItems.setCustomPluginValue(NEW_ITEM_OF_TYPE_KEY,unseenItems);
     results.append(newsItems);
-    results.append(messages);
+
+    ListItem categories(CatItem::createTypeParent(CatItem::TAG));
     results.append(categories);
 
     for(int i=0; i< results.count(); i++){
@@ -368,12 +350,17 @@ QList<ListItem> Cat_Store::getOrganizingSources(ItemFilter* inputList){
             if(filterItem.getOrganizeingType()!=CatItem::MIN_TYPE){
                 QList<CatItem::ItemType>  types = filterItem.getOrganizingTypeList();
                 for(int i=0; i< types.count();i++){
-                    res.append(getSourceFromType(types[i],UI_MINI_COUNT_LIMIT));
+                    res.append(getSubSourcesFromType(types[i],UI_MINI_COUNT_LIMIT));
+                    ListItem typeRep(CatItem::createTypeParent(types[i]));
+                    typeRep.setFilterRole(CatItem::SUBCATEGORY_FILTER);
+                    if(!(typeRep == filterItem)){
+                        res.append(typeRep);
+                    }
                 }
             }
             res.append(coalatedSources(inputList));
             if(!res.isEmpty()){
-                ListItem lfi(parentItem);
+                ListItem lfi(filterItem);
                 lfi.setFilterRole(CatItem::ACTIVE_CATEGORY);
                 res.push_front(lfi);
                 return res;
@@ -387,7 +374,7 @@ QList<ListItem> Cat_Store::getOrganizingSources(ItemFilter* inputList){
     //Get a range of values...
 }
 
-QList<ListItem> Cat_Store::getSourceFromType(CatItem::ItemType type, int limit){
+QList<ListItem> Cat_Store::getSubSourcesFromType(CatItem::ItemType type, int limit){
 
     QList<ListItem> res;
     //CatItem typeParent(addPrefix(TYPE_PREFIX,QString::number(type)));
@@ -398,11 +385,12 @@ QList<ListItem> Cat_Store::getSourceFromType(CatItem::ItemType type, int limit){
     for(unsigned int i=0; i< MIN(crs.size(),(unsigned)limit);i++){
         QString path = (crs[i].getChildPath());
         CatItem item = this->getItemByPathPrivate(path,1);
-        if(!item.isEmpty()){ continue;}
+        if(item.isEmpty()){ continue;}
         if(!item.hasSourceWeight()){ continue;}
         ListItem li(item);
         res.append(li);
     }
+
     return res;
 }
 

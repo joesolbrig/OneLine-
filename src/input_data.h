@@ -64,6 +64,10 @@ public:
         m_formattedItems.sortFilterByItem(li);
     }
 
+    void setSubfilterItem(ListItem li){
+        m_formattedItems.sortFilterBySubItem(li);
+    }
+
     ListItem getFilterItem(){
         return m_formattedItems.getFilterItem();
     }
@@ -383,15 +387,13 @@ public:
         if(!curState().isExpanded()){
             count--;
         }
-        for(int i=0; i < count; i++){
+        for(int i=count-1; i >= 0; i--){
             //use full if we're at an object described by path
             if(!m_parentStack[i].getCurrentItem().isEmpty()){
-                if(i>0){
+                if(i){
                     if(str.length() > spaceAvailable -ELIPSIS_STRING_CHARS.length()){
                         str = ELIPSIS_STRING_CHARS + str;
                         break;
-                    } else {
-                        str.push_front( str + " "+ UI_SEPARATOR_STRING + " ") ;
                     }
                 }
                 if((m_parentStack[i].getCurrentItem().hasLabel(FILE_CATALOG_PLUGIN_STR)
@@ -400,6 +402,9 @@ public:
                     str = m_parentStack[i].getCurrentItem().getPath() + str;
                     break;
                 } else {
+                    if(!str.isEmpty()){
+                        str = " "+ UI_SEPARATOR_STRING + " " + str;
+                    }
                     str = m_parentStack[i].getCurrentItem().getName() + str;
                 }
             }
@@ -427,15 +432,10 @@ public:
 
     void filterByItem(ListItem li){
         curState().setFilterItem(li);
-//        if(m_parentStack.length()<2){
-//            if(m_filterItem ==li ){
-//                m_filterItem = ListItem();
-//            } else{
-//                m_filterItem = li;
-//            }
-//        } else {
-//            curState().setFilterItem(li);
-//        }
+    }
+
+    void subFilterByItem(ListItem li){
+        curState().setSubfilterItem(li);
     }
 
 

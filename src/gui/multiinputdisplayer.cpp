@@ -33,7 +33,7 @@ QSize MultiInputDisplayer::sizeOrPaint(QPainter *painter, int heightAvailable, i
         } else {
             m_choiceList->setVisible(false);
         }
-    } else{
+    } else {
         topPos += sizeOrPaintVerb(painter,topPos);
         qDebug() << "topPos after Verb";
         int listTop = topPos;

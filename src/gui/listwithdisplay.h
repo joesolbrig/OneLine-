@@ -83,7 +83,20 @@ public:
             setMask(FancyEnclosingRect::getStandardBox(r));
         }
         QWidget::setGeometry(r);
+    }
 
+    void setFullGeometry(QRect r=QRect()){
+        if(r.height() > UI_RECT_YRADIUS*2 &&
+                r.width() > UI_RECT_XRADIUS*2 ){
+            setMask(FancyEnclosingRect::getStandardBox(r));
+        }
+        m_width = r.width();
+        for(int i=0; i< m_viewStack.count();i++){
+            QRect r = m_viewStack[i]->geometry();
+            r.setWidth(MIN(r.width(),m_width));
+            m_viewStack[i]->setGeometry(r);
+        }
+        QWidget::setGeometry(r);
     }
 
     bool showingSidePreview() {return (m_previewFrame!=0);}
@@ -223,7 +236,7 @@ public:
 
     void addMessage(QString msg);
     int getMessageSpaceAvailable();
-
+    int getMessageItemCount();
     void clear(){
         if(m_viewStack.length()==0){return;}
         if(currentViewRef()){

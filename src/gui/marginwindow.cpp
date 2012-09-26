@@ -155,7 +155,7 @@ void MarginWindow::gSetAppPos(int vOrient, int hOrient){
     gMainWidget->move(editRect.topLeft());
     if(gMainWidget->m_itemChoiceList!=0){
         gMainWidget->m_itemChoiceList->raise();
-        gMainWidget->m_itemChoiceList->setGeometry(listRect);
+        gMainWidget->m_itemChoiceList->setFullGeometry(listRect);
         if(gMainWidget->m_itemChoiceList->m_previewFrame && previewRect.height()>0){
             gMainWidget->m_itemChoiceList->m_previewFrame->setGeometry(previewRect);
             gMainWidget->m_itemChoiceList->m_previewFrame->raise();

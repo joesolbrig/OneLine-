@@ -335,6 +335,7 @@ void TextMessageBar::clear(){
     m_textButtons.clear();
     m_scene->update();
 }
+
 void TextMessageBar::addItems(QList<ListItem> ci){
     clear();
     int left=m_vertPadding;
