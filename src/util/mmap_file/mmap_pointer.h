@@ -280,7 +280,7 @@ public:
         QString fn = fileName();
         QFile file(fn);
         qDebug() << "trying to close" << fn;
-        Q_ASSERT(file.exists());
+        //Q_ASSERT(file.exists());
         file.open(QIODevice::ReadWrite);
         Q_ASSERT(file.isOpen());
         char data[sizeof(qint64)+4];

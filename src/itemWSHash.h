@@ -1055,7 +1055,7 @@ public:
 
     long getFullWeight(){return getTotalWeight();}
 
-    int getWeightSection() const {return (int)log(getTotalWeight());}
+    int getWeightSection() const {return (int)log2(getTotalWeight());}
 
     void assign_from(const CatItem &s){
         d = s.d;

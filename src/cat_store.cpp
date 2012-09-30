@@ -18,7 +18,7 @@ long codeStringStart(QString str){
 
 
 
-Cat_Store::Cat_Store(bool shouldRestore) :
+Cat_Store::Cat_Store(bool shouldRestore, QString overideDir) :
     RELEVANTCE_BUCKET_COUNT(10),
     MAX_EXTENSION_ITEMS(10),
     HIGH_RELEVANCE_CUTOFF(HIGH_EXTERNAL_WEIGHT),
@@ -44,6 +44,7 @@ Cat_Store::Cat_Store(bool shouldRestore) :
     C_BY_PARENDID("Child Relations By Parents"),
     C_BY_CHILDID("Child Relations By Children"),
     C_BY_PARENTID_CHILDW("External Weights By Parent"),
+    C_BY_PARENTID_CHILDAW("Adjusted Weight By Parent"),
     C_BY_PARENTID_RELW("Relation Weights By Parent - child ordering"),
     C_BY_PARENTID_RELT_W("Relation Weights By Parent - type-child ordering"),
     C_BY_PARENTID_UNSEEN_CHILDS("Relation Weights By Parent - unseen children ordering"),
@@ -56,9 +57,9 @@ Cat_Store::Cat_Store(bool shouldRestore) :
     V_BY_ITEMTIME("Visibility entries by item then time"),
 
     items_by_keys(this),
-    item_index(shouldRestore, USER_APP_DIR),
-    child_index(shouldRestore, USER_APP_DIR),
-    history_index(shouldRestore, USER_APP_DIR)
+    item_index(shouldRestore, overideDir.isEmpty() ? USER_APP_DIR: overideDir),
+    child_index(shouldRestore, overideDir.isEmpty() ? USER_APP_DIR: overideDir),
+    history_index(shouldRestore, overideDir.isEmpty() ? USER_APP_DIR: overideDir)
 
 {
 
@@ -81,6 +82,7 @@ Cat_Store::Cat_Store(bool shouldRestore) :
     child_index.addIndex(C_BY_PARENDID);
     child_index.addIndex(C_BY_CHILDID);
     child_index.addIndex(C_BY_PARENTID_CHILDW);
+    child_index.addIndex(C_BY_PARENTID_CHILDAW);
     child_index.addIndex(C_BY_PARENTID_RELW);
     child_index.addIndex(C_BY_PARENTID_SIBLING_CHILDS);
     child_index.addIndex(C_BY_PARENTID_RELT_W);
@@ -107,6 +109,17 @@ Cat_Store::Cat_Store(bool shouldRestore) :
 
     lastViewUpdate = appGlobalTime();
 }
+
+void Cat_Store::clearAll(){
+    items_by_keys.clear();
+    item_index.clearAll();
+    child_index.clearAll();
+    history_index.clearAll();
+
+
+}
+
+
 
 QMutex* Cat_Store::getMutext(){ return &catalogMutex;}
 
@@ -641,26 +654,6 @@ QList<CatItem> Cat_Store::coalateBySources(ItemFilter* filter, QList<CatItem> in
             }
         }
     }
-//    while(go){
-//        go = false;
-//        for(int i=0; i<organizingSources.count();i++){
-//            QList<CatItem>& priorItem = priorityItems[
-//                    organizingSources[i]
-//                ];
-//            if(priorItem.length()>=sourceIndices[i]){
-//                continue;
-//            }
-//            go = true;
-//            CatItem item = priorItem[sourceIndices[i]];
-//            qreal newWeight = item.getRelevanceWeight()
-//                        * organizingSources[i].getSourceWeight();
-//            if(newWeight > adjustedWeight){
-//                sourceIndices[i]++;
-//                adjustedWeight = newWeight;
-//                res.append(item);
-//            }
-//        }
-//    }
     return res;
 }
 
@@ -1082,14 +1075,6 @@ void Cat_Store::removeItem(CatItem it){
                 Tuple(it.getItemId()), Tuple(it.getItemId()+1), parChildIndices[i]);
         for(unsigned int j=0;j<rels.size();j++){ child_index.removeObject(rels.at(j)); }
     }
-//            vector<DbChildRelation> crs = child_index.get_range(
-//                    Tuple(it.getItemId()), Tuple(it.getItemId()+1), C_BY_PARENTID_CHILDW);
-//            for(unsigned int i=0;i<crs.size();i++){ child_index.removeObject(crs.at(i)); }
-//
-//            crs = child_index.get_range(
-//                    Tuple(it.getItemId()), Tuple(it.getItemId()+1), C_BY_CHILDID);
-//            for(unsigned int i=0;i<crs.size();i++){ child_index.removeObject(crs.at(i)); }
-//
     item_index.removeObject(it);
 }
 
@@ -1271,7 +1256,8 @@ QList<CatItem> Cat_Store::findEarlySiblingsProtected(CatItem item, int offset){
 
 }
 
-QList<CatItem> Cat_Store::getHighestTypeProtected(ItemFilter* filter, long i, QString index, bool takeLowest,
+QList<CatItem> Cat_Store::getHighestTypeProtected(ItemFilter* filter, long i,
+                                                  QString index, bool takeLowest,
                                                   int* initialPos){
     long max_items = item_index.indexSize(index);
     vector<CatItem> scrs;
@@ -1685,7 +1671,7 @@ void Cat_Store::addRelation(DetachedChildRelation cr, int recur){
     long childId = (long)cr.getChildId();
     DbChildRelation dbR(cr);
 
-    qint32 scaleW = MIN(cr.getExternalWeight()*((int)DOUBLE_SCALE_FACTOR),MAX_TOTAL_WEIGHT );
+    qint32 scaleW = MIN(cr.getExternalWeight(),MAX_TOTAL_WEIGHT );
     Tuple ewTuple(parentId, scaleW);
     child_index.addEntry( ewTuple, dbR, C_BY_PARENTID_CHILDW);
     child_index.addEntry( parentId, (long)(child.getTotalWeight()), dbR, C_BY_PARENTID_RELW);
@@ -1748,7 +1734,7 @@ CatItem Cat_Store::addHistoryEvent(CatItem it, UserEvent evt, time_t n ){
     }
     vector<DbChildRelation> parents = child_index.get_range(it.getItemId(), it.getItemId()+1, C_BY_CHILDID);
     for(unsigned int i=0;i < parents.size();i++){
-        CatItem parent = CatItem(parents.at(i).getParentPath());
+        CatItem parent = getItemByPathPrivate(parents.at(i).getParentPath());
         if(evt.getIsChosen()){
             parent.setChosenness(parent.getChosenness()+1);
             item_index.addEntry(parent.getChosenness(), parent, I_BY_SOURCECHOSENNESS);
@@ -1761,12 +1747,11 @@ CatItem Cat_Store::addHistoryEvent(CatItem it, UserEvent evt, time_t n ){
 }
 
 double Cat_Store::calcRelevanceWeight(CatItem& it){
-    //if(it.getRelevanceWeight() ==0){return 0;}//recalc items of relevance...
     if(it.getIsDepricated()){
         return DEPRICATED_DEFAULT_WEIGHT;
     }
 
-    double weight = MEDIUM_EXTERNAL_WEIGHT + it.getExternalWeight()/10;
+    double weight = it.getExternalWeight()/10;
     const int timeFactor = 60*60;
     unsigned long f = 1;
     unsigned long now = appGlobalTime();
@@ -1777,9 +1762,6 @@ double Cat_Store::calcRelevanceWeight(CatItem& it){
         if(now  <  ((ff)*timeFactor)){
             break;
         }
-        //        if(history_index.count() > HISTORY_MEANING_THRESHHOLD
-        //           && (par.getVisibility() < VISIBILITY_CUTOFF))
-        //            {continue;}
         long int_begin = now - ((ff)*timeFactor);
         long int_end = (now > (f*2*timeFactor))?  now - (f*2*timeFactor) : 0;
 
@@ -1791,7 +1773,8 @@ double Cat_Store::calcRelevanceWeight(CatItem& it){
         Q_ASSERT(histWeight>=0);
         if(histWeight>0){
             it.setLabel(SPECIFICALLY_CHOSEN_KEY);
-            weight += histWeight*timeDiscount(i)*DOUBLE_SCALE_FACTOR;
+            long increment = histWeight*timeDiscount(i)*DOUBLE_SCALE_FACTOR;
+            weight += increment;
         } else if(visAntiWeight>0){
             weight -= visAntiWeight*timeDiscount(i)*DOUBLE_SCALE_FACTOR*VISIBILITY_DISCOUNT_FACTOR;
         }
@@ -1806,53 +1789,96 @@ double Cat_Store::calcRelevanceWeight(CatItem& it){
 //Weight is the max of overall frecency and frequency relative to each parent
 //Scaled to make constant-sized database
 long Cat_Store::calcFullWeight(CatItem it){
-    qint32 base_w = it.getRelevanceWeight();
-    long i_c = item_index.count();
-    long i_o = (item_index.get_endOrder(base_w, I_BY_FRCWEIGHT)-1);
-    if(!it.getPinnedString().isEmpty())
-        { i_o = MAX(i_c, i_o - PINNED_MIN_ORDER); }
+    qint32 baseWeight = it.getRelevanceWeight()*10;
 
-    long new_w = ((i_c - i_o+50)*DOUBLE_SCALE_FACTOR*DOUBLE_SCALE_FACTOR)/(i_c+100);
-    new_w = new_w*RELATIVE_WEIGHT_ABSOLUTE_FRECENCY_FACTORE;
-
-
-    Q_ASSERT(new_w >0);
+    int fullWeight=DOUBLE_SCALE_FACTOR*DOUBLE_SCALE_FACTOR;
     //new_w = item_index.count(I_BY_FRCWEIGHT) - new_w;
     vector<DbChildRelation> parentRelations = child_index.get_range(
             Tuple(it.getItemId(),0), Tuple(it.getItemId()+1,0), C_BY_CHILDID);
     for(unsigned int i=0;i < parentRelations.size();i++){
-        CatItem par = item_index.getValue(parentRelations.at(i).getParentPath());
+
+        DbChildRelation& rel = parentRelations.at(i);
+        CatItem par = item_index.getValue(rel.getParentPath());
+
         if(!par.isSource()){ continue; }
+
         long sourceW = par.getSourceWeight();
+        long parentId = rel.getParentId();
         int sourceWeightOrder = item_index.get_order(Tuple(sourceW,0), I_BY_SOURCEWEIGHT);
-        signed long externalWeight = parentRelations.at(i).getExternalWeight();
-        if( externalWeight > MEDIUM_EXTERNAL_WEIGHT*2 && sourceWeightOrder <= DEFAULT_SOURCE_WEIGHT ){
 
-            //OK, ordinal index of item relative to a given source, scaled to
-            //the size of the source and it's weight
-            Tuple t(parentRelations.at(i).getParentId(), externalWeight);
-            Tuple boundT(parentRelations.at(i).getParentId()+1,0);
-            long totalRange = child_index.get_range_count(t, boundT, C_BY_PARENTID_CHILDW);
+        signed long externalWeight = rel.getExternalWeight();
+        externalWeight += baseWeight;
+        externalWeight = MIN(externalWeight,MAX_TOTAL_WEIGHT );
 
-            long wIndex = child_index.get_endOrder(t, C_BY_PARENTID_CHILDW);
+        Tuple t(parentId, externalWeight);
+        Tuple lowBound(parentId,0);
+        Tuple highBound(parentId+1,0);
+        child_index.removeEntry(rel, C_BY_PARENTID_CHILDAW);
+        child_index.addEntry( t, rel, C_BY_PARENTID_CHILDAW);
 
-            //The following condition probably should not happen at all
-            //but I'm just fixing it on the fly
-            if(wIndex >totalRange){ wIndex = totalRange;};
+        //OK, ordinal index of item relative to a given source, scaled
+        long totalRange = child_index.get_range_count(lowBound, highBound, C_BY_PARENTID_CHILDAW)+1;
+        long wIndex = child_index.get_range_count(lowBound, t, C_BY_PARENTID_CHILDAW)+1;
+        Q_ASSERT(wIndex <=totalRange);
 
-            long sourceWeight = (((1+totalRange) - wIndex)*DOUBLE_SCALE_FACTOR*DOUBLE_SCALE_FACTOR)
-                             /
-                             (totalRange*(log2(sourceWeightOrder)*100));
-            Q_ASSERT(wIndex < i_c);
+        long scalingFactor = totalRange*(log2(sourceWeightOrder)*100)+1;
+        Q_ASSERT(scalingFactor>0);
+        long scaledWeight = (((1+totalRange) - wIndex)*DOUBLE_SCALE_FACTOR);
+        long sourceWeight = scaledWeight / scalingFactor+1;
+        rel.setTotalWeight(sourceWeight);
 
-            if(sourceWeight >= 0){
-                new_w = MIN(new_w, sourceWeight);
-                new_w = MAX(1, new_w);
-            }
-         }
+        fullWeight = MIN(fullWeight, sourceWeight);
     }
-    return new_w;
+    return fullWeight;
 }
+
+//long Cat_Store::calcFullWeight(CatItem it){
+//    qint32 base_w = it.getRelevanceWeight();
+//    long i_c = item_index.count();
+//    long i_o = (item_index.get_endOrder(base_w, I_BY_FRCWEIGHT)-1);
+//    if(!it.getPinnedString().isEmpty())
+//    { i_o = MAX(i_c, i_o - PINNED_MIN_ORDER); }
+//
+//    long new_w = ((i_c - i_o+50)*DOUBLE_SCALE_FACTOR*DOUBLE_SCALE_FACTOR)/(i_c+100);
+//    new_w = new_w*RELATIVE_WEIGHT_ABSOLUTE_FRECENCY_FACTORE;
+//
+//    Q_ASSERT(new_w >0);
+//    //new_w = item_index.count(I_BY_FRCWEIGHT) - new_w;
+//    vector<DbChildRelation> parentRelations = child_index.get_range(
+//            Tuple(it.getItemId(),0), Tuple(it.getItemId()+1,0), C_BY_CHILDID);
+//    for(unsigned int i=0;i < parentRelations.size();i++){
+//        CatItem par = item_index.getValue(parentRelations.at(i).getParentPath());
+//        if(!par.isSource()){ continue; }
+//        long sourceW = par.getSourceWeight();
+//        int sourceWeightOrder = item_index.get_order(Tuple(sourceW,0), I_BY_SOURCEWEIGHT);
+//        signed long externalWeight = parentRelations.at(i).getExternalWeight();
+//        if( externalWeight > MEDIUM_EXTERNAL_WEIGHT*2 && sourceWeightOrder <= DEFAULT_SOURCE_WEIGHT ){
+//
+//            //OK, ordinal index of item relative to a given source, scaled to
+//            //the size of the source and it's weight
+//            Tuple t(parentRelations.at(i).getParentId(), externalWeight);
+//            Tuple boundT(parentRelations.at(i).getParentId()+1,0);
+//            long totalRange = child_index.get_range_count(t, boundT, C_BY_PARENTID_CHILDW);
+//
+//            long wIndex = child_index.get_endOrder(t, C_BY_PARENTID_CHILDW);
+//
+//            //The following condition probably should not happen at all
+//            //but I'm just fixing it on the fly
+//            if(wIndex >totalRange){ wIndex = totalRange;};
+//
+//            long sourceWeight = (((1+totalRange) - wIndex)*DOUBLE_SCALE_FACTOR*DOUBLE_SCALE_FACTOR)
+//                                /
+//                                (totalRange*(log2(sourceWeightOrder)*100));
+//            Q_ASSERT(wIndex < i_c);
+//
+//            if(sourceWeight >= 0){
+//                new_w = MIN(new_w, sourceWeight);
+//                new_w = MAX(1, new_w);
+//            }
+//        }
+//    }
+//    return new_w;
+//}
 
 long Cat_Store::calcUpdatability(CatItem item){
     CatItem parent = item.getSourceParent();
@@ -1929,15 +1955,32 @@ double Cat_Store::getWeightedChoseness(CatItem it){
 //I'm sure not if human hyperbolic discounting of future rewards
 //justifies this but it's worth considering.
 double Cat_Store::timeDiscount(qint32 t){
-    double l = 1/((float)abs(t)+1);
+    double l = 1/((float)abs(t*t)+1);
     Q_ASSERT(l >0 );
+    Q_ASSERT(l <= 1 );
     return l;
+}
+
+void Cat_Store::reweightHightweightItems(const QString index, bool takeLowest){
+    QList<CatItem> highItems = getHighestTypeProtected(0, TOP_ITEMS_TO_UPDATE,
+            index,takeLowest);
+
+    for(int i=0; i<highItems.count();i++){
+        CatItem it = highItems[i];
+        if(it.isEmpty()){  continue; }
+        reweightItemProtected(it);
     }
-    //This gets frecency
-    //What matters most is reweighing the most recently rated items...
-    //This is slanted toward the highest
+}
+
+//This gets frecency
+//What matters most is reweighing the most recently rated items...
+//This is slanted toward the highest
 
 void Cat_Store::reweightItemsProtected(QList<CatItem>* forExtension){
+    //I_BY_FINALWEIGHT
+    reweightHightweightItems(I_BY_FINALWEIGHT,true);
+    reweightHightweightItems(I_BY_FRCWEIGHT,false);
+
     int allItemC = history_index.count(H_BY_ITEMTIME);
     unsigned int c = MIN(allItemC, HIGH_RELEVANCE_CUTOFF);
     vector<HistoryEvent> items =

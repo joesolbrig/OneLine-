@@ -1972,8 +1972,8 @@ public:
         }
 
 
-        QList<ListItem> raw = inputData[m_itemPosition].getFormattedListItems(
-                selected, itemsHigh, charsAvail);
+        QList<ListItem> raw = inputData[m_itemPosition].getFormattedListItems(itemsHigh, charsAvail);
+
         for(int i=0; i < raw.count(); i++){
             ListItem tempItem = raw[i];
             if(acceptItem(&tempItem)){
@@ -2006,6 +2006,14 @@ public:
                 litem.setCustomPluginValue(VERB_TAKES_NO_ARGS_KEY, (int)true);
             }
             res[i] = litem;
+        }
+
+        selected =-1;
+        CatItem curItem = currentItem();
+        for(int i = 0; i < res.count(); ++i) {
+            if(res[i].getPath() == curItem.getPath()){
+                selected=i;
+            }
         }
         return res;
     }

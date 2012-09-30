@@ -17,6 +17,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+
+
 //Test routines
 #include <QApplication>
 #include <QFont>
@@ -60,6 +62,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "test_defines.h" //ONLY include this only per project!!
 #include "util/mmap_file/btree_impl.h"
+
+#include "cat_store.h"
+
 
 //This goes between 'a' and 'a'+10,
 //That shouldn't change any results since includes
@@ -864,28 +869,31 @@ void TheApplicationTester::testXslPlugin(){
 }
 
 void TheApplicationTester::testUpdateUsage(){
+    CatBuilder::getCatalog()->clearAll();
+
     int old_time_offset = gTime_offset_for_testing;
 
     CatItem src("externalSource1");
     CatItem src2("externalParent");
-    src.setSourceWeight(MEDIUM_EXTERNAL_WEIGHT*10,src2);
+    src.setSourceWeight(HIGH_EXTERNAL_WEIGHT,src2);
     src.setTagLevel(CatItem::INTERNAL_SOURCE);
+    CatBuilder::getCatalog()->addItem(src);
+    CatItem srcSaved = CatBuilder::getCatalog()->getItem("externalSource1");
+    Q_ASSERT(srcSaved.isSource());
 
     CatItem e1("externalItem1");
     e1.setExternalWeight(HIGH_EXTERNAL_WEIGHT,src);
     CatItem e2("externalItem2");
     e2.setExternalWeight(MEDIUM_EXTERNAL_WEIGHT,src);
-    CatBuilder::getCatalog()->addItem(src);
     CatBuilder::getCatalog()->addItem(e1);
     CatBuilder::getCatalog()->addItem(e2);
 
     CatItem eri1 = CatBuilder::getCatalog()->getItem("externalItem1");
     CatItem eri2 = CatBuilder::getCatalog()->getItem("externalItem2");
+    CatBuilder::getCatalog()->reweightItems();
     long ew1 = eri1.getFullWeight();
     long ew2 = eri2.getFullWeight();
-    CatBuilder::getCatalog()->reweightItems();
     Q_ASSERT(ew1 < ew2); //Full weight goes down versus higher weight going up.
-
     //Reweigh items
     for(int i=0;i < 24;i++){
         CatBuilder::getCatalog()->reweightItems();
@@ -903,6 +911,10 @@ void TheApplicationTester::testUpdateUsage(){
     CatItem item1("two_w_old");
     CatItem item2("one_w_old");
     CatItem item3("now_old");
+    item1.setExternalWeight(MEDIUM_EXTERNAL_WEIGHT,src);
+    item2.setExternalWeight(MEDIUM_EXTERNAL_WEIGHT,src);
+    item3.setExternalWeight(MEDIUM_EXTERNAL_WEIGHT,src);
+
     CatBuilder::getCatalog()->addItem(item1);
     CatBuilder::getCatalog()->addItem(item2);
     CatBuilder::getCatalog()->addItem(item3);
@@ -919,20 +931,36 @@ void TheApplicationTester::testUpdateUsage(){
     CatBuilder::getCatalog()->reweightItem(item2);
     CatBuilder::getCatalog()->reweightItem(item3);
 
-    //One gets 2 calls one weeks later
-    gTime_offset_for_testing += 5*7*24*60*60;
+    CatItem ri1 = CatBuilder::getCatalog()->getItem("two_w_old");
+    CatItem ri2 = CatBuilder::getCatalog()->getItem("one_w_old");
+    CatItem ri3 = CatBuilder::getCatalog()->getItem("now_old");
+    long rw1 = ri1.getRelevanceWeight();
+    long rw2 = ri2.getRelevanceWeight();
+    long rw3 = ri3.getRelevanceWeight();
+    Q_ASSERT(rw1 > rw2);
+    Q_ASSERT(rw1 > rw3);
+
+    //One gets 2 calls later
+    gTime_offset_for_testing += 2*5* 7*24*60*60;
     lWind->m_inputList.setItem(item2);
     CatBuilder::getCatalog()->setExecuted(&lWind->m_inputList);
     gTime_offset_for_testing += 10;
     CatBuilder::getCatalog()->setExecuted(&lWind->m_inputList);
-    //Reweigh items
+
     CatBuilder::getCatalog()->reweightItem(item1);
     CatBuilder::getCatalog()->reweightItem(item2);
     CatBuilder::getCatalog()->reweightItem(item3);
-//    for(int i=0;i < 24;i++){
-//        CatBuilder::getCatalog()->reweightItems();
-//    }
 
+    ri1 = CatBuilder::getCatalog()->getItem("two_w_old");
+    ri2 = CatBuilder::getCatalog()->getItem("one_w_old");
+    ri3 = CatBuilder::getCatalog()->getItem("now_old");
+    rw1 = ri1.getRelevanceWeight();
+    rw2 = ri2.getRelevanceWeight();
+    rw3 = ri3.getRelevanceWeight();
+    Q_ASSERT(rw1 < rw2);
+    Q_ASSERT(rw1 > rw3);
+    srcSaved = CatBuilder::getCatalog()->getItem("externalSource1");
+    Q_ASSERT(srcSaved.isSource());
     //one gets 1 calls four weeks later
     //one was just called
     gTime_offset_for_testing += 24*60*60;
@@ -940,18 +968,24 @@ void TheApplicationTester::testUpdateUsage(){
     lWind->m_inputList.setItem(item3);
     CatBuilder::getCatalog()->setExecuted(&lWind->m_inputList);
 
+
+    srcSaved = CatBuilder::getCatalog()->getItem("externalSource1");
+    Q_ASSERT(srcSaved.isSource());
     //Reweigh items
     CatBuilder::getCatalog()->reweightItem(item1);
     CatBuilder::getCatalog()->reweightItem(item2);
     CatBuilder::getCatalog()->reweightItem(item3);
 
     //get entries from catalog
-    CatItem ri1 = CatBuilder::getCatalog()->getItem("two_w_old");
-    CatItem ri2 = CatBuilder::getCatalog()->getItem("one_w_old");
-    CatItem ri3 = CatBuilder::getCatalog()->getItem("now_old");
-//    long rw1 = ri1.getRelevanceWeight();
-//    long rw2 = ri2.getRelevanceWeight();
-//    long rw3 = ri3.getRelevanceWeight();
+    ri1 = CatBuilder::getCatalog()->getItem("two_w_old");
+    ri2 = CatBuilder::getCatalog()->getItem("one_w_old");
+    ri3 = CatBuilder::getCatalog()->getItem("now_old");
+
+    rw1 = ri1.getRelevanceWeight();
+    rw2 = ri2.getRelevanceWeight();
+    rw3 = ri3.getRelevanceWeight();
+    Q_ASSERT(rw1 <= rw2);
+    Q_ASSERT(rw2 < rw3);
 
     long dw1 = ri1.getFullWeight();
     dw1 = dw1;
@@ -966,7 +1000,7 @@ void TheApplicationTester::testUpdateUsage(){
     //Check they begin in time order
 
     //advance the clock a month
-    gTime_offset_for_testing = 10*7*24*60*60; //six weeks later in seconds
+    gTime_offset_for_testing = 10*7*24*60*60; //...weeks later in seconds
 
 
     //Reweigh items
@@ -986,13 +1020,60 @@ void TheApplicationTester::testUpdateUsage(){
     fw3 = fw3;
 
     //Check they are now in frequency order
-    Q_ASSERT(fw1 < fw2);
+    Q_ASSERT(fw1 > fw2);
     Q_ASSERT(fw2 < fw3);
 
     gTime_offset_for_testing = old_time_offset;
 
 
 
+}
+
+void TheApplicationTester::testUpdateUsage2(){
+
+    //Cat_Store cs(true,".");
+    CatBuilder::getCatalog()->clearAll();
+
+    CatItem src("externalSource1");
+    CatItem src2("externalParent");
+    src.setSourceWeight(MEDIUM_EXTERNAL_WEIGHT*10,src2);
+    src.setTagLevel(CatItem::INTERNAL_SOURCE);
+    CatBuilder::getCatalog()->addItem(src);
+
+    int levels =5;
+    for(int i=levels-1;i>=0;i--){
+        float expI = pow(2,i);
+        for(int j=0;j<expI;j++){
+            //should give swaths of similar names but with gaps
+            QString path = QString("externalItem1") +
+                              numAsStr(i*2375400 + j*7+1000); //QString("longPrefix") +
+            CatItem e1( path);
+            e1.setExternalWeight(
+                    MAX(MAX_MAX_EXTERNAL_WEIGHT/(expI+0.2), MEDIUM_EXTERNAL_WEIGHT),src);
+            CatBuilder::getCatalog()->addItem(e1);
+            CatItem eri1 = CatBuilder::getCatalog()->getItem(path);
+            Q_ASSERT(eri1.getPath() == path);
+        }
+    }
+    for(int i=0;i<levels;i++){
+        CatBuilder::getCatalog()->reweightItems();
+    }
+
+    for(int i=0;i<levels;i++){
+        for(int j=0;j<i;j++){
+            //should give swaths of similar names but with gaps
+            QString path = QString("externalItem1") +
+                              numAsStr(i*2375400 + j*7+1000); //QString("longPrefix") +
+            CatItem eri1 = CatBuilder::getCatalog()->getItem(path);
+            Q_ASSERT(eri1.getPath() == path);
+            qDebug() <<"ij:" << i << "," << j << " rel weight: "
+                    << eri1.getRelevanceWeight();
+            qDebug() <<"ij:" << i << "," << j << " weight : " << eri1.getFullWeight();
+            int wSection = eri1.getWeightSection();
+            qDebug() <<"ij:" << i << "," << j << " weight section: " << wSection;
+            Q_ASSERT( wSection < i+2);
+        }
+    }
 }
 
 void TheApplicationTester::testItemFormatRoutine(){
@@ -1532,7 +1613,7 @@ void TheApplicationTester::test_cat_store2(){
 
 void TheApplicationTester::test_MultiTree2(){
     MultiTree<TestStringContainer> index;
-    index.clear();
+    index.clearAll();
     index.addIndex(ALL_INDEX);
     index.addIndex(ODD_INDEX);
     index.addIndex(EVEN_INDEX);

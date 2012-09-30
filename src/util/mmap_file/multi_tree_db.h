@@ -454,7 +454,7 @@ template <class VALUE, class INDEX_TYPE>   class MultiTree {
                 restore();
             } else {
                 MPointer<refnode>::createAllocator();
-                clear();
+                clearAll();
             }
         }
 
@@ -537,10 +537,10 @@ template <class VALUE, class INDEX_TYPE>   class MultiTree {
         }
 
 
-        bool clear(){
+        bool clearAll(){
             bool res = !(!itemLocations.clear() || !m_itemList.clear()
                          || !m_baseIndices.clear() || !baseLocations.clear());
-            MPointer<refnode>::clear();
+            //MPointer<refnode>::clear();
 
             Q_ASSERT(res);
             return res;

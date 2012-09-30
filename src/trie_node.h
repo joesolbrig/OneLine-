@@ -52,6 +52,12 @@ public:
         m_bestItems.clear();
     }
 
+    void clear(){
+        m_entries.clear();
+        m_entries = QVector<TrieNode*>(KEY_POSITIONS, 0);
+        m_bestItems.clear();;
+    }
+
     static short int encode(QChar v){
         if(v.isPunct()){ return 0; }
         if (!v.isLetter()) {return 1;}
@@ -100,6 +106,7 @@ public:
         ItemRep ir1 = ir;
         if( ir1.next_char()){
             QChar c = ir1.char_at();
+            Q_ASSERT(encode(c) < m_entries.size());
             if(m_entries[encode(c)]){
                 m_entries[encode(c)]->remove(ir1, l+1);
                 if ((m_entries[encode(c)]->m_bestItems.size()==0)

@@ -60,6 +60,7 @@ class Cat_Store {
         const QString C_BY_PARENDID;
         const QString C_BY_CHILDID;
         const QString C_BY_PARENTID_CHILDW;
+        const QString C_BY_PARENTID_CHILDAW;
         const QString C_BY_PARENTID_RELW;
         const QString C_BY_PARENTID_RELT_W;
         const QString C_BY_PARENTID_UNSEEN_CHILDS;
@@ -93,7 +94,8 @@ class Cat_Store {
         //Everything public should be mutex-protected, show not call anything else public
         //
 
-        Cat_Store(bool shouldRestore=true);
+        Cat_Store(bool shouldRestore=true, QString overideDir="");
+        void clearAll();
 
         QMutex* getMutext();
         QList<ListItem> getFileSources();
@@ -238,6 +240,7 @@ class Cat_Store {
         //What matters most is reweighing the most recently rated items...
         //This is slanted toward the highest
         void reweightItemsProtected(QList<CatItem>* forExtension=0);
+        void reweightHightweightItems(const QString, bool takeLowest );
         //Let's what happen if I do nothing..
         void pruneVisibilityList();
 

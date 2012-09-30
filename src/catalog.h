@@ -15,7 +15,7 @@
 class CatItem;
 class PluginHandler;
 class InputList;
-class cat_store;
+//class cat_store;
 
 class Catalog {
 protected:
@@ -31,6 +31,7 @@ public:
     virtual ~Catalog();
     PluginHandler* plug_ptr(){return &plugins;}
     virtual void addItem(CatItem item);
+    virtual void clearAll() { cat_store.clearAll();}
 
     //void addChildren(CatItem& item);
     //void addParents(CatItem& item);

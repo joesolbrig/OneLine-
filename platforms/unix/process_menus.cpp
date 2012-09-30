@@ -41,9 +41,9 @@ CatItem gnomeMenuBaseItem(){
     CatItem gm(BASE_GNOME_MENU_PATH, GNOME_MENUS_NAME);
     gm.setItemType(CatItem::ORGANIZING_TYPE);
     gm.setSourceWeight(MAX_MAX_EXTERNAL_WEIGHT,
-                       CatItem::createTypeParent(CatItem::LOCAL_DATA_DOCUMENT));
-    CatItem typeParent(addPrefix(TYPE_PREFIX,QString::number(CatItem::LOCAL)));
-    gm.addParent(typeParent);
+                       CatItem::createTypeParent(CatItem::LOCAL));
+//    CatItem typeParent = CatItem::createTypeParent(CatItem::LOCAL);
+//    gm.addParent(typeParent);
     Q_ASSERT(gm.hasSourceWeight());
     return gm;
 }
@@ -121,7 +121,7 @@ static CatItem walk_directory(GMenuTreeDirectory *directory, int previousWeight)
       dirItem.setIcon(gmenu_tree_directory_get_icon(directory));
   }
 
-  CatItem gm(BASE_GNOME_MENU_PATH);
+  //CatItem gm(BASE_GNOME_MENU_PATH);
   //give directories a little more weight
   dirItem.setExternalWeight(previousWeight, gnomeMenuBaseItem());
   dirItem.setTagLevel(CatItem::POSSIBLE_TAG);
@@ -169,9 +169,7 @@ static CatItem walk_directory(GMenuTreeDirectory *directory, int previousWeight)
 
 QList<CatItem> parseXdgMenus () {
 
-  //bindtextdomain (GETTEXT_PACKAGE, GNOMELOCALEDIR);
   bindtextdomain ("gnome-menus", "/usr/local/share/locale");
-  //bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
   bind_textdomain_codeset ("gnome-menus", "UTF-8");
   textdomain ("gnome-menus");
 
@@ -189,6 +187,5 @@ QList<CatItem> parseXdgMenus () {
   for(int i=0; i< childs.count();i++){
       childs[i].setPinned("");
   }
-
   return childs;
 }

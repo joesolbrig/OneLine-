@@ -71,10 +71,6 @@ class TheApplicationTester : public QObject {
         void test_ItemTrie1();
         void testOHash();
 
-        void testUpdateUsage();
-        void test_MultiTree2();
-        void test_MultiTree1();
-        void test_cat_store();
         void testInformationFormat1();
 
         void testFileFind();
@@ -94,6 +90,7 @@ class TheApplicationTester : public QObject {
 
         void testPeopleFilterCombine();
 
+        void testExtendFacebookSources();
 
     //Support functions, tests are private slots
     public slots:
@@ -102,11 +99,13 @@ class TheApplicationTester : public QObject {
     //We swap functions in and out of below for custom tests...
     private slots:
         //working tests
-        //functions go above "'slots:" when we want to hide them...
+        //not-used functions go above "'slots:" when we want to hide them...
 
-        void testExtendFacebookSources();
-
-
+        void testUpdateUsage2();
+        void testUpdateUsage();
+        void test_MultiTree2();
+        void test_MultiTree1();
+        void test_cat_store();
 
     };
 

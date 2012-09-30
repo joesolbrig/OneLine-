@@ -1,3 +1,6 @@
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+
 #include <QString>
 #include <QHash>
 #include <QSettings>
@@ -6,8 +9,6 @@
 
 //#define tr(x) (QObject::tr(x))
 
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
 
 #define APPLICATION_NAME "Oneline"
 #define ORGANIZATION_NAME "Oneline"
@@ -610,6 +611,7 @@ const QString DEFAULT_APP_ACTION_MIXIN("_DEFAULT_APP_ACTION");
 const QString XSLT_PLUGIN_END_TAG("xslt_plugin_end_tag");
 
 const unsigned int DOUBLE_SCALE_FACTOR(1000);
+const int TOP_ITEMS_TO_UPDATE(100);
 
 //Total weight scale items by their sources
 const unsigned int RELATIVE_WEIGHT_ABSOLUTE_FRECENCY_FACTORE(10);

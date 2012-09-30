@@ -12,7 +12,7 @@ ItemRep::ItemRep(CatItem it, Tuple internalId, int change_count,
     m_internalId = internalId;
     m_name = it.getName();
     Q_ASSERT(!m_name.isEmpty());
-    Q_ASSERT(it.getFullWeight());
+    //Q_ASSERT(it.getFullWeight());
     totalWeight = it.getFullWeight();
     change_cn = change_count;
     l_to_match = -1;

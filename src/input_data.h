@@ -162,9 +162,8 @@ public:
         return toReturn;
     }
 
-    QList<ListItem> getFormattedListItems(VerbItem filterItem,int& selected, int itemsHigh, int charsAvail, int treePos){
+    QList<ListItem> getFormattedListItems(VerbItem filterItem,int itemsHigh, int charsAvail, int treePos){
 
-        selected =-1;
         QList<ListItem> res;
         if(this->getUserKeys().isEmpty()){
             if(treePos > 1){
@@ -179,13 +178,6 @@ public:
 
         res = m_formattedItems.toList();
 
-        for(int i = 0; i < res.count(); ++i) {
-            if(res[i].getPath() == m_currentItem.getPath() ||
-               res[i].getPath() == filterItem.getPath()){
-                selected=i;
-            }
-            qDebug() << "nth keyChar: " << res[i].hotkeyChar();
-        }
         return res;
     }
 
@@ -473,8 +465,8 @@ public:
         curState().intersperseListItemList(il);
     }
 
-    QList<ListItem> getFormattedListItems(int& selected, int itemsHigh, int charsAvail){
-        return curState().getFormattedListItems(m_organizingArg, selected,itemsHigh, charsAvail, m_parentStack.length());
+    QList<ListItem> getFormattedListItems(int itemsHigh, int charsAvail){
+        return curState().getFormattedListItems(m_organizingArg, itemsHigh, charsAvail, m_parentStack.length());
     }
 
     QList<CatItem> getListItems(){

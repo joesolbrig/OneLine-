@@ -464,6 +464,9 @@ class BaseChildRelation {
 
         virtual qint32 getSourceWeight() const {return m_sourceWeight;}
         virtual void setSourceWeight(qint32 i) {m_sourceWeight=i;}
+        
+        virtual qint32 getTotalWeight() const {return m_totalWeight;}
+        virtual void setTotalWeight(qint32 i) {m_totalWeight=i;}
 
         virtual qint32 getUpdateWeight() const {return MAX(m_sourceWeight, m_updateWeight);}
         virtual void setUpdateWeight(qint32 i) {m_updateWeight=i;}
@@ -477,10 +480,10 @@ class BaseChildRelation {
 
         }
 
-        virtual qint32 getTotalWeight() const{
-            int externalWeightTemp = MAX(m_relevanceWeight, m_externalWeight/10);
-            return externalWeightTemp;
-        }
+//        virtual qint32 getTotalWeight() const{
+//            int externalWeightTemp = MAX(m_relevanceWeight, m_externalWeight/10);
+//            return externalWeightTemp;
+//        }
 
         virtual void setRelevanceWeight(qint32 i)=0;
         qint32 getUsage() const {return m_usage;}
