@@ -35,7 +35,7 @@ QString Catalog::curFilterStr;
 
 
 Catalog::Catalog(QHash<QString, QList<QString> > dirs, QSet<QString> pluginFilter):
-        cat_store() {
+        cat_store(true, (dirs[LOCAL_DIR])[0]) {
     m_dirs = dirs;
     m_pluginFilter = pluginFilter;
 }

@@ -130,6 +130,8 @@ public:
         return *this;
     }
 
+    static QList<ListItem> convertList(QList<CatItem> cList);
+
     QString modifiedDescription();
 
     QIcon getActualIcon(){

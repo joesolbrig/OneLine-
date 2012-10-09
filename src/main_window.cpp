@@ -213,6 +213,7 @@ void MainUserWindow::choiceUnderstoodTimeout(){
     //
     time_t now = appGlobalTime(); //This is in conds...
     m_timeCount++; //This is arbitrary units
+    if(m_contextMenu){ return;}
 
     //int timeSinceLastChange = (now - m_lastStateChange); //MILLISECS_IN_SECOND*
 
@@ -436,8 +437,8 @@ void MainUserWindow::catalogBuilt() {
 
     m_builder->wait();
 
-    if(m_inputList.slotCount()==0){
-        if(m_inputList.getListItems().count()==0){
+    if(m_inputList.slotCount()==1){
+        if(m_itemChoiceList->getItemCount()==0){
             st_TakeItemFromList=false;
             searchOnInput();
         }
@@ -572,6 +573,7 @@ bool MainUserWindow::tryShowPreview(){
     if(!m_inputList.isExpanded()){
         QString itemPath = index->data(ROLE_ITEM_PATH).toString();
         pItem = m_inputList.getItemByPath(itemPath);
+        if(pItem.isEmpty()){ return false;}
         if(!(pItem==m_rightPreviewingItem)){
             m_rightPreviewingItem = pItem;
             return false;
@@ -724,6 +726,13 @@ void MainUserWindow::focusInEvent ( QFocusEvent *) {
         qDebug() << "show list cause I gained focus...";
         m_itemChoiceList->setVisible(true);
     }
+    if(m_contextMenu){
+        FancyContextMenu* t = m_contextMenu;
+        m_contextMenu = 0;
+        t->close();
+        t->deleteLater();
+    }
+
     setFocus();
 }
 
@@ -1014,7 +1023,7 @@ void MainUserWindow::addMiniIcons(){
 //
 //    }
 
-    if(!m_inputList.isExpanded()){
+    if(!m_inputList.isExpanded() || !m_inputList.atFirstSlot()){
         int charsAvail;
         int rowsAvail;
         getListDimension(charsAvail, rowsAvail);
@@ -1134,6 +1143,7 @@ void MainUserWindow::menuEvent(QContextMenuEvent* evt) {
 void MainUserWindow::listMenuEvent(QString itemPath, QPoint p) {
     CatItem item = m_inputList.getItemByPath(itemPath);
     if(!m_contextMenu && m_inputList.slotPosition()==0 && !item.isEmpty()){
+        CatBuilder::updateItem(item,2,UserEvent::SELECTED, true);
         InputList il;
         il.setItem(item);
         il.addSlot();
@@ -1771,8 +1781,11 @@ void MainUserWindow::operateOnItem(QString path, const CatItem opItem){
             qApp->postEvent(this,ke, Qt::HighEventPriority);
         } else if( operationItem.getPath() == addPrefix(OPERATION_PREFIX,SET_PRIORIT_OPERATION)){
             int w = operationItem.getCustomValue(SET_PRIORITY_KEY_STR);
-            item.setScaledSourceWeight(w);
+            item.setWeightTics(w);
             CatBuilder::updateItem(item,1,UserEvent::STANDARD_UPDATE);
+            searchOnInput();
+            m_inputList.addSingleListItem(item,m_savedPosition);
+            m_itemChoiceList->updateItem(ListItem(item));
         } else if(operationItem.getPath() == addPrefix(OPERATION_PREFIX,PIN_OPERATION_NAME)
             || childAction.getPath() == addPrefix(OPERATION_PREFIX,PIN_OPERATION_NAME)){
             item.setPinned(m_inputList.getUserKeys());

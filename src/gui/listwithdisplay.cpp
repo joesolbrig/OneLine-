@@ -80,6 +80,8 @@ int ListWithDisplay::getMessageItemCount(){
 }
 
 
+
+
 bool ListWithDisplay::setMultiInput(InputList* il){
     if(!m_multiInputDisplayer){
         m_multiInputDisplayer = new MultiInputDisplayer(il,m_width);
@@ -108,6 +110,10 @@ void ListWithDisplay::setHeight(int h){
     qDebug() << "setting height: " << h;
     m_height = h;
     setBaseGeometry();
+}
+
+int ListWithDisplay::getItemCount(){
+    return currentViewRef()->count();
 }
 
 QRect ListWithDisplay::getFocusRect(){

@@ -361,7 +361,9 @@ public:
         return QString();
     }
 
-    //int getItemCount(){ return inputData[m_itemPosition].getListItemCount()(); }
+    int getItemCount(){
+        return inputData[m_itemPosition].getListItemCount();
+    }
 
     CatItem getFilterItem(){
         return inputData[m_itemPosition].getFilterItem();
@@ -511,6 +513,8 @@ public:
     }
 
     int slotCount(){ return inputData.count(); }
+    bool atFirstSlot(){ return inputData.count()==1 ||
+                             (usingCustomVerb() && inputData.count()==2); }
     int slotPosition(){ return m_itemPosition; }
 
     int nounBeginSlot(){ return m_nounsBeginIndex;}
@@ -1950,6 +1954,7 @@ public:
         return r;
     }
 
+
     QList<ListItem> getFormattedListItems(int& selected, int itemsHigh, int charsAvail) {
         QList<ListItem> res;
 
@@ -2157,7 +2162,12 @@ public:
 
 
     QString getPathText(int spaceAvailable){
-        return inputData[m_itemPosition].getExplorePath(spaceAvailable);
+        if(atFirstSlot()){
+            return inputData[m_itemPosition].getExplorePath(spaceAvailable);
+        } else {
+            return asFormattedString();
+        }
+
     }
 
 
@@ -2222,6 +2232,9 @@ public:
         }
     }
 
+
+
+
     QString asFormattedString(CatItem substituteItem= CatItem(),
                               int* beginFieldPos=0, int* endFieldPos=0, bool usePath=true){
         Q_ASSERT(m_itemPosition < inputData.count() &&(m_itemPosition>-1));
@@ -2237,7 +2250,8 @@ public:
             { atCustomVerb = true; }
 
         QString formatedStr;
-        if(inputData.length()==1 && !usingCustomVerb()){
+        if((inputData.length()==1 ||
+            (inputData.length()==2 && m_opIndex!=-1)) && !usingCustomVerb()){
             if(substituteItem.isEmpty()){
                 formatedStr += inputData[0].getCurrentItem().getNameForEditLine();
             } else {

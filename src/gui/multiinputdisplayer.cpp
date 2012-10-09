@@ -22,11 +22,14 @@ QSize MultiInputDisplayer::sizeOrPaint(QPainter *painter, int heightAvailable, i
         QString opName = m_inputList->getOperationPart().getName();
 //        topPos += sizeOrPaintField(painter, f,  m_inputList->getOperationPart().getName(),
 //                   topPos);
-        topPos += sizeOrPaintField(painter, f, opName + " " + m_inputList->asFormattedString(), topPos);
+        topPos += sizeOrPaintField(painter, f,
+                    "TESTING TESTING", topPos);
+        topPos += sizeOrPaintField(painter, f,
+                                   opName + " " + m_inputList->asFormattedString(), topPos);
         topPos += sizeOrPaintField(painter, f,
                     m_inputList->getOperationPart().getOperationHelperPhrase(),
                    topPos);
-        if(!m_inputList->getListItems().isEmpty()){
+        if(!m_choiceList->count()){
             int avail =heightAvailable - (topPos+CUSTOM_FORM_BOTTOMMARGIN);
             topPos += sizeOrPaintList(painter, topPos, avail, false);
             m_choiceList->setVisible(true);

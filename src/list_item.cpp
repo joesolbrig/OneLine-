@@ -188,7 +188,6 @@ void drawHtmlRightAligned(QPainter *painter, const QFont font, QRect rect, QStri
 
 void drawHtmlLine(QPainter *painter, const QFont font, QRect rect, QString text, bool multiline,
                   bool leftAligned) {
-
     if(!painter){return;}
 
     painter->save();
@@ -359,6 +358,15 @@ ListItem::ListItem(CatItem it): CatItem(it){
     m_maxSplitPointIndex = -2;
     m_nextKeyIndex = -1;
     m_charsAvail = 0;
+}
+
+QList<ListItem> ListItem::convertList(QList<CatItem> cList){
+    QList<ListItem> res;
+    for(int i=0; i< cList.count(); i++){
+        res.append(ListItem(cList[i]));
+    }
+    return res;
+
 }
 
 QString ListItem::modifiedDescription(){

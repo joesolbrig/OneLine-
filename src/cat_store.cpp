@@ -107,7 +107,7 @@ Cat_Store::Cat_Store(bool shouldRestore, QString overideDir) :
         items_by_keys.insert(toRestore[i],kl);
     }
 
-    lastViewUpdate = appGlobalTime();
+    m_lastViewUpdate = appGlobalTime();
 }
 
 void Cat_Store::clearAll(){
@@ -118,8 +118,6 @@ void Cat_Store::clearAll(){
 
 
 }
-
-
 
 QMutex* Cat_Store::getMutext(){ return &catalogMutex;}
 
@@ -283,11 +281,11 @@ QList<ListItem> Cat_Store::getBaseSources(){
     newsItems.setIcon(FEED_TYPE_ICON);
 
     Tuple endMessageTuple((CatItem::MESSAGE),now);
-    Tuple startMessageTuple((CatItem::MESSAGE),now-lastViewUpdate);
+    Tuple startMessageTuple((CatItem::MESSAGE),now-m_lastViewUpdate);
     int unseenMessages=item_index.get_range_count(
             startMessageTuple,endMessageTuple, I_BY_MESSAGETIME);
     Tuple endWebTuple((CatItem::PUBLIC_DOCUMENT),now);
-    Tuple startWebTuple((CatItem::PUBLIC_DOCUMENT),now-lastViewUpdate);
+    Tuple startWebTuple((CatItem::PUBLIC_DOCUMENT),now-m_lastViewUpdate);
     int unseenItems=item_index.get_range_count(
             startWebTuple,endWebTuple, I_BY_MESSAGETIME);;
 
@@ -321,13 +319,16 @@ QList<ListItem> Cat_Store::getBaseSources(){
 
 QList<ListItem> Cat_Store::getCondensedSources(){
     time_t now = ::appGlobalTime();
+
+
+
     QList<ListItem> results;
 
     ListItem locals(CatItem::createTypeParent(CatItem::LOCAL));
     results.append(locals);
 
     ListItem messages(CatItem::createTypeParent(CatItem::MESSAGE));
-    Tuple startMessageTuple((CatItem::MESSAGE),now-lastViewUpdate);
+    Tuple startMessageTuple((CatItem::MESSAGE),now-m_lastViewUpdate);
     Tuple endMessageTuple((CatItem::MESSAGE),now);
     int unseenMessages=item_index.get_range_count(
             startMessageTuple,endMessageTuple, I_BY_MESSAGETIME);
@@ -336,7 +337,7 @@ QList<ListItem> Cat_Store::getCondensedSources(){
 
     ListItem newsItems(CatItem::createTypeParent(CatItem::PUBLIC_FEED));
     Tuple endWebTuple((CatItem::PUBLIC_DOCUMENT),now);
-    Tuple startWebTuple((CatItem::PUBLIC_DOCUMENT),now-lastViewUpdate);
+    Tuple startWebTuple((CatItem::PUBLIC_DOCUMENT),now-m_lastViewUpdate);
     int unseenItems=item_index.get_range_count(
             startWebTuple,endWebTuple, I_BY_MESSAGETIME);
     newsItems.setCustomPluginValue(NEW_ITEM_OF_TYPE_KEY,unseenItems);
@@ -379,7 +380,8 @@ QList<ListItem> Cat_Store::getOrganizingSources(ItemFilter* inputList){
                 return res;
             }
         }
-        return getCondensedSources();
+        //return getCondensedSources();
+        return ListItem::convertList(getHighestSourceParents(inputList));
     } else if(parentItem.hasLabel(FILE_CATALOG_PLUGIN_STR)){
         return getFileSources();
     }
@@ -459,65 +461,88 @@ QList<CatItem> Cat_Store::getMainApps(){
     return (getItemChildrenProtected(&ifilt,typeParent, VERB_PRELOAD_COUNT));
 }
 
-QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* intialPos){
-    QMutexLocker locker(&catalogMutex);
-    Q_ASSERT(filter);
-    m_returnedPaths.clear();
-
-    QList<CatItem> res;
-    QList<QList<CatItem> > priorityItems;
-    QSet<QString> itemsUsedGuard;
 
 
+QList<CatItem> Cat_Store::getHighestSourceParents(ItemFilter* filter){
+
+    QList<CatItem> resultTypes;
     CatItem::ItemType organizingType = filter->getOrganizeingType();
-    if(organizingType!=CatItem::MIN_TYPE){
-        limit = limit*4;
-    }
 
     //Highest weight items of a given type...
     if(organizingType!=CatItem::MIN_TYPE){
         QList<CatItem::ItemType> types = filter->getOrganizingTypeList();
         for(int i=0; i< types.count();i++){
             CatItem typeParent = CatItem::createTypeParent(types[i]);
-            priorityItems.append(getItemChildrenProtected(filter,typeParent, limit, intialPos));
+            resultTypes.append(typeParent);
         }
 
     } else {
-        CatItem::ItemType types[] = {CatItem::VERB,
-                    CatItem::LOCAL_DATA_DOCUMENT,
-                    CatItem::LOCAL_DATA_FOLDER,
-                    CatItem::PUBLIC_DOCUMENT,
-                    CatItem::TAG,
-                    CatItem::MESSAGE
-                };
-        for(unsigned int i=0; i< sizeof(types); i++){
-            CatItem typeParent = CatItem::createTypeParent(types[i]);
-            priorityItems.append(getItemChildrenProtected(filter,typeParent, limit, intialPos));
+        QList<CatItem::ItemType> types;
+        types.append(CatItem::LOCAL);
+        types.append(CatItem::MESSAGE);
+        types.append(CatItem::LOCAL_DATA_FOLDER);
+        types.append(CatItem::TAG);
+
+
+        QList<CatItem> highSourceItems = getHighestTypeProtected(filter, 10,
+                I_BY_SOURCEWEIGHT,true,0, false);
+
+        bool addedType=false;
+        for(int i=0; i< highSourceItems.count(); i++){
+            CatItem source = highSourceItems[i];
+            if(!addedType && source.getSourceWeightTics() < ITEM_TYPE_LEVEL){
+                for(int j=0; j< types.count(); j++){
+                    CatItem typeParent = CatItem::createTypeParent(types[j]);
+                    resultTypes.append(typeParent);
+                }
+                addedType =true;
+            }
+            resultTypes.append(source);
         }
-        //Messages, some ratio with their source...
-        QList<CatItem> messageItems;
-        messageItems = getInitialMessages(10, filter, limit, intialPos);
-        priorityItems.append(messageItems);
-
-        //Sources
-        QList<CatItem> highTypeItems = getHighestTypeProtected(filter, limit,
-                I_BY_SOURCEWEIGHT,true, intialPos);
-        priorityItems.append(highTypeItems);
-
-        //Pinned Items
-//        QList<CatItem> pinnedItems = getHighestTypeProtected(filter, limit,
-//                I_PINNED_BY_FINALWEIGHT,true, intialPos);
-//        priorityItems.append(pinnedItems);
-
-        //Misc high weight items
-//        QList<CatItem>  highestRatedItems = getHighestTypeProtected(filter, limit,
-//            I_BY_FRCWEIGHT,true, intialPos);
-//        priorityItems.append(highestRatedItems);
+        if(!addedType){
+            for(int j=0; j< types.count(); j++){
+                CatItem typeParent = CatItem::createTypeParent(types[j]);
+                resultTypes.append(typeParent);
+            }
+            addedType =true;
+        }
     }
 
-    QList<int> listIndex;
-    for(int i=0;i<priorityItems.count();i++){listIndex.append(0);}
+    time_t now = ::appGlobalTime();
+    for(int i=0; i< resultTypes.count(); i++){
+        CatItem item = resultTypes[i];
+        CatItem::ItemType organType = item.getOrganizeingType();
+        Q_ASSERT(organType >= (int)CatItem::MIN_TYPE && organType <= CatItem::MAX_TYPE);
+        if(organType!=CatItem::MIN_TYPE){
+            Tuple startWebTuple((organType),MAX(now-m_lastViewUpdate,0));
+            Tuple endWebTuple((organType),now);
+            int unseenItems=item_index.get_range_count(
+                    startWebTuple,endWebTuple, I_BY_MESSAGETIME);
+            resultTypes[i].setCustomPluginValue(NEW_ITEM_OF_TYPE_KEY,unseenItems);
+        }
 
+    }
+    return resultTypes;
+}
+
+QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* intialPos){
+    QMutexLocker locker(&catalogMutex);
+    Q_ASSERT(filter);
+    m_returnedPaths.clear();
+
+    QList<QList<CatItem> > priorityItems;
+    QSet<QString> itemsUsedGuard;
+
+    CatItem::ItemType organizingType = filter->getOrganizeingType();
+    QList<CatItem> types = this->getHighestSourceParents(filter);
+    for(int i=0; i< types.count();i++){
+        priorityItems.append(getItemChildrenProtected(filter,types[i], limit, intialPos));
+    }
+
+
+    QList<int> listIndex;
+    QList<CatItem> res;
+    for(int i=0;i<priorityItems.count();i++){listIndex.append(0);}
     bool go = true;
     while(go){
         go = false;
@@ -546,10 +571,88 @@ QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* 
             }
         }
     }
-    if(intialPos)
-        { *intialPos += limit; }
+    if(intialPos) { *intialPos += limit; }
     return res;
 }
+
+
+//QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* intialPos){
+//    QMutexLocker locker(&catalogMutex);
+//    Q_ASSERT(filter);
+//    m_returnedPaths.clear();
+//
+//    QList<CatItem> res;
+//    QList<QList<CatItem> > priorityItems;
+//    QSet<QString> itemsUsedGuard;
+//
+//
+//    CatItem::ItemType organizingType = filter->getOrganizeingType();
+//    if(organizingType!=CatItem::MIN_TYPE){
+//        limit = limit*4;
+//    }
+//
+//    //Highest weight items of a given type...
+//    if(organizingType!=CatItem::MIN_TYPE){
+//        QList<CatItem::ItemType> types = filter->getOrganizingTypeList();
+//        for(int i=0; i< types.count();i++){
+//            CatItem typeParent = CatItem::createTypeParent(types[i]);
+//            priorityItems.append(getItemChildrenProtected(filter,typeParent, limit, intialPos));
+//        }
+//
+//    } else {
+//        CatItem::ItemType types[] = {CatItem::VERB,
+//                    CatItem::LOCAL_DATA_DOCUMENT,
+//                    CatItem::LOCAL_DATA_FOLDER,
+//                    CatItem::PUBLIC_DOCUMENT,
+//                    CatItem::TAG,
+//                    CatItem::MESSAGE
+//                };
+//        for(unsigned int i=0; i< sizeof(types); i++){
+//            CatItem typeParent = CatItem::createTypeParent(types[i]);
+//            priorityItems.append(getItemChildrenProtected(filter,typeParent, limit, intialPos));
+//        }
+//
+//        //Sources
+//        QList<CatItem> highTypeItems = getHighestTypeProtected(filter, limit,
+//                I_BY_SOURCEWEIGHT,true, intialPos);
+//        priorityItems.append(highTypeItems);
+//    }
+//
+//    QList<int> listIndex;
+//    for(int i=0;i<priorityItems.count();i++){listIndex.append(0);}
+//
+//    bool go = true;
+//    while(go){
+//        go = false;
+//        for(int i=0;i<priorityItems.count();i++){
+//            if(priorityItems[i].count() > listIndex[i] &&  res.count() < limit){
+//                CatItem item = priorityItems[i][listIndex[i]];
+//                if(organizingType!=CatItem::MESSAGE){
+//                    if(item.getIsTimeDependant() ){
+//                        time_t curTime = appGlobalTime();
+//                        time_t creationTime = item.getCreationTime();
+//                        if(!item.isUnseenItem()
+//                            && creationTime < curTime - SEEN_MSG_CUTOFF_INTERVAL)
+//                            { continue; }
+//                        if(item.isUnseenItem()
+//                            && creationTime < curTime - UNSEEN_MSG_CUTOFF_INTERVAL)
+//                            { continue; }
+//                    }
+//                }
+//                setUnseenChildCount(item);
+//                listIndex[i]++;
+//                go = true;
+//                if(itemsUsedGuard.contains(item.getPath())){ continue;}
+//                itemsUsedGuard.insert(item.getPath());
+//                if(item.getItemType() != CatItem::PERSON || organizingType==CatItem::PERSON )
+//                    { res.append(item); }
+//            }
+//        }
+//    }
+//    if(intialPos)
+//        { *intialPos += limit; }
+//    return res;
+//}
 
 qreal Cat_Store::getSourceRatio(CatItem source){
     QMutexLocker locker(&catalogMutex);
@@ -590,6 +693,7 @@ void Cat_Store::setSourceToRatio(CatItem source, qreal ratio){
     for(int i=0; i<organizingSources.count();i++){
         qreal realOldW = organizingSources[i].getSourceWeight();
         organizingSources[i].setSourceWeight(realOldW * reweightFactor);
+        organizingSources[i].setStub(false);
         addItemEntryProtected(organizingSources[i]);
     }
     source.setSourceWeight(newWeight);
@@ -1041,7 +1145,7 @@ void Cat_Store::addVisibilityEvent(CatItem item, UserEvent evt){
 
     time_t n = appGlobalTime();
     if(evt.event_type == UserEvent::NEW_MESSAGES_NOTED){
-        lastViewUpdate = n;
+        m_lastViewUpdate = n;
     } else  if(evt.event_type == UserEvent::SHOWN_LIST || evt.event_type == UserEvent::SHOWN_EDITLINE){
         HistoryEvent he(item.getName(), QHash<QString, QString>(), item.getPath(), evt, n);
         Tuple(item.getItemId(),n);
@@ -1097,6 +1201,8 @@ CatItem Cat_Store::getItemByPathPrivate(QString path, int depth){
     item.clearRelations();
     if(depth>=0){
         restoreRelations(item, depth);
+        qDebug() << "getting item: " << item.getPath();
+        Q_ASSERT(depth==0 || !item.getSearchSourceParent().isEmpty());
     }
     
     if(false && item.getIsIntermediateSource()){
@@ -1112,10 +1218,10 @@ CatItem Cat_Store::getItemByPathPrivate(QString path, int depth){
     return item;
 }
 
-void Cat_Store::restoreRelations(CatItem& it, int depth){
-    restoreRelationByIndex(it, C_BY_CHILDID, MIN(depth,1)); //parents
-    restoreRelationByIndex(it, C_BY_PARENDID, depth-1); //children
-
+void Cat_Store::restoreRelations(CatItem& item, int depth){
+    restoreRelationByIndex(item, C_BY_CHILDID, MIN(depth,1)); //parents
+    restoreRelationByIndex(item, C_BY_PARENDID, depth-1); //children
+    addTypePseudoRelationsToItem(item);
 }
 
 
@@ -1256,23 +1362,23 @@ QList<CatItem> Cat_Store::findEarlySiblingsProtected(CatItem item, int offset){
 
 }
 
-QList<CatItem> Cat_Store::getHighestTypeProtected(ItemFilter* filter, long i,
+QList<CatItem> Cat_Store::getHighestTypeProtected(ItemFilter* filter, long limit,
                                                   QString index, bool takeLowest,
-                                                  int* initialPos){
+                                                  int* initialPos, bool filterBySeen){
     long max_items = item_index.indexSize(index);
     vector<CatItem> scrs;
     int start = initialPos? *initialPos: 0;
     if(takeLowest){
-        scrs = item_index.get_range_by_pos(start,i,index);
+        scrs = item_index.get_range_by_pos(start,limit,index);
     } else {
-        scrs = item_index.get_range_by_pos(max_items-i-(1+start),max_items-start,index);
+        scrs = item_index.get_range_by_pos(max_items-limit-(1+start),max_items-start,index);
     }
     QList<CatItem> res;
-    for(unsigned int i=0;i<scrs.size();i++) {
+    for(unsigned int i=0;i<scrs.size() && res.size()<=limit;i++) {
         CatItem it = scrs[i];
         if(m_returnedPaths.contains(it.getPath())){continue;}
         m_returnedPaths.insert(it.getPath());
-        if(filter && !filter->acceptItem(&it)){continue;}
+        if(filterBySeen && filter && !filter->acceptItem(&it)){continue;}
         restoreRelations(it);
         res.append(it);
     }
@@ -1382,6 +1488,14 @@ QList<CatItem> Cat_Store::findRecentUnseenReadProtected(time_t cutOff){
 
 QList<CatItem> Cat_Store::getItemChildrenProtected(ItemFilter* inputList,CatItem it,
         long limit, int* intialPos){
+
+
+    if(it == CatItem::createTypeParent(CatItem::MESSAGE)){
+        return getInitialMessages(limit, inputList, limit, intialPos);
+    }
+
+
+
     int offset = intialPos? *intialPos: 0;
     vector<DbChildRelation> crs = child_index.get_range(
             Tuple(it.getItemId()), Tuple(it.getItemId()+1), C_BY_PARENTID_RELW, limit,offset);
@@ -1646,6 +1760,9 @@ void Cat_Store::addTypePseudoRelationsToItem(CatItem& item){
         CatItem par = CatItem::createTypeParent(item.getSortingType());
         item.addParent(par);
     }
+    CatItem soureParent = item.getSearchSourceParent();
+    soureParent = soureParent;
+    Q_ASSERT(!soureParent.isEmpty());
 }
 
 void Cat_Store::removeRelation(DbChildRelation rel){
@@ -1828,6 +1945,7 @@ long Cat_Store::calcFullWeight(CatItem it){
         rel.setTotalWeight(sourceWeight);
 
         fullWeight = MIN(fullWeight, sourceWeight);
+        fullWeight = MAX(fullWeight, 1);
     }
     return fullWeight;
 }
@@ -1881,7 +1999,8 @@ long Cat_Store::calcFullWeight(CatItem it){
 //}
 
 long Cat_Store::calcUpdatability(CatItem item){
-    CatItem parent = item.getSourceParent();
+    CatItem parent = item.getUpdateSourceParent();
+    if(parent.isEmpty()) { return 0;}
     int parId = parent.getItemId();
     int sUpWeight = item.getUpdatingSourceWeight();
     long totalRange = child_index.get_order(Tuple(parId+1,0), C_SOURCE_BY_PARENT_TYPE);

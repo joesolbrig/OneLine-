@@ -172,6 +172,10 @@ monitor_callback (GFileMonitor      *monitor,
   MenuMonitorEvent      event;
   MenuMonitor          *menu_monitor = (MenuMonitor *) user_data;
 
+  //warning removal foo/wtf
+  monitor = monitor;
+  other_file= other_file;
+
   event = MENU_MONITOR_EVENT_INVALID;
   switch (eflags)
     {

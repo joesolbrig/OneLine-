@@ -200,6 +200,8 @@ TheApplicationTester::TheApplicationTester(){
     qDebug() << "Important little detail ... this is SIZEOF CatItem: " << sizeof(CatItem);
     qDebug() << "Another little detail ... this is SIZEOF TrieNode: " << sizeof(TrieNode);
 
+    ((*gDirs)[QString(LOCAL_DIR)]).value(0)=".";
+
     Catalog* c = CatBuilder::getOrCreateCatalog(*gDirs);
     c = c;
     Q_ASSERT(c  != NULL );
@@ -1024,8 +1026,6 @@ void TheApplicationTester::testUpdateUsage(){
     Q_ASSERT(fw2 < fw3);
 
     gTime_offset_for_testing = old_time_offset;
-
-
 
 }
 

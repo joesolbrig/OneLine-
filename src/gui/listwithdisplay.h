@@ -237,6 +237,7 @@ public:
     void addMessage(QString msg);
     int getMessageSpaceAvailable();
     int getMessageItemCount();
+    int getItemCount();
     void clear(){
         if(m_viewStack.length()==0){return;}
         if(currentViewRef()){

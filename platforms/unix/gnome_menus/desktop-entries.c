@@ -80,6 +80,9 @@ get_flags_from_key_file (DesktopEntry *entry,
   char      *tryexec;
   guint      flags;
   int        i;
+  
+  //warning... 
+  entry = entry;
 
   error = NULL;
   no_display = g_key_file_get_boolean (key_file,

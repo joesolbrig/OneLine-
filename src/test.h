@@ -92,7 +92,9 @@ class TheApplicationTester : public QObject {
 
         void testExtendFacebookSources();
 
-    //Support functions, tests are private slots
+        void test_MultiTree2();
+        void test_MultiTree1();
+        void test_cat_store();    //Support functions, tests are private slots
     public slots:
         void extensionCycler(QList<CatItem> inList, QList<CatItem>* outList);
 
@@ -103,9 +105,7 @@ class TheApplicationTester : public QObject {
 
         void testUpdateUsage2();
         void testUpdateUsage();
-        void test_MultiTree2();
-        void test_MultiTree1();
-        void test_cat_store();
+
 
     };
 

@@ -14,22 +14,41 @@
 #include "listwithframe.h"
 #include "fancycontextmenu.h"
 
+//Qt::FramelessWindowHint | Qt::Tool
+
 FancyContextMenu::FancyContextMenu(CatItem priorityItem, QList<CatItem> actionChildren):
-        QWidget(0, Qt::FramelessWindowHint | Qt::Tool ), m_layout(QBoxLayout::LeftToRight,this), m_slider(this)
+        QWidget(0,
+                Qt::FramelessWindowHint), m_layout(QBoxLayout::TopToBottom,this), m_sublayout(QBoxLayout::LeftToRight), m_slider(this)
 {
+    setAttribute(Qt::WA_DeleteOnClose,true);
+    setAttribute(Qt::WA_LayoutOnEntireRect,true);
 
     //slider
     m_slider.setTickPosition(QSlider::TicksLeft);
     m_slider.setMinimum(0);
-    m_slider.setMaximum(log(MAX_MAX_EXTERNAL_WEIGHT));
-    int w = priorityItem.getScaledSourceWeight();
+    m_slider.setMaximum((WEIGHT_TICS-1));
+
+    m_priorityParent = priorityItem.getSearchSourceParent();
+    int w = m_priorityParent.getSourceWeightTics();
     qDebug() << "FancyContextMenu setting scaledWeight:" << w;
     m_slider.setValue(w);
-//    QStyle s;
-//    m_slider.setStyle(&s);
     connect(&m_slider, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)));
-    m_layout.setMargin(0);
-    m_layout.addWidget(&m_slider,Qt::AlignLeft);
+
+    QFont f = ListItem(m_priorityParent).getDisplayFont();
+    m_topLabel.setFont(f);
+    m_topLabel.setText(
+            tagAs(m_priorityParent.getName(),"b")
+            + QString(" priority ") );
+    m_topLabel.setMargin(0);
+    m_topLabel.setIndent(0);
+    m_topLabel.adjustSize();
+    QRect r = m_topLabel.geometry();
+    QFontMetrics fm(f);
+    r.setHeight(fm.height());
+    m_topLabel.setGeometry(r);
+
+    m_layout.addWidget(&m_topLabel, 0, Qt::AlignTop);
+    m_sublayout.addWidget(&m_slider,0, Qt::AlignLeft);
 
     //menu
     for(int i=0; i<actionChildren.count();i++){
@@ -43,33 +62,48 @@ FancyContextMenu::FancyContextMenu(CatItem priorityItem, QList<CatItem> actionCh
         QAction* extendMenu = m_menu.addAction( name,this,SLOT(optionChosen()));
         connect(extendMenu, SIGNAL(triggered()), gMainWidget, SLOT(extendCatalog()));
     }
-    connect(this, SIGNAL(operateOnItem(QString, CatItem )),gMainWidget, SLOT(operateOnItem(QString, const CatItem )));
-    QRect g = geometry();
-    g.setHeight(m_menu.height());
-    g.setWidth(m_slider.geometry().width() + m_menu.geometry().width());
-    setGeometry(g);
-    m_layout.addWidget(&m_menu,0,Qt::AlignRight);
 
-    //layout
+    connect(this, SIGNAL(operateOnItem(QString, const CatItem )),
+            gMainWidget, SLOT(operateOnItem(QString, const CatItem )));
+    QRect g = geometry();
+    g.setHeight(MAX(m_menu.height(), m_slider.height()) + m_topLabel.height());
+    g.setWidth(MAX(m_slider.geometry().width() + m_menu.geometry().width(),
+                   m_topLabel.width()));
+    setGeometry(g);
+    m_sublayout.addWidget(&m_menu,0, Qt::AlignRight);
+
     m_priorityItem = priorityItem;
+    m_sublayout.setMargin(0);
+    m_sublayout.setContentsMargins(0,0,0,0);
+    //m_sublayout.update();
+    m_layout.addLayout(&m_sublayout,1);
     setLayout(&m_layout);
-    m_layout.update();
     m_layout.setMargin(0);
+    m_layout.setContentsMargins(0,0,0,0);
+    //m_layout.update();
     adjustSize();
     setFocusPolicy(Qt::StrongFocus);
     setMouseTracking(true);
     setFocus();
 }
 
+void FancyContextMenu::focusOutEvent ( QFocusEvent * evt) {
+    QWidget::focusOutEvent(evt);
+}
+
+void FancyContextMenu::mousePressEvent(QMouseEvent * event){
+    QWidget::mousePressEvent(event);
+}
+
 FancyContextMenu::~FancyContextMenu(){
-    gMainWidget->m_contextMenu =0;
+    gMainWidget->m_contextMenu=0;
     destroy();
 }
 
 
 void FancyContextMenu::sliderChanged(int value){
     CatItem setPrioritItem(addPrefix(OPERATION_PREFIX,SET_PRIORIT_OPERATION));
-    if(m_priorityItem.getScaledSourceWeight() !=value){
+    if(m_priorityItem.getSourceWeightTics() !=value){
         setPrioritItem.setCustomValue(SET_PRIORITY_KEY_STR,value);
         emit operateOnItem(m_priorityItem.getPath(),setPrioritItem);
     }

@@ -140,6 +140,8 @@ handle_entry_directory_changed (EntryDirectory *dir,
   MenuLayoutNodeRoot *nr;
   GSList             *tmp;
 
+  dir=dir;
+
   g_assert (node->type == MENU_LAYOUT_NODE_MENU);
 
   nr = (MenuLayoutNodeRoot *) menu_layout_node_get_root (node);
@@ -1307,7 +1309,8 @@ check_no_attributes (GMarkupParseContext  *context,
                      const char          **attribute_values,
                      GError              **error)
 {
-  if (attribute_names[0] != NULL)
+    attribute_values=attribute_values;
+    if (attribute_names[0] != NULL)
     {
       set_error (error, context,
                  G_MARKUP_ERROR, G_MARKUP_ERROR_PARSE,

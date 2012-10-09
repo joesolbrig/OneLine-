@@ -83,7 +83,7 @@ class Cat_Store {
         int m_extendBucketCounter;
         int m_extendMetaCounter;
 
-        time_t lastViewUpdate;
+        time_t m_lastViewUpdate;
         QList<CatItem> m_toUpdate;
         QSet<QString> m_insertedPaths;
         QSet<QString> m_returnedPaths;
@@ -117,6 +117,9 @@ class Cat_Store {
         QList<ListItem> coalatedSources(ItemFilter* inputList);
         QList<CatItem> getMainApps();
         QList<CatItem> getInitialItems(ItemFilter* filter, long limit = MAX_SOURCE_COUNT, int* initialPos=0);
+
+        QList<CatItem> getHighestSourceParents(ItemFilter* filter);
+
     public:
         void setUnseenChildCount(CatItem& it);
         QList<CatItem> getOperations(ItemFilter* filter, int limit);
@@ -189,7 +192,7 @@ class Cat_Store {
         QList<CatItem> findEarlySiblingsProtected(CatItem item, int offset);
 
         QList<CatItem> getHighestTypeProtected(ItemFilter* filter, long i, QString index, bool takeLowest=false,
-                                               int* initialPos=0);
+                                               int* initialPos=0, bool filterBySeen=true);
 
         void reweightItemProtected(CatItem& it);
         void addItemEntryProtected(CatItem itemToAdd);

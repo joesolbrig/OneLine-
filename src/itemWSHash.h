@@ -347,6 +347,7 @@ public:
         mimeType.setItemType(CatItem::ACTION_TYPE);
         mimeType.setExternalWeight(MINIMUM_EXTERNAL_WEIGHT,CatItem(pluginName));
         mimeType.setCustomPluginInfo(REAL_MIMETYPE_KEY,content_type);
+        mimeType.setSourceWeight(MEDIUM_EXTERNAL_WEIGHT);
         return mimeType;
     }
 
@@ -794,6 +795,7 @@ public:
 
     void setCustomPluginValue(QString key, qint32 i) {
         if(key == POSITIVE_WEIGHT_KEY_STR){
+            i = MAX(DOUBLE_SCALE_FACTOR*DOUBLE_SCALE_FACTOR - i, 1);
             this->setTotalWeight(DOUBLE_SCALE_FACTOR*DOUBLE_SCALE_FACTOR - i);
         } else if(key == ITEM_CREATION_TIME_KEY_STR){
                 setCreationTime(i);
@@ -967,7 +969,12 @@ public:
         return true;
     }
 
-    bool isSource() const {return (int)getTagLevel() > (int)INTERNAL_STATIC_SOURCE;}
+    //Weighting and weighing based functions
+    bool isSource() const {
+        if(hasSourceWeight()){ return true; }
+
+        return (int)getTagLevel() > (int)INTERNAL_STATIC_SOURCE;
+    }
 
     bool isUserItem(){
 
@@ -997,7 +1004,9 @@ public:
     }
 
     bool isUpdatableSource(){ return (bool)getCustomValue(UPDATEABLE_SOURCE_KEY);}
-    void setIsUpdatableSource(bool b=true){ setCustomPluginValue(UPDATEABLE_SOURCE_KEY,(int)b);}
+    void setIsUpdatableSource(bool b=true){
+        setCustomPluginValue(UPDATEABLE_SOURCE_KEY,(int)b);
+    }
 
     time_t getSourceUpdateTime(){ return (time_t)getCustomValue(SOURCE_UPDATE_TIME_KEY,0);}
     void setSourceUpdateTime(time_t b){ setCustomPluginValue(SOURCE_UPDATE_TIME_KEY,(int)b);}
@@ -1006,10 +1015,10 @@ public:
     void setSupportsSourceUpdateTime(time_t b){ setCustomPluginValue(SOURCE_UPDATE_TIME_KEY,(int)b);}
 
 
-    qint32 getScaledSourceWeight();
-    void setScaledSourceWeight(int i);
 
-    CatItem getSourceParent(qint32 w = 0);
+
+    CatItem getSearchSourceParent(qint32 w = 0);
+    CatItem getUpdateSourceParent(qint32 w = 0);
     QList<CatItem> getSourceParents();
 
     qint32 getWeightFromSources();
@@ -1053,9 +1062,158 @@ public:
         return getExternalWeight();
     }
 
-    long getFullWeight(){return getTotalWeight();}
+    long getFullWeight(){
+        return getTotalWeight();
+    }
 
-    int getWeightSection() const {return (int)log2(getTotalWeight());}
+    int getWeightSection() const {
+        return (int)log2(getTotalWeight());
+    }
+
+
+    qint32 getSourceWeightTics(){
+        long weight=0;
+        weight=getSourceWeight();
+        Q_ASSERT(MAX_MAX_FULL_WEIGHT>weight);
+        double maxWeightSection = log2(MAX_MAX_FULL_WEIGHT);
+        double baseWeightSection = log2(weight);
+        int tics = (baseWeightSection*WEIGHT_TICS)/maxWeightSection;
+        return tics;
+    }
+
+    void setWeightTics(int i){
+        if(i==getSourceWeightTics()){ return; }
+        double maxWeightSection = log2(MAX_MAX_FULL_WEIGHT);
+        double baseWeightSection = (i*maxWeightSection)/WEIGHT_TICS;
+        long weight = pow(2,(int)(baseWeightSection+0.3));
+        weight = MAX(weight, 1);
+        weight = MIN(weight, MAX_MAX_FULL_WEIGHT);
+        setSourceWeight(weight);
+        Q_ASSERT(getSourceWeight()==weight);
+        Q_ASSERT(abs(((log2(weight)*WEIGHT_TICS)/maxWeightSection)-i)<=1);
+        int tic = getSourceWeightTics();
+        tic = tic;
+        Q_ASSERT(abs(tic-i)<=1);
+    }
+
+    qint32 getUsage(){
+        return getCustomValue(USAGE_KEY_STR,USAGE_DEFAULT);
+    }
+    void setUsage(qint32 v){
+        setCustomPluginValue(USAGE_KEY_STR,v);
+    }
+
+    qint32 getRelevanceWeight(){
+        return getCustomValue(RELEVANCE_WEIGHT_KEY_STR,RELEVANCE_WEIGHT_DEFAULT);
+    }
+
+    void setRelevanceWeight(qint32 v){
+        setCustomPluginValue(RELEVANCE_WEIGHT_KEY_STR,v);
+    }
+
+    qint32 getTotalWeight() const{
+        return getCustomValue(TOTAL_WEIGHT_KEY_STR,TOTAL_WEIGHT_DEFAULT);
+    }
+
+    qint32 getPositiveTotalWeight() const{
+        qint32 tw = getTotalWeight();
+        return MAX((DOUBLE_SCALE_FACTOR*DOUBLE_SCALE_FACTOR - tw),0);
+    }
+
+    void setTotalWeight(qint32 v){
+        Q_ASSERT(v >=0);
+        setCustomPluginValue(TOTAL_WEIGHT_KEY_STR,v);
+    }
+
+    qint32 getSourceWeight(){
+        return getCustomValue(SOURCE_WEIGHT_KEY_STR,0);
+    }
+    void setSourceWeight(qint32 v){
+        setCustomPluginValue(SOURCE_WEIGHT_KEY_STR,v);
+    }
+
+    bool hasSourceWeight() const {
+        return hasLabel(SOURCE_WEIGHT_KEY_STR);
+    }
+
+    bool hasWeightInfo(){
+        if(hasLabel(RELEVANCE_WEIGHT_KEY_STR)){
+            return false;
+        }
+        if(hasLabel(SOURCE_WEIGHT_KEY_STR)){
+            return false;
+        }
+        long w = this->getExternalWeight();
+        if(w == MEDIUM_EXTERNAL_WEIGHT){
+            return true;
+        }
+        return false;
+    }
+
+
+    qint32 getChosenness(){
+        return getCustomValue(CHOSENNESS_KEY_STR,CHOSENNESS_DEFAULT);
+    }
+    void setChosenness(qint32 v){
+        setCustomPluginValue(CHOSENNESS_KEY_STR,v);
+    }
+
+    qint32 getVisibility(){
+        return getCustomValue(VISIBILITY_KEY_STR,VISIBILITY_DEFAULT);
+    }
+
+    void setVisibility(qint32 v){
+        setCustomPluginValue(VISIBILITY_KEY_STR, v);
+    }
+
+    time_t getRelevanceTime() const {
+        if(hasLabel(MODIFICATION_TIME_KEY))
+            {return (time_t)getCustomValue(MODIFICATION_TIME_KEY,(time_t)0);}
+        return d->m_creation_time;
+    }
+
+    time_t getCreationTime() const {
+        return MAX(0,d->m_creation_time);
+    }
+
+    void setCreationTime(time_t  v, bool explicitlySet=true){
+        if(explicitlySet){
+            setLabel(TIME_EXPLICITELY_SET_KEY_STR);
+        }
+        d->m_creation_time = MAX(v,0);
+    }
+
+    time_t getModificationTime() const {
+        return (time_t)getCustomValue(MODIFICATION_TIME_KEY,(time_t)0);
+    }
+    void setModificationTime(time_t  v){
+        setCustomPluginValue(MODIFICATION_TIME_KEY,v);
+    }
+
+    time_t getChildScanTime() const {
+        return (time_t)getCustomValue(CHILD_SCAN_TIME_KEY,(time_t)0);
+    }
+    void setChildScanTime(time_t  v){
+        setCustomPluginValue(CHILD_SCAN_TIME_KEY,v);
+    }
+
+    bool isUnseenItem(){
+        return(isTimelyMessage()
+            && !getCustomValue(ITEM_SEEN_KEY,(int)false));
+    }
+    void setSeen(bool b=true){
+        if(!b){
+            this->setIsTimeDependant();
+        }
+        setCustomValue(ITEM_SEEN_KEY,(int)b);
+    }
+
+    int getUnseenChildren(){
+        return( getCustomValue(UNSEEN_CHILDREN_KEY,0));
+    }
+    void setUnseenChildren(int b){
+        setCustomValue(UNSEEN_CHILDREN_KEY,b);
+    }
 
     void assign_from(const CatItem &s){
         d = s.d;
@@ -1718,6 +1876,9 @@ public:
     }
 
     static CatItem createTypeParent(CatItem::ItemType type){
+        Q_ASSERT(type >= (int)CatItem::MIN_TYPE &&
+                 type <= CatItem::MAX_TYPE);
+
         QString name;
         QString icon;
         switch(type){
@@ -1800,7 +1961,9 @@ public:
         res.setItemType(CatItem::ORGANIZING_TYPE);
         res.setOrganizingType(type);
         res.setLabel(TYPE_PARENT_KEY);
-        res.setSourceWeight(HIGH_EXTERNAL_WEIGHT);
+        res.setSourceWeight(MEDIUM_EXTERNAL_WEIGHT);
+        res.setTagLevel(CatItem::INTERNAL_SOURCE);
+        res.setStub(true);
         return res;
 
     }
@@ -1957,124 +2120,7 @@ public:
         setCustomPluginInfo(FILLIN_GEN_FILE_KEY, s);
     }
 
-    qint32 getUsage(){
-        return getCustomValue(USAGE_KEY_STR,USAGE_DEFAULT);
-    }
-    void setUsage(qint32 v){
-        setCustomPluginValue(USAGE_KEY_STR,v);
-    }
 
-    qint32 getRelevanceWeight(){
-        return getCustomValue(RELEVANCE_WEIGHT_KEY_STR,RELEVANCE_WEIGHT_DEFAULT);
-    }
-
-    void setRelevanceWeight(qint32 v){
-        setCustomPluginValue(RELEVANCE_WEIGHT_KEY_STR,v);
-    }
-
-    qint32 getTotalWeight() const{
-        return getCustomValue(TOTAL_WEIGHT_KEY_STR,TOTAL_WEIGHT_DEFAULT);
-    }
-
-    qint32 getPositiveTotalWeight() const{
-        qint32 tw = getTotalWeight();
-        return MAX((DOUBLE_SCALE_FACTOR*DOUBLE_SCALE_FACTOR - tw),0);
-    }
-
-    void setTotalWeight(qint32 v){
-        Q_ASSERT(v >=0);
-        setCustomPluginValue(TOTAL_WEIGHT_KEY_STR,v);
-    }
-
-    qint32 getSourceWeight(){
-        return getCustomValue(SOURCE_WEIGHT_KEY_STR,0);
-    }
-    void setSourceWeight(qint32 v){
-        setCustomPluginValue(SOURCE_WEIGHT_KEY_STR,v);
-    }
-
-    bool hasSourceWeight(){
-        Q_ASSERT(!isEmpty());
-        return hasLabel(SOURCE_WEIGHT_KEY_STR);
-    }
-    bool hasWeightInfo(){
-        if(hasLabel(RELEVANCE_WEIGHT_KEY_STR)){
-            return false;
-        }
-        if(hasLabel(SOURCE_WEIGHT_KEY_STR)){
-            return false;
-        }
-        long w = this->getExternalWeight();
-        if(w == MEDIUM_EXTERNAL_WEIGHT){
-            return true;
-        }
-        return false;
-    }
-
-
-    qint32 getChosenness(){
-        return getCustomValue(CHOSENNESS_KEY_STR,CHOSENNESS_DEFAULT);
-    }
-    void setChosenness(qint32 v){
-        setCustomPluginValue(CHOSENNESS_KEY_STR,v);
-    }
-
-    qint32 getVisibility(){
-        return getCustomValue(VISIBILITY_KEY_STR,VISIBILITY_DEFAULT);
-    }
-
-    void setVisibility(qint32 v){
-        setCustomPluginValue(VISIBILITY_KEY_STR, v);
-    }
-
-    time_t getRelevanceTime() const {
-        if(hasLabel(MODIFICATION_TIME_KEY))
-            {return (time_t)getCustomValue(MODIFICATION_TIME_KEY,(time_t)0);}
-        return d->m_creation_time;
-    }
-
-    time_t getCreationTime() const {
-        return MAX(0,d->m_creation_time);
-    }
-
-    void setCreationTime(time_t  v, bool explicitlySet=true){
-        if(explicitlySet){
-            setLabel(TIME_EXPLICITELY_SET_KEY_STR);
-        }
-        d->m_creation_time = MAX(v,0);
-    }
-
-    time_t getModificationTime() const {
-        return (time_t)getCustomValue(MODIFICATION_TIME_KEY,(time_t)0);
-    }
-    void setModificationTime(time_t  v){
-        setCustomPluginValue(MODIFICATION_TIME_KEY,v);
-    }
-
-    time_t getChildScanTime() const {
-        return (time_t)getCustomValue(CHILD_SCAN_TIME_KEY,(time_t)0);
-    }
-    void setChildScanTime(time_t  v){
-        setCustomPluginValue(CHILD_SCAN_TIME_KEY,v);
-    }
-
-    bool isUnseenItem(){
-        return(isTimelyMessage()
-            && !getCustomValue(ITEM_SEEN_KEY,(int)false));
-    }
-    void setSeen(bool b=true){
-        if(!b){
-            this->setIsTimeDependant();
-        }
-        setCustomValue(ITEM_SEEN_KEY,(int)b);
-    }
-
-    int getUnseenChildren(){
-        return( getCustomValue(UNSEEN_CHILDREN_KEY,0));
-    }
-    void setUnseenChildren(int b){
-        setCustomValue(UNSEEN_CHILDREN_KEY,b);
-    }
 
     ItemType getItemType() const{
         if(d->m_data.contains(ITEM_TYPE_KEY_STR)){
@@ -2456,7 +2502,6 @@ public:
     void setUserName(QString s){
         setCustomPluginInfo(STREAM_USERNAME_PATH,s);
     }
-
 
     QString getPassword(){
         return getCustomString(STREAM_PASSWORD_PATH );

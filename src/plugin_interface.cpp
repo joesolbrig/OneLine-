@@ -695,30 +695,7 @@ int CatItem::getChildCount() const {
 }
 
 
-
-qint32 CatItem::getScaledSourceWeight(){
-    if(hasSourceWeight()){
-        return log(this->getSourceWeight());
-    } else {
-        //Total weight go down normally
-        return log(MAX_MAX_EXTERNAL_WEIGHT) - getWeightSection();
-    }
-}
-
-void CatItem::setScaledSourceWeight(int i){
-    int w;
-    if(log(MAX_MAX_EXTERNAL_WEIGHT) > i){
-        w = 10^(i);
-    } else {
-        w = MAX_MAX_EXTERNAL_WEIGHT;
-    }
-    setTotalWeight(w);
-    if(this->isSource()){ setSourceWeight(w, CatItem()); }
-}
-
-
-
-CatItem CatItem::getSourceParent(qint32 w){
+CatItem CatItem::getUpdateSourceParent(qint32 w){
     CatItem par;
     for(int i=0;i<d->children_detached_list.count();i++){
         if(d->children_detached_list[i].getChildPath() == getPath() &&
@@ -726,6 +703,57 @@ CatItem CatItem::getSourceParent(qint32 w){
             if(d->children_detached_list[i].getSourceWeight() >= w){
                 w = d->children_detached_list[i].getSourceWeight();
                 par = d->children_detached_list[i].getParent();
+            }
+        }
+    }
+    //Q_ASSERT(!par.isEmpty());
+    return par;
+}
+
+CatItem CatItem::getSearchSourceParent(qint32 w){
+    if(this->hasSourceWeight()){
+        return *this;
+    }
+
+    CatItem par;
+    for(int i=0;i<d->children_detached_list.count();i++){
+        if(d->children_detached_list[i].getChildPath() == getPath() ){
+            CatItem possiblePar = d->children_detached_list[i].getParent();
+            if(possiblePar.getItemType() == CatItem::LOCAL_DATA_FOLDER
+               || possiblePar.getItemType() == CatItem::PUBLIC_DOCUMENT
+               || possiblePar.getItemType() == CatItem::PERSON ){
+                int weight = d->children_detached_list[i].getSourceWeight();
+                if(weight>=w || par.isEmpty()){
+                    w = weight;
+                    par = d->children_detached_list[i].getParent();
+                }
+            }
+        }
+    }
+    if(!par.isEmpty()){
+        return par;
+    }
+    for(int i=0;i<d->children_detached_list.count();i++){
+        if(d->children_detached_list[i].getChildPath() == getPath() ){
+            CatItem possiblePar = d->children_detached_list[i].getParent();
+            if(possiblePar.getItemType() == CatItem::ACTION_TYPE){
+                return possiblePar;
+            }
+        }
+    }
+    if(!par.isEmpty()){
+        return par;
+    }
+    for(int i=0;i<d->children_detached_list.count();i++){
+        if(d->children_detached_list[i].getChildPath() == getPath() ){
+            CatItem possiblePar = d->children_detached_list[i].getParent();
+            int weight;
+            if(possiblePar.hasSourceWeight()){
+                weight = possiblePar.getSourceWeight();
+                if(weight>w){
+                    w = weight;
+                    par = possiblePar;
+                }
             }
         }
     }
@@ -948,7 +976,6 @@ CatItem& CatItem::addParent(CatItem& parentItem, QString pluginName,
     Q_ASSERT(parentItem.getPath() != getPath());
     addChildInternal(parentItem, *this, pluginName,childRelType, isDefaultAppType);
     return addParentInternal(parentItem, *this, pluginName,childRelType, isDefaultAppType);
-
 }
 
 CatItem& CatItem::addChildInternal(CatItem& parentItem, CatItem& childItem, QString pluginName,
@@ -1248,6 +1275,7 @@ bool CatItem::mergeItem(CatItem s, bool allowDiff, bool thisIsOriginal, QSet<QSt
         d->m_creation_time = s.d->m_creation_time; }
 
     {QHash<QString, QString>::iterator i;
+    bool soureStub = s.isStub();
     for(i=s.d->m_data.begin();i!=s.d->m_data.end();++i){
 
         if(i.key().endsWith(ATTRIB_PRIORITY_POSTFIX))
@@ -1270,8 +1298,9 @@ bool CatItem::mergeItem(CatItem s, bool allowDiff, bool thisIsOriginal, QSet<QSt
             d->m_data[pKey]=s.d->m_data[pKey];
         }
 
-
-        d->m_data[i.key()]=i.value();
+        if(!d->m_data.contains(i.key()) || !soureStub){
+            d->m_data[i.key()]=i.value();
+        }
     }}
 
     {QHash<QString, QVariant>::iterator i;

@@ -189,17 +189,17 @@ void ListInnerLayout::addItem(ListItem itm){
             menuItFromListItem(itm, charsWidth()));
 }
 
-void ListInnerLayout::updateItem(ListItem itm){
+void ListInnerLayout::updateItem(ListItem catItem){
     int num = m_realItemList->count();
     for(int i = 0; i < num; ++i) {
-        QListWidgetItem * item = m_realItemList->item(i);
-        if (item->data(ROLE_ITEM_PATH) == itm.getPath()) {
-            *item = *menuItFromListItem(itm, charsWidth());
+        QListWidgetItem * widgetItem = m_realItemList->item(i);
+        if (widgetItem->data(ROLE_ITEM_PATH) == catItem.getPath()) {
+            *widgetItem = *menuItFromListItem(catItem, charsWidth());
             return;
         }
     }
     m_realItemList->addItem(
-            menuItFromListItem(itm, charsWidth()));
+            menuItFromListItem(catItem, charsWidth()));
 }
 
 void ListInnerLayout::addItemList(QList<ListItem> il){

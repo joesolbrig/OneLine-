@@ -611,6 +611,10 @@ const QString DEFAULT_APP_ACTION_MIXIN("_DEFAULT_APP_ACTION");
 const QString XSLT_PLUGIN_END_TAG("xslt_plugin_end_tag");
 
 const unsigned int DOUBLE_SCALE_FACTOR(1000);
+const int MAX_FULL_WEIGHT(DOUBLE_SCALE_FACTOR*DOUBLE_SCALE_FACTOR);
+const int MAX_MAX_FULL_WEIGHT(DOUBLE_SCALE_FACTOR*DOUBLE_SCALE_FACTOR*10);
+const unsigned int WEIGHT_TICS(10);
+const int ITEM_TYPE_LEVEL(WEIGHT_TICS-2);
 const int TOP_ITEMS_TO_UPDATE(100);
 
 //Total weight scale items by their sources

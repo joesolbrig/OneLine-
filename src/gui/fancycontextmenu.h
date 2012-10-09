@@ -13,9 +13,12 @@ class FancyContextMenu : public QWidget
     Q_OBJECT
 
     QBoxLayout m_layout;
+    QLabel m_topLabel;
+    QBoxLayout m_sublayout;
     QSlider m_slider;
     QMenu m_menu;
     CatItem m_priorityItem;
+    CatItem m_priorityParent;
     QHash<QString, CatItem> m_optionItems;
     QPoint m_mousePos;
 public:
@@ -25,18 +28,14 @@ public:
         hide();
         deleteLater();
     }
-    void mousePressEvent(QMouseEvent *e){
-        m_mousePos = e->pos();
-        if(geometry().contains(m_mousePos)){ return; }
-        end();
 
-        QWidget::mousePressEvent(e);
-    }
 
 signals:
     void operateOnItem(QString, const CatItem );
 
 public slots:
+    void focusOutEvent(QFocusEvent* evt);
+    void mousePressEvent(QMouseEvent * event );
 
     void sliderChanged(int value);
     void optionChosen();
