@@ -347,22 +347,7 @@ void IconDelegate::drawRect(IconDelegateFormat& idf) const{
         backgroundTexture = QPixmap::fromImage(im);
         QBrush br(backgroundTexture);
         idf.m_painter->fillRect(idf.m_baseRect, br);
-//        QBrush highlightBrush(typeColor);
-//        idf.m_painter->fillRect(idf.m_baseRect, highlightBrush);
     }
-//    else {
-//        if(idf.m_index.data(ROLE_INTERACTION_TYPE)== CatItem::CUSTOM_VERB_INTERACTION){
-//            QPen pn;
-//            pn.setColor(UI_CUSTOM_VERB_COLOR);
-//            idf.m_painter->setPen(pn);
-//            idf.m_painter->drawRect(idf.m_baseRect);
-//        } else if(idf.m_index.data(ROLE_INTERACTION_TYPE)== CatItem::VERB_ARG_INTERACTION){
-//            QPen pn;
-//            pn.setColor(UI_CUSTOM_VERB_ARG_COLOR);
-//            idf.m_painter->setPen(pn);
-//            idf.m_painter->drawRect(idf.m_baseRect);
-//        }
-//    }
     QPersistentModelIndex hoverIndex =
             ((ListInnerLayout*)(this->parent()))->getRealList()->m_hoveredIndex;
     if(hoverIndex == idf.m_index ){

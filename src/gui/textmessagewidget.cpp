@@ -13,6 +13,8 @@ TextBarItem::TextBarItem(TextMessageBar *p, ListItem it) :
     setAcceptsHoverEvents(true);
 
     connect(this, SIGNAL(itemClicked(ListItem, bool)),p, SLOT(itemClicked(ListItem, bool)));
+    connect(this, SIGNAL(miniIconRightClicked(ListItem, QPoint )),
+            (QObject*)gMainWidget, SLOT(miniIconListMenuEvent(ListItem, QPoint )));
     prepareGeometryChange();
     m_animation = 0;
     m_animating = false;
@@ -22,14 +24,20 @@ TextBarItem::TextBarItem(TextMessageBar *p, ListItem it) :
 
     m_textItem = new QGraphicsTextItem();
     QFont fnt = m_item.getDisplayFont();
-    //QFont fnt(UI_MINI_BAR_FONT,FONT_SIZE_DEFAULT);
+
     fnt.setBold(true);
     if(m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY){
         fnt.setPointSize(fnt.pointSize()+2);
         m_textItem->setDefaultTextColor(UI_ICONBAR_ITEM_COLOR);
     } else if(m_item.getFilterRole() == CatItem::CATEGORY_FILTER){
         fnt.setPointSize(fnt.pointSize()+1);
-        m_textItem->setDefaultTextColor(UI_ICONBAR_ITEM_COLOR);
+        if(it.getOrganizeingType() !=CatItem::MIN_TYPE){
+            QColor typeColor = ListItem::colorFromType((CatItem::ItemType)
+                                            it.getOrganizeingType());
+            m_textItem->setDefaultTextColor(typeColor);
+        } else {
+            m_textItem->setDefaultTextColor(UI_ICONBAR_ITEM_COLOR);
+        }
     } else if(m_item.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
         fnt.setPointSize(fnt.pointSize()-1);
         m_textItem->setDefaultTextColor(UI_ICONBAR_ITEM_COLOR);
@@ -209,11 +217,19 @@ void TextBarItem::setBigness(qreal b){
     update();
 }
 
+void TextBarItem::mousePressEvent(QGraphicsSceneMouseEvent * evt) {
+    Qt::MouseButtons bts = evt->buttons();
+    Qt::MouseButton bt = evt->button();
+    if(bts | Qt::RightButton || (bt ==Qt::RightButton)) {
+        if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){ return;}
+        setSelected(!m_activated);
+        emit miniIconRightClicked(m_item, pos().toPoint());
 
-void TextBarItem::mousePressEvent(QGraphicsSceneMouseEvent *){
-    if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){ return;}
-    setSelected(!m_activated);
-    emit itemClicked(m_item, m_activated);
+    } else {
+        if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){ return;}
+        setSelected(!m_activated);
+        emit itemClicked(m_item, m_activated);
+    }
 }
 
 void TextBarItem::setSelected(bool sel){
@@ -414,47 +430,35 @@ void TextMessageBar::addTextItem(QGraphicsItem* gItem){
     m_scene->addItem(gItem);
 }
 
-void TextMessageBar::setGeometry(QRect r){
-//    if(m_backgroundItem){
-//        m_backgroundItem->setPos(0,0);
-//    }
-    //Round-off to icon size
-
-    int mod_h = r.height();
-    qDebug() << "Icon Widget set height" << mod_h;
-    r.setHeight(mod_h);
-    int w = r.width();
+void TextMessageBar::setGeometry(QRect initialR){
+    int mod_h = initialR.height();
+//    qDebug() << "Icon Widget set height" << mod_h;
+    initialR.setHeight(mod_h);
+    int width = initialR.width();
     int leftSpace=m_vertPadding;
     if(m_navTextItem){
         m_navTextItem->setPos(QPointF(leftSpace,m_horzPadding));
         QRectF r = m_navTextItem->boundingRect();
         leftSpace = r.right();
     }
-
-    w -= 2*m_horzPadding;
+    width -= 2*m_horzPadding;
     Q_ASSERT((m_icon_size + leftSpace + m_vertPadding) >0);
-    w /= m_icon_size + leftSpace + m_vertPadding;
-    w *= m_icon_size + leftSpace + m_vertPadding;
-    w += 2*m_horzPadding;
-    //w = MAX(w,100);
-    r.setWidth(MAX(r.width(),w));
-    QWidget::setGeometry(r);
-    m_view->setGeometry(r);
-    r.moveLeft(0);
-    r.moveTop(0);
-
-    //
+    width /= m_icon_size + leftSpace + m_vertPadding;
+    width *= m_icon_size + leftSpace + m_vertPadding;
+    width += 2*m_horzPadding;
+    initialR.setWidth(MAX(initialR.width(),width));
+    QWidget::setGeometry(initialR);
+    m_view->setGeometry(initialR);
+    initialR.moveLeft(0);
+    initialR.moveTop(0);
     int buttonWidth=0;
     for(int i=0; i < m_textButtons.length(); i++){
         buttonWidth += m_textButtons[i]->fixedRect().width();
     }
-
-
     if(m_textButtons.length()>0){
-        qreal innerPadding = ((r.width() -(leftSpace + m_vertPadding)) - buttonWidth)/
+        qreal innerPadding = ((initialR.width() -(leftSpace + m_vertPadding)) - buttonWidth)/
                              (m_textButtons.length());
         qreal buttonSide = innerPadding/2 + leftSpace;
-
         for(int i=0; i < m_textButtons.length(); i++){
             m_textButtons[i]->setPos(
                     QPointF(buttonSide,
@@ -463,16 +467,9 @@ void TextMessageBar::setGeometry(QRect r){
             buttonSide+=innerPadding;
         }
     }
-
-//        m_scene->setSceneRect(r);
-//        m_view->setSceneRect(r);
-    QRectF rr(r);
-
+    QRectF rr(initialR);
     m_view->setSceneRect(rr);
     m_scene->setSceneRect(rr);
     m_scene->update();
-    //m_scene->update();
-    //m_view->show();
-    //update();
-
 }
+

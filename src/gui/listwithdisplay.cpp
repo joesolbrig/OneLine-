@@ -19,7 +19,9 @@ ListWithDisplay::ListWithDisplay()
     m_miniIconBar = new TextMessageBar(this);
     addViewRef();
     currentViewRef() = new ListWithFrame(this);
-    currentViewRef()->setGeometry(this->geometry());
+    QRect innerR = this->geometry();
+    innerR.moveTopLeft(QPoint(0,0));
+    currentViewRef()->setGeometry(innerR);
     currentViewRef()->setVisible(true);
     currentViewRef()->raise();
     //m_upDownAnimation = new QPropertyAnimation(this, "animatedHeight");
@@ -30,14 +32,14 @@ ListWithDisplay::ListWithDisplay()
     m_timeOutsideBarArea =0;
     setFocusPolicy(Qt::StrongFocus);
     //m_miniIconBar = &m_iconBarOnStack;
-    QRect r = geometry();
+    QRect iconBarR = geometry();
     if(currentViewRef()){
-        r = currentViewRef()->geometry();
+        iconBarR = currentViewRef()->geometry();
     }
-    r.setHeight(UI_MINI_ICON_BAR_HEIGHT);
-    r.setTopLeft(QPoint(0,0));
-    r.moveBottom(0);
-    m_miniIconBar->setGeometry(r);
+    iconBarR.setHeight(UI_MINI_ICON_BAR_HEIGHT);
+    iconBarR.setTopLeft(QPoint(0,0));
+    iconBarR.moveBottom(0);
+    m_miniIconBar->setGeometry(iconBarR);
     m_miniIconBar->hide();
     m_autoHideIconBarPosition = 0;
     setMouseTracking(true);
@@ -84,7 +86,7 @@ int ListWithDisplay::getMessageItemCount(){
 
 bool ListWithDisplay::setMultiInput(InputList* il){
     if(!m_multiInputDisplayer){
-        m_multiInputDisplayer = new MultiInputDisplayer(il,m_width);
+        m_multiInputDisplayer = new FormDisplayer(il,m_width);
         m_multiInputDisplayer->setChoiceList(baseViewRef());
         raise();
         Q_ASSERT(m_viewStack.length()==1);

@@ -1891,7 +1891,7 @@ public:
                 icon = UI_NEXTACTION_PLACEHOLDER_ICON;
                 break;
             case TAG:
-                name = TAGS_NAME;
+                name = CATEGORY_NAME;
                 icon = TAG_TYPE_ICON;
                 break;
             case OPERATION:

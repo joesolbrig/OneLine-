@@ -298,6 +298,7 @@ public:
     void tabAction(int k, QKeyEvent* controlKey);
     bool arrowUpDown(int k, QKeyEvent* controlKey);
     bool expandInto(int k, QKeyEvent* controlKey);
+    bool expandInto(CatItem& item, bool setSide=false);
     bool goBackFrom(int k, QKeyEvent* controlKey);
     void popGuiState();
 
@@ -326,6 +327,7 @@ public slots:
     void setOpaqueness(int val);
     void menuEvent(QContextMenuEvent*);
     void listMenuEvent(QString itemPath, QPoint p);
+    void miniIconListMenuEvent(ListItem IconItem, QPoint p);
     void inputKeyPressEvent(QKeyEvent* key);
     void inputMethodEvent(QInputMethodEvent* e);
     void mousePressEvent(QMouseEvent *e);

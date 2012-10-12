@@ -680,7 +680,11 @@ public:
         m_itemsByUserDescription.clear();
     }
 
-    QList<ListItem> getFilterItems(int , int charsAvail, int ){
+    bool isFilterItem(CatItem item){
+        return m_organizingItems.contains(item.getPath());
+    }
+
+    QList<ListItem> getFilterItems(int limit, int charsAvail, int ){
         QList<ListItem> res;
         for(int i=0; i< m_organizingItems.count(); i++){
             ListItem li = atStringRef(m_organizingItems[i]);
@@ -688,7 +692,7 @@ public:
             QChar k = setExtraItemKey(li, charsAvail);
             m_hotKeys.insert(OHash::count() +i,k);
         }
-        for(int i=0; i< m_organizingItems.count(); i++){
+        for(int i=0; i< m_organizingItems.count() && res.count() <limit; i++){
             ListItem li = atString(m_organizingItems[i]);
             if(li.isEmpty()){ continue;}
             res.append(li);

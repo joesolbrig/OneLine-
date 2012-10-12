@@ -276,20 +276,21 @@ void MyListWidget::mousePressEvent( QMouseEvent * event  ) {
         return;
     }
 
-    QRect depRect = IconDelegate::getDepricateItemRect(containingRect);
-    if(depRect.contains(localPos)){
-        CatItem depricateItem(addPrefix(OPERATION_PREFIX,DEPRICATE_OPERATION_NAME));
-        //emit listItemAction(path, depricateItem);
-        //fickin signals not going through...
-        gMainWidget->operateOnItem(path,depricateItem);
-        return;
-    }
     QRect childRect = IconDelegate::getChildArrowRect(containingRect);
     if(childRect.contains(pos)){
         listWidgetItem->setSelected(true);
         setCurrentRow(index.row());
         CatItem clickItem(addPrefix(OPERATION_PREFIX,GOTO_CHILD_OPERATION));
         gMainWidget->operateOnItem(path,clickItem);
+        return;
+    }
+
+    QRect depRect = IconDelegate::getDepricateItemRect(containingRect);
+    if(depRect.contains(localPos)){
+        CatItem depricateItem(addPrefix(OPERATION_PREFIX,DEPRICATE_OPERATION_NAME));
+        //emit listItemAction(path, depricateItem);
+        //fickin signals not going through...
+        gMainWidget->operateOnItem(path,depricateItem);
         return;
     }
     if(listWidgetItem){

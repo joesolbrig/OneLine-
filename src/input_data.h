@@ -185,6 +185,10 @@ public:
         return m_formattedItems.toCatList();
     }
 
+    bool isFilterItem(CatItem item){
+        return m_formattedItems.isFilterItem(item);
+    }
+
     QList<ListItem> getOrganizingFiltersItems(int itemsHigh, int charsAvail, int minWeight){
         return  m_formattedItems.getFilterItems(itemsHigh, charsAvail, minWeight);
     }
@@ -471,6 +475,11 @@ public:
 
     QList<CatItem> getListItems(){
         return curState().getListItems();
+    }
+
+    bool isFilterItem(CatItem item){
+        return curState().isFilterItem(item);
+
     }
 
     QList<ListItem> getFilterItems(int itemsHigh, int charsAvail, int minWeight){

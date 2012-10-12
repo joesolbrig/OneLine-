@@ -16,19 +16,18 @@ QSize MultiInputDisplayer::sizeOrPaint(QPainter *painter, int heightAvailable, i
     qDebug() << "painter = " << (int)painter;
     topPos += CUSTOM_FORM_TOPMARGIN;
     if(m_inputList->operationSlot()!=-1) {
-        //topPos += sizeOrPaintField(painter, m_inputList->operationSlot(), topPos);
         QFont f = m_font;
         f.setPointSize(f.pointSize()+3);
         QString opName = m_inputList->getOperationPart().getName();
-//        topPos += sizeOrPaintField(painter, f,  m_inputList->getOperationPart().getName(),
-//                   topPos);
         topPos += sizeOrPaintField(painter, f,
-                    "TESTING TESTING", topPos);
-        topPos += sizeOrPaintField(painter, f,
-                                   opName + " " + m_inputList->asFormattedString(), topPos);
-        topPos += sizeOrPaintField(painter, f,
-                    m_inputList->getOperationPart().getOperationHelperPhrase(),
-                   topPos);
+                                   opName + " " + m_inputList->asFormattedString(),
+                                   topPos);
+        qDebug() << "topPos after field:" << topPos ;
+        QString opPhrase = m_inputList->getOperationPart().getOperationHelperPhrase();
+        Q_ASSERT(!opPhrase.isEmpty());
+        qDebug() << "opPhrase" << opPhrase;
+        topPos += sizeOrPaintField(painter, f, opPhrase, topPos);
+        qDebug() << "topPos after field:" << topPos ;
         if(!m_choiceList->count()){
             int avail =heightAvailable - (topPos+CUSTOM_FORM_BOTTOMMARGIN);
             topPos += sizeOrPaintList(painter, topPos, avail, false);
@@ -47,7 +46,7 @@ QSize MultiInputDisplayer::sizeOrPaint(QPainter *painter, int heightAvailable, i
             int avail =heightAvailable - (topPos+CUSTOM_FORM_BOTTOMMARGIN);
             if(i!=m_inputList->slotPosition()){
                 topPos += sizeOrPaintField(painter, i, topPos);
-                qDebug() << "topPos after field";
+                qDebug() << "topPos after field:" << topPos ;
             } else {
                 if(painter){
                     Q_ASSERT(heightAvailable<0);
@@ -173,10 +172,10 @@ int MultiInputDisplayer::sizeOrPaintField(QPainter *painter,int index, int topPo
     return newPos - topPos;
 }
 
-int MultiInputDisplayer::sizeOrPaintField(QPainter *painter, QFont font, QString string, int topPos){
+int MultiInputDisplayer::sizeOrPaintField(QPainter *painter, QFont font,
+                                          QString string, int topPos){
 
     QRect r;
-
     int newPos=topPos;
 
     r.setTopLeft(QPoint(CUSTOM_LABEL_RIGHTMARGIN,newPos));

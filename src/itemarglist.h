@@ -1528,11 +1528,17 @@ public:
         return inputData[m_itemPosition].contextItem();
     }
 
+    bool isOrganizingItem(CatItem item){
+        return inputData[m_itemPosition].isFilterItem(item);
+    }
+
     QList<ListItem> getOrganizingFilterItems(int itemsAllowed, int charsAvail, int minWeight = 0){
         if((!customVerbChosen() && m_itemPosition==1)
             || !m_itemPosition==m_nounsBeginIndex
             || inputData.length()==1){
-            return inputData[m_itemPosition].getFilterItems(itemsAllowed, charsAvail, minWeight );
+            QList<ListItem> items  = inputData[m_itemPosition].getFilterItems(itemsAllowed, charsAvail, minWeight );
+            Q_ASSERT(items.count()<= itemsAllowed);
+            return items;
         } else {
             return QList<ListItem>();
         }

@@ -147,9 +147,7 @@ void MarginWindow::gSetAppPos(int vOrient, int hOrient){
         previewRect.setRight(scr.right());
     }
 
-    move(outSideRect.topLeft());
-
-
+    //move(outSideRect.topLeft());
     setGeometry(outSideRect);
     if(!gMainWidget){return;}
     gMainWidget->move(editRect.topLeft());

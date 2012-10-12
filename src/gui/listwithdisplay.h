@@ -25,6 +25,7 @@
 #include "textmessagewidget.h"
 #include "listinnerlayout.h"
 #include "fancyenclosingrect.h"
+#include "formdisplayer.h"
 
 class MyListWidget;
 
@@ -35,6 +36,8 @@ class ListInnerLayout;
 #include "listwithframe.h"
 
 //class InputManager;
+
+class FormDisplayer;
 
 class ListWithDisplay : public QWidget {
     Q_OBJECT
@@ -71,7 +74,7 @@ class ListWithDisplay : public QWidget {
     int m_selectedItem;
     QString m_bottomMessage;
 
-    MultiInputDisplayer* m_multiInputDisplayer;
+    FormDisplayer* m_multiInputDisplayer;
     QMutex m_previewMutex;
 
 public:

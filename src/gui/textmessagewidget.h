@@ -30,10 +30,12 @@ class TextMessageBar;
 
 //Just to remove some stupid warnings...
 class MyQGraphicsItemBridge : public QGraphicsItem {
+
 public:
     MyQGraphicsItemBridge(): QGraphicsItem(){}
 private:
     Q_DISABLE_COPY(MyQGraphicsItemBridge)
+
 
 };
 
@@ -122,6 +124,7 @@ public slots:
 signals:
     void painted();
     void itemClicked(ListItem li, bool selected);
+    void miniIconRightClicked(ListItem it, QPoint p);
 
 };
 

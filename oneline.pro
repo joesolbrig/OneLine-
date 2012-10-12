@@ -16,7 +16,6 @@ INCLUDEPATH += /usr/include/glib-2.0/
 INCLUDEPATH += /usr/include/libwnck-1.0/
 INCLUDEPATH += /usr/include/gnome-vfs-2.0/
 INCLUDEPATH += /usr/local/lib/include/qjson/
-
 CONFIG += link_pkgconfig
 PKGCONFIG += gtk+-2.0 \
     libgnomeui-2.0 \
@@ -73,7 +72,8 @@ SOURCES = appearance_window.cpp \
     src/gui/marginwindow.cpp \
     src/gui/listinnerlayout.cpp \
     src/gui/fancycontextmenu.cpp \
-    src/gui/fancyenclosingrect.cpp
+    src/gui/fancyenclosingrect.cpp \
+    src/gui/formdisplayer.cpp
 HEADERS = appearance_window.h \
     catalog.h \
     globals.h \
@@ -128,7 +128,8 @@ HEADERS = appearance_window.h \
     src/util/mmap_file/mmap_pointer.h \
     src/gui/fancycontextmenu.h \
     src/gui/fancyenclosingrect.h \
-    src/constants_ui.h
+    src/constants_ui.h \
+    src/gui/formdisplayer.h
 ICON = oneline.ico
 unix { 
     UI_DIR = src/

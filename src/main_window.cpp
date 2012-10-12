@@ -654,12 +654,17 @@ void MainUserWindow::hidePreview(){
 void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
 
     if(setTheItem){
+
+
         if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
             m_inputList.setSubFilterItem(it);
-        } else {
+        } else if(it.getFilterRole() == CatItem::CATEGORY_FILTER){
             m_inputList.setFilterItem(it);
             CatBuilder::getMiniIcons(m_inputList);
-            }
+        } else if(it.getItemType() == CatItem::LOCAL_DATA_FOLDER){
+            CatItem item = it;
+            expandInto(item);
+        }
     } else {
         if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
             m_inputList.setSubFilterItem(ListItem());
@@ -1018,16 +1023,11 @@ void MainUserWindow::fillList(){
 
 void MainUserWindow::addMiniIcons(){
 
-//    if(m_inputList.slotPosition()>1 && !m_inputList.customVerbChosen()){
-//        m_itemChoiceList->hideIconList();
-//
-//    }
-
-    if(!m_inputList.isExpanded() || !m_inputList.atFirstSlot()){
+    if(!m_inputList.isExpanded() && m_inputList.atFirstSlot()){
         int charsAvail;
         int rowsAvail;
         getListDimension(charsAvail, rowsAvail);
-        QList<ListItem> mi = m_inputList.getOrganizingFilterItems(10, charsAvail);
+        QList<ListItem> mi = m_inputList.getOrganizingFilterItems(4, charsAvail);
         m_itemChoiceList->addMiniIconList(mi);
     } else {
         m_itemChoiceList->addMiniIconList(QList<ListItem>());
@@ -1143,6 +1143,21 @@ void MainUserWindow::menuEvent(QContextMenuEvent* evt) {
 void MainUserWindow::listMenuEvent(QString itemPath, QPoint p) {
     CatItem item = m_inputList.getItemByPath(itemPath);
     if(!m_contextMenu && m_inputList.slotPosition()==0 && !item.isEmpty()){
+        CatBuilder::updateItem(item,2,UserEvent::SELECTED, true);
+        InputList il;
+        il.setItem(item);
+        il.addSlot();
+        QList<CatItem> outItems;
+        CatBuilder::getItemsFromQuery(il, outItems, MAX_ITEMS);
+        m_contextMenu = new FancyContextMenu(item,outItems);
+        m_contextMenu->move(p);
+        m_contextMenu->show();//Stay here modally till the user chooses something...
+        m_contextMenu->activateWindow();
+    }
+}
+
+void MainUserWindow::miniIconListMenuEvent(ListItem item, QPoint p) {
+    if(!m_contextMenu && !item.isEmpty()){
         CatBuilder::updateItem(item,2,UserEvent::SELECTED, true);
         InputList il;
         il.setItem(item);
@@ -1477,7 +1492,6 @@ bool MainUserWindow::tryExecuteCurrentItem(){
                 menuOptions();
                 st_Visible = true;
                 break;
-
             case MSG_TAKE_OUTPUT:
                 st_TakeItemFromList=true;
                 m_inputList.clearAll();
@@ -1510,9 +1524,13 @@ bool MainUserWindow::tryExecuteCurrentItem(){
 
 //Right Arrow into
 bool MainUserWindow::expandInto(int , QKeyEvent* controlKey){
-    st_showItemList = true;
 
     CatItem& baseItem = m_inputList.currentItemRef();
+    st_showItemList = true;
+    return expandInto(baseItem, controlKey && controlKey->modifiers() == Qt::ControlModifier);
+
+}
+bool MainUserWindow::expandInto(CatItem& baseItem, bool expandOnSide){
     if(baseItem.isEmpty()){
         QListWidgetItem *it = m_itemChoiceList->currentItem();
         if(!it){ return false;}
@@ -1545,7 +1563,7 @@ bool MainUserWindow::expandInto(int , QKeyEvent* controlKey){
             searchOnInput();
         }
 
-        if(controlKey && controlKey->modifiers() == Qt::ControlModifier){
+        if(expandOnSide){
             m_itemOrigin = AS_SIDEVIEW;
         } else { m_itemOrigin = FROM_PARENT; }
 
@@ -1590,14 +1608,14 @@ bool MainUserWindow::arrowUpDown(int , QKeyEvent* controlKey){
 
         st_showItemList = true;
 
-        st_TakeItemFromList = true;
-        st_SearchResultsChanged  = false;
-        st_UserChoiceChanged = true;
         if(m_inputList.getListItemCount()== 0 ||
            !m_itemChoiceList->isVisible()){
             st_TakeItemFromList = false;
             searchOnInput();
         }
+        st_TakeItemFromList = true;
+        st_SearchResultsChanged  = false;
+        st_UserChoiceChanged = true;
     }
     return true;
 }
@@ -1784,8 +1802,11 @@ void MainUserWindow::operateOnItem(QString path, const CatItem opItem){
             item.setWeightTics(w);
             CatBuilder::updateItem(item,1,UserEvent::STANDARD_UPDATE);
             searchOnInput();
-            m_inputList.addSingleListItem(item,m_savedPosition);
-            m_itemChoiceList->updateItem(ListItem(item));
+            addMiniIcons();
+            if(!m_inputList.isOrganizingItem(item)){
+                m_inputList.addSingleListItem(item,m_savedPosition);
+                m_itemChoiceList->updateItem(ListItem(item));
+            }
         } else if(operationItem.getPath() == addPrefix(OPERATION_PREFIX,PIN_OPERATION_NAME)
             || childAction.getPath() == addPrefix(OPERATION_PREFIX,PIN_OPERATION_NAME)){
             item.setPinned(m_inputList.getUserKeys());
@@ -1959,7 +1980,7 @@ bool MainUserWindow::processControlKey(QKeyEvent* controlKey){
             handled = arrowUpDown(k, controlKey);
             break;
         case Qt::Key_Right:
-            expandInto(k, controlKey);
+            handled = expandInto(k, controlKey);
 
             break;
         //

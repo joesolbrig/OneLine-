@@ -477,35 +477,27 @@ QList<CatItem> Cat_Store::getHighestSourceParents(ItemFilter* filter){
         }
 
     } else {
-        QList<CatItem::ItemType> types;
-        types.append(CatItem::LOCAL);
-        types.append(CatItem::MESSAGE);
-        types.append(CatItem::LOCAL_DATA_FOLDER);
-        types.append(CatItem::TAG);
-
+        QList<CatItem> types;
+        types.append(CatItem::createTypeParent(CatItem::LOCAL));
+        types.append(CatItem::createTypeParent(CatItem::MESSAGE));
+        types.append(CatItem::createTypeParent(CatItem::PUBLIC_FEED));
+        types.append(CatItem::createTypeParent(CatItem::TAG));
 
         QList<CatItem> highSourceItems = getHighestTypeProtected(filter, 10,
                 I_BY_SOURCEWEIGHT,true,0, false);
+
+        Q_ASSERT(highSourceItems.count()<20);
 
         bool addedType=false;
         for(int i=0; i< highSourceItems.count(); i++){
             CatItem source = highSourceItems[i];
             if(!addedType && source.getSourceWeightTics() < ITEM_TYPE_LEVEL){
-                for(int j=0; j< types.count(); j++){
-                    CatItem typeParent = CatItem::createTypeParent(types[j]);
-                    resultTypes.append(typeParent);
-                }
+                resultTypes.append(types);
                 addedType =true;
             }
             resultTypes.append(source);
         }
-        if(!addedType){
-            for(int j=0; j< types.count(); j++){
-                CatItem typeParent = CatItem::createTypeParent(types[j]);
-                resultTypes.append(typeParent);
-            }
-            addedType =true;
-        }
+        if(!addedType){ resultTypes.append(types); }
     }
 
     time_t now = ::appGlobalTime();
