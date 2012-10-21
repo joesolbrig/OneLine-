@@ -327,7 +327,6 @@ public slots:
     void setOpaqueness(int val);
     void menuEvent(QContextMenuEvent*);
     void listMenuEvent(QString itemPath, QPoint p);
-    void miniIconListMenuEvent(ListItem IconItem, QPoint p);
     void inputKeyPressEvent(QKeyEvent* key);
     void inputMethodEvent(QInputMethodEvent* e);
     void mousePressEvent(QMouseEvent *e);

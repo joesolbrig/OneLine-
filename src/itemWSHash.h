@@ -275,6 +275,16 @@ public:
                 CatItem p(set->value(key).toString());
                 p.setStub(true);
                 addChild(p);
+            } else if(key.startsWith(ITEM_SECTION_CHILD_CONFIG_FIELD)){
+                QString group = set->value(key).toString();
+                set->beginGroup(group);
+                CatItem p(set,pluginParent);
+                addChild(p);
+                QString endGroup = set->group();
+                if(!endGroup.isEmpty()){
+                    set->endGroup();
+                }
+                p.setStub(true);
             } else if(key!=PATH_KEY_STR) {
                 setCustomPluginInfo(key,set->value(key).toString());
             }
@@ -635,8 +645,9 @@ public:
     }
 
     QString getNameForEditLine(QString keyColor = KEY_COLOR,
-                             QString extraAttribs ="") const{
-        return formatStringByKey(getName(),getMatchIndex(),keyColor,extraAttribs );
+                             QString extraAttribs ="",
+                             int limit=0) const{
+        return formatStringByKey(getName(),getMatchIndex(),keyColor,extraAttribs, limit );
     }
 
     bool isHistoryItem() const{
@@ -970,8 +981,19 @@ public:
     }
 
     //Weighting and weighing based functions
-    bool isSource() const {
-        if(hasSourceWeight()){ return true; }
+    bool isCategorizingSource() const {
+        if(hasLabel(IS_CATEGORING_SOURCE_KEY)){ return true; }
+        if(hasLabel(IS_INTERMEDIATE_SOURCE_KEY)){return false; }
+        if(hasLabel(FIREFOX_PLUGIN_NAME) &&
+           hasLabel(STREAM_SOURCE_PATH)){ return true; }
+        if( getItemType() == CatItem::LOCAL_DATA_DOCUMENT
+           || getItemType() == CatItem::OPERATION){
+            return false;
+        }
+
+        if(getItemType()==CatItem::LOCAL_DATA_FOLDER){return true;}
+
+        //if(hasSourceWeight()){ return true; }
 
         return (int)getTagLevel() > (int)INTERNAL_STATIC_SOURCE;
     }
@@ -1017,7 +1039,7 @@ public:
 
 
 
-    CatItem getSearchSourceParent(qint32 w = 0);
+    QList<CatItem> getSearchSourceParents();
     CatItem getUpdateSourceParent(qint32 w = 0);
     QList<CatItem> getSourceParents();
 
@@ -2239,6 +2261,20 @@ public:
         return res;
     }
 
+    QList<CatItem> getOrganizingTypeItems(){
+        QList<CatItem> res;
+        if(!hasLabel(TYPE_PARENT_KEY)){
+            res.append(*this);
+            return res;
+        }
+
+        QList<ItemType> types = getOrganizingTypeList();
+        for(int i=0; i< types.count(); i++){
+            res.append(createTypeParent(types[i]));
+        }
+        return res;
+    }
+
     void setOrganizingCharacteristic(QString ck){
         setCustomPluginInfo(ORGANIZING_CHARACTERISTIC_KEY,ck);
     }
@@ -2403,6 +2439,7 @@ public:
     }
 
     bool getIsAction() const {
+
         if(this->getItemType()== CatItem::ACTION_TYPE){
             return true;
         }

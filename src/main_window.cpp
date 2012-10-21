@@ -187,6 +187,9 @@ void MainUserWindow::startTasks(){
     CatBuilder::getItemsFromQuery(il, outItems, MAX_ITEMS);
     gMarginWidget->gSetAppPos();
 
+    activateWindow();
+    raise();
+
 }
 
 void MainUserWindow::preloadIcons(){
@@ -651,44 +654,7 @@ void MainUserWindow::hidePreview(){
 }
 
 //Event processing..........
-void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
 
-    if(setTheItem){
-
-
-        if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
-            m_inputList.setSubFilterItem(it);
-        } else if(it.getFilterRole() == CatItem::CATEGORY_FILTER){
-            m_inputList.setFilterItem(it);
-            CatBuilder::getMiniIcons(m_inputList);
-        } else if(it.getItemType() == CatItem::LOCAL_DATA_FOLDER){
-            CatItem item = it;
-            expandInto(item);
-        }
-    } else {
-        if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
-            m_inputList.setSubFilterItem(ListItem());
-        } else {
-            m_inputList.setFilterItem(ListItem());
-        }
-        CatBuilder::getMiniIcons(m_inputList);
-    }
-    st_ListFilled = false;
-    m_inputList.setExpanded(false);
-    st_ShowCustomFieldWindow = false;
-    st_customFieldTakesKey = false;
-    st_TakeItemFromList = false;
-    //This will give a new item mini-icon list if necessary
-    if(it.getOrganizingCharacteristic().isEmpty()){
-        searchOnInput();
-    } else {
-        m_itemOrigin = FROM_SEARCH;
-        st_SearchResultsChanged = true;
-    }
-
-
-    updateDisplay();
-}
 
 void MainUserWindow::focusOutEvent ( QFocusEvent * evt) {
     QWidget::focusOutEvent(evt);
@@ -1021,19 +987,7 @@ void MainUserWindow::fillList(){
     st_SearchResultsChanged  = false;
 }
 
-void MainUserWindow::addMiniIcons(){
 
-    if(!m_inputList.isExpanded() && m_inputList.atFirstSlot()){
-        int charsAvail;
-        int rowsAvail;
-        getListDimension(charsAvail, rowsAvail);
-        QList<ListItem> mi = m_inputList.getOrganizingFilterItems(4, charsAvail);
-        m_itemChoiceList->addMiniIconList(mi);
-    } else {
-        m_itemChoiceList->addMiniIconList(QList<ListItem>());
-    }
-    setPathMessage();
-}
 
 void MainUserWindow::setPathMessage(){
     int spaceAvailable = m_itemChoiceList->getMessageSpaceAvailable();
@@ -1149,25 +1103,15 @@ void MainUserWindow::listMenuEvent(QString itemPath, QPoint p) {
         il.addSlot();
         QList<CatItem> outItems;
         CatBuilder::getItemsFromQuery(il, outItems, MAX_ITEMS);
-        m_contextMenu = new FancyContextMenu(item,outItems);
-        m_contextMenu->move(p);
-        m_contextMenu->show();//Stay here modally till the user chooses something...
-        m_contextMenu->activateWindow();
-    }
-}
-
-void MainUserWindow::miniIconListMenuEvent(ListItem item, QPoint p) {
-    if(!m_contextMenu && !item.isEmpty()){
-        CatBuilder::updateItem(item,2,UserEvent::SELECTED, true);
-        InputList il;
-        il.setItem(item);
-        il.addSlot();
-        QList<CatItem> outItems;
-        CatBuilder::getItemsFromQuery(il, outItems, MAX_ITEMS);
-        m_contextMenu = new FancyContextMenu(item,outItems);
-        m_contextMenu->move(p);
-        m_contextMenu->show();//Stay here modally till the user chooses something...
-        m_contextMenu->activateWindow();
+        il.formatActionList(outItems, item);
+        FancyContextMenu* cm = new FancyContextMenu(item,outItems);
+        QPoint mp = ::gMarginWidget->mapFromGlobal(p);
+        Q_ASSERT(cm);
+        cm->move(mp);
+        cm->show();//Stay here modally till the user chooses something...
+        cm->raise();
+        cm->setFocus();
+        m_contextMenu = cm;
     }
 }
 
@@ -1478,7 +1422,6 @@ bool MainUserWindow::tryExecuteCurrentItem(){
     }
 
 
-
     m_inputDisplay->clearExpressionIcons();
     m_inputDisplay->clearText();
     m_inputDisplay->setActiveIconPos(0);
@@ -1508,6 +1451,7 @@ bool MainUserWindow::tryExecuteCurrentItem(){
                 searchOnInput();
                 refreshExtendCatalog(true);
                 m_inputList.addListItemList(outputList);
+                st_Visible = true;
                 break;
 
             case MSG_NO_ACTION:
@@ -1569,6 +1513,135 @@ bool MainUserWindow::expandInto(CatItem& baseItem, bool expandOnSide){
 
     }
     return true;
+}
+
+//Miniicon stuff
+void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
+    if(setTheItem){
+        if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
+            m_inputList.setSubFilterItem(it);
+        } else if(it.getFilterRole() == CatItem::CATEGORY_FILTER){
+            m_inputList.setFilterItem(it);
+            CatBuilder::getMiniIcons(m_inputList);
+        } else if(it.getItemType() == CatItem::LOCAL_DATA_FOLDER){
+            CatItem item = it;
+            expandInto(item);
+        }
+    } else {
+        if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
+            m_inputList.setSubFilterItem(ListItem());
+        } else {
+            m_inputList.setFilterItem(ListItem());
+        }
+        CatBuilder::getMiniIcons(m_inputList);
+    }
+    st_ListFilled = false;
+    m_inputList.setExpanded(false);
+    st_ShowCustomFieldWindow = false;
+    st_customFieldTakesKey = false;
+    st_TakeItemFromList = false;
+    //This will give a new item mini-icon list if necessary
+    if(it.getOrganizingCharacteristic().isEmpty()){
+        searchOnInput();
+    } else {
+        m_itemOrigin = FROM_SEARCH;
+        st_SearchResultsChanged = true;
+    }
+    updateDisplay();
+}
+
+void MainUserWindow::operateOnItem(QString path, const CatItem opItem){
+    CatItem item = m_inputList.getItemByPath(path);
+    CatItem operationItem = opItem;
+
+    QList<CatItem> children = operationItem.getChildren();
+    CatItem childAction;
+    if(children.length()>0){ childAction = children[0];}
+
+    if( operationItem.isOperation() ){
+        if(operationItem.getPath() == addPrefix(OPERATION_PREFIX,GOTO_CHILD_OPERATION)){
+            //Since we're called from within the list, can't change the list directly
+            //Post an event to change it later instead.
+            QKeyEvent* ke = new QKeyEvent(QEvent::KeyPress,Qt::Key_Right, Qt::NoModifier);
+            qApp->postEvent(this,ke, Qt::HighEventPriority);
+        } else if( operationItem.getPath() == addPrefix(OPERATION_PREFIX,SET_PRIORIT_OPERATION)){
+            int w = operationItem.getCustomValue(SET_PRIORITY_KEY_STR);
+            item.setWeightTics(w);
+            CatBuilder::addItem(item);
+            CatBuilder::updateItem(item,1,UserEvent::STANDARD_UPDATE);
+            searchOnInput();
+            CatBuilder::getMiniIcons(m_inputList);
+            addMiniIcons();
+            if(!m_inputList.isOrganizingItem(item)){
+                m_inputList.addSingleListItem(item,m_savedPosition);
+                m_itemChoiceList->updateItem(ListItem(item));
+            }
+        } else if(operationItem.getPath() == addPrefix(OPERATION_PREFIX,PIN_OPERATION_NAME)
+            || childAction.getPath() == addPrefix(OPERATION_PREFIX,PIN_OPERATION_NAME)){
+            item.setPinned(m_inputList.getUserKeys());
+            item.setIsTempItem(false);
+            CatBuilder::addItem(item);
+            m_itemChoiceList->updateItem(ListItem(item));
+        } else if(operationItem.getPath() == addPrefix(OPERATION_PREFIX,DEPRICATE_OPERATION_NAME)
+            || childAction.getPath() == addPrefix(OPERATION_PREFIX,DEPRICATE_OPERATION_NAME)){
+            if(item.getItemType() == CatItem::MESSAGE && item.isUnseenItem()){
+                item.setSeen();
+                st_TakeItemFromList = false;
+                searchOnInput();
+            } else {
+                item.setIsDepricated();
+                item.setIsTempItem(false);
+            }
+            CatBuilder::addItem(item);
+            m_inputList.removeItem(item);
+            m_itemChoiceList->removeItem(item);
+        } else if(operationItem.getPath() ==
+                  addPrefix(OPERATION_PREFIX,ACTIVATE_OPTION_ITEM)){
+            Q_ASSERT(children.length()==1);
+            //Hoping we can do this directly...
+            st_TakeItemFromList = false;
+            m_inputList.setItem(path);
+            QKeyEvent ke(QEvent::KeyPress,Qt::Key_Backtab, Qt::NoModifier);
+            tabAction(Qt::Key_Tab,&ke);
+            if(m_inputList.acceptItem(&childAction)){
+                m_inputList.setItem(childAction);
+                if(!tryExecuteCurrentItem()){
+                    QKeyEvent ke(QEvent::KeyPress,Qt::Key_Tab, Qt::NoModifier);
+                    tabAction(Qt::Key_Tab,&ke);
+                }
+            }
+        } else if(operationItem.getPath() ==
+                  addPrefix(OPERATION_PREFIX,SELECTION_OPERATION_NAME)){
+            if(m_inputList.getItemByPath(path).isEmpty()
+                && !m_inputList.findItemInParent(path).isEmpty()){
+                m_inputList.popToParentPosition(path);
+                m_itemChoiceList->collapseSideExplore();
+                m_itemOrigin = FROM_SEARCH;
+                st_SearchResultsChanged = true;
+                st_ListFilled = false;
+                st_TakeItemFromList = false;
+            } else {
+                st_TakeItemFromList = true;
+            }
+            st_UserChoiceChanged = true;
+        }
+    }
+    updateDisplay();
+}
+
+
+void MainUserWindow::addMiniIcons(){
+
+    if(!m_inputList.isExpanded() && m_inputList.atFirstSlot()){
+        int charsAvail;
+        int rowsAvail;
+        getListDimension(charsAvail, rowsAvail);
+        QList<ListItem> mi = m_inputList.getOrganizingFilterItems(4, (charsAvail/4)-2);
+        m_itemChoiceList->addMiniIconList(mi);
+    } else {
+        m_itemChoiceList->addMiniIconList(QList<ListItem>());
+    }
+    setPathMessage();
 }
 
 bool MainUserWindow::goBackFrom(int , QKeyEvent* ){
@@ -1783,82 +1856,6 @@ void MainUserWindow::tabAction(int k, QKeyEvent* controlKey){
     }
 }
 
-void MainUserWindow::operateOnItem(QString path, const CatItem opItem){
-    CatItem item = m_inputList.getItemByPath(path);
-    CatItem operationItem = opItem;
-
-    QList<CatItem> children = operationItem.getChildren();
-    CatItem childAction;
-    if(children.length()>0){ childAction = children[0];}
-
-    if( operationItem.isOperation() ){
-        if(operationItem.getPath() == addPrefix(OPERATION_PREFIX,GOTO_CHILD_OPERATION)){
-            //Since we're called from within the list, can't change the list directly
-            //Post an event to change it later instead.
-            QKeyEvent* ke = new QKeyEvent(QEvent::KeyPress,Qt::Key_Right, Qt::NoModifier);
-            qApp->postEvent(this,ke, Qt::HighEventPriority);
-        } else if( operationItem.getPath() == addPrefix(OPERATION_PREFIX,SET_PRIORIT_OPERATION)){
-            int w = operationItem.getCustomValue(SET_PRIORITY_KEY_STR);
-            item.setWeightTics(w);
-            CatBuilder::updateItem(item,1,UserEvent::STANDARD_UPDATE);
-            searchOnInput();
-            addMiniIcons();
-            if(!m_inputList.isOrganizingItem(item)){
-                m_inputList.addSingleListItem(item,m_savedPosition);
-                m_itemChoiceList->updateItem(ListItem(item));
-            }
-        } else if(operationItem.getPath() == addPrefix(OPERATION_PREFIX,PIN_OPERATION_NAME)
-            || childAction.getPath() == addPrefix(OPERATION_PREFIX,PIN_OPERATION_NAME)){
-            item.setPinned(m_inputList.getUserKeys());
-            item.setIsTempItem(false);
-            CatBuilder::addItem(item);
-            m_itemChoiceList->updateItem(ListItem(item));
-        } else if(operationItem.getPath() == addPrefix(OPERATION_PREFIX,DEPRICATE_OPERATION_NAME)
-            || childAction.getPath() == addPrefix(OPERATION_PREFIX,DEPRICATE_OPERATION_NAME)){
-            if(item.getItemType() == CatItem::MESSAGE && item.isUnseenItem()){
-                item.setSeen();
-                st_TakeItemFromList = false;
-                searchOnInput();
-            } else {
-                item.setIsDepricated();
-                item.setIsTempItem(false);
-            }
-            CatBuilder::addItem(item);
-            m_inputList.removeItem(item);
-            m_itemChoiceList->removeItem(item);
-        } else if(operationItem.getPath() ==
-                  addPrefix(OPERATION_PREFIX,ACTIVATE_OPTION_ITEM)){
-            Q_ASSERT(children.length()==1);
-            //Hoping we can do this directly...
-            st_TakeItemFromList = false;
-            m_inputList.setItem(path);
-            QKeyEvent ke(QEvent::KeyPress,Qt::Key_Backtab, Qt::NoModifier);
-            tabAction(Qt::Key_Tab,&ke);
-            if(m_inputList.acceptItem(&childAction)){
-                m_inputList.setItem(childAction);
-                if(!tryExecuteCurrentItem()){
-                    QKeyEvent ke(QEvent::KeyPress,Qt::Key_Tab, Qt::NoModifier);
-                    tabAction(Qt::Key_Tab,&ke);
-                }
-            }
-        } else if(operationItem.getPath() ==
-                  addPrefix(OPERATION_PREFIX,SELECTION_OPERATION_NAME)){
-            if(m_inputList.getItemByPath(path).isEmpty()
-                && !m_inputList.findItemInParent(path).isEmpty()){
-                m_inputList.popToParentPosition(path);
-                m_itemChoiceList->collapseSideExplore();
-                m_itemOrigin = FROM_SEARCH;
-                st_SearchResultsChanged = true;
-                st_ListFilled = false;
-                st_TakeItemFromList = false;
-            } else {
-                st_TakeItemFromList = true;
-            }
-            st_UserChoiceChanged = true;
-        }
-    }
-    updateDisplay();
-}
 
 
 //Processes all text directly except when you have subordinate edit function...

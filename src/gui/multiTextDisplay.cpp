@@ -36,7 +36,7 @@ MultiTextDisplay::MultiTextDisplay(QWidget* parent): QWidget(parent,Qt::Frameles
     m_backgroundLabel.move(0,m_backgroundLabel.pos().y());
     m_explanationLabel.hide();
 
-    m_mainEdit.setObjectName("EditLine");
+    //m_mainEdit.setObjectName("editLine");
     m_mainEdit.show();
     m_mainEdit.raise();
 

@@ -710,40 +710,31 @@ CatItem CatItem::getUpdateSourceParent(qint32 w){
     return par;
 }
 
-CatItem CatItem::getSearchSourceParent(qint32 w){
-    if(this->hasSourceWeight()){
-        return *this;
+QList<CatItem> CatItem::getSearchSourceParents(){
+    QList<CatItem> res;
+    if(isCategorizingSource()){
+        res.append(*this);
     }
 
-    CatItem par;
+    //if(this->hasSourceWeight()){ return *this; }
+
     for(int i=0;i<d->children_detached_list.count();i++){
         if(d->children_detached_list[i].getChildPath() == getPath() ){
             CatItem possiblePar = d->children_detached_list[i].getParent();
-            if(possiblePar.getItemType() == CatItem::LOCAL_DATA_FOLDER
-               || possiblePar.getItemType() == CatItem::PUBLIC_DOCUMENT
-               || possiblePar.getItemType() == CatItem::PERSON ){
-                int weight = d->children_detached_list[i].getSourceWeight();
-                if(weight>=w || par.isEmpty()){
-                    w = weight;
-                    par = d->children_detached_list[i].getParent();
+            if(possiblePar.isCategorizingSource()){
+                if(possiblePar.getItemType() == CatItem::LOCAL_DATA_FOLDER
+                   || possiblePar.getItemType() == CatItem::PUBLIC_DOCUMENT
+                   || possiblePar.getItemType() == CatItem::PERSON ){
+                    res.push_front(possiblePar);
+                } else {
+                    res.push_back(possiblePar);
                 }
             }
         }
     }
-    if(!par.isEmpty()){
-        return par;
-    }
-    for(int i=0;i<d->children_detached_list.count();i++){
-        if(d->children_detached_list[i].getChildPath() == getPath() ){
-            CatItem possiblePar = d->children_detached_list[i].getParent();
-            if(possiblePar.getItemType() == CatItem::ACTION_TYPE){
-                return possiblePar;
-            }
-        }
-    }
-    if(!par.isEmpty()){
-        return par;
-    }
+    if(res.count()>0){ return res;}
+
+    int w=0;
     for(int i=0;i<d->children_detached_list.count();i++){
         if(d->children_detached_list[i].getChildPath() == getPath() ){
             CatItem possiblePar = d->children_detached_list[i].getParent();
@@ -752,12 +743,12 @@ CatItem CatItem::getSearchSourceParent(qint32 w){
                 weight = possiblePar.getSourceWeight();
                 if(weight>w){
                     w = weight;
-                    par = possiblePar;
+                    res.append(possiblePar);
                 }
             }
         }
     }
-    return par;
+    return res;
 }
 
 QList<CatItem> CatItem::getSourceParents(){
@@ -766,7 +757,7 @@ QList<CatItem> CatItem::getSourceParents(){
     for(int i=0;i<d->children_detached_list.count();i++){
         if(d->children_detached_list[i].getChildPath() == getPath() &&
            ((d->children_detached_list[i].getChildType() == (BaseChildRelation::WEIGHT_SOURCE)
-            || d->children_detached_list[i].getParent().isSource()))){
+            || d->children_detached_list[i].getParent().isCategorizingSource()))){
             parents.append(d->children_detached_list[i].getParent());
         }
     }

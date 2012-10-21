@@ -740,12 +740,12 @@ void TheApplicationTester::testXslPlugin2(){
 
     CatItem extendIt1 = the_test_builder->getItem(XMEL_BOOKMARKS_PATH1);
     Q_ASSERT(!extendIt1.isEmpty());
-    Q_ASSERT(extendIt1.isSource());
+    Q_ASSERT(extendIt1.isCategorizingSource());
     Q_ASSERT(extendIt1.getRequestUrl() =="/home/hansj/.recently-used.xbel");
-    Q_ASSERT(extendIt1.isSource());
+    Q_ASSERT(extendIt1.isCategorizingSource());
     CatItem extendIt2 = the_test_builder->getItem(XMEL_BOOKMARKS_PATH2);
     Q_ASSERT(!extendIt2.isEmpty());
-    Q_ASSERT(extendIt2.isSource());
+    Q_ASSERT(extendIt2.isCategorizingSource());
     Q_ASSERT(extendIt2.getRequestUrl() =="/home/hansj/.recently-used");
     the_test_builder->getCatalog()->reweightItem(extendIt1);
     the_test_builder->getCatalog()->reweightItem(extendIt2);
@@ -881,7 +881,7 @@ void TheApplicationTester::testUpdateUsage(){
     src.setTagLevel(CatItem::INTERNAL_SOURCE);
     CatBuilder::getCatalog()->addItem(src);
     CatItem srcSaved = CatBuilder::getCatalog()->getItem("externalSource1");
-    Q_ASSERT(srcSaved.isSource());
+    Q_ASSERT(srcSaved.isCategorizingSource());
 
     CatItem e1("externalItem1");
     e1.setExternalWeight(HIGH_EXTERNAL_WEIGHT,src);
@@ -962,7 +962,7 @@ void TheApplicationTester::testUpdateUsage(){
     Q_ASSERT(rw1 < rw2);
     Q_ASSERT(rw1 > rw3);
     srcSaved = CatBuilder::getCatalog()->getItem("externalSource1");
-    Q_ASSERT(srcSaved.isSource());
+    Q_ASSERT(srcSaved.isCategorizingSource());
     //one gets 1 calls four weeks later
     //one was just called
     gTime_offset_for_testing += 24*60*60;
@@ -972,7 +972,7 @@ void TheApplicationTester::testUpdateUsage(){
 
 
     srcSaved = CatBuilder::getCatalog()->getItem("externalSource1");
-    Q_ASSERT(srcSaved.isSource());
+    Q_ASSERT(srcSaved.isCategorizingSource());
     //Reweigh items
     CatBuilder::getCatalog()->reweightItem(item1);
     CatBuilder::getCatalog()->reweightItem(item2);

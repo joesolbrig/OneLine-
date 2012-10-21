@@ -11,6 +11,7 @@ INCLUDEPATH += ../../src/ \
     /usr/include/QtOAuth/include \
     /usr/local/lib/include/qjson \
     /usr/local/include/QtCrypto
+
 # qoauth requires the appropriate qca plugin TOO but loads this **at runtime**
 # from the qt directory
 LIBS += -L/usr/lib \
@@ -35,7 +36,8 @@ HEADERS = streamplugin.h \
     ../../src/inputLanguage.h \
     ../../src/fillInItem.h \
     recursive_json.h \
-    iconfromurl_reader.h
+    iconfromurl_reader.h \
+    ../../src/itemWSHash.h
 SOURCES = ../../src/plugin_interface.cpp \
     streamplugin.cpp \
     feed_read.cpp \
@@ -46,10 +48,10 @@ SOURCES = ../../src/plugin_interface.cpp \
     ../../src/dataTreeInstances.cpp \
     recursive_json.cpp \
     iconfromurl_reader.cpp
-#win32:LIBS += /usr/local/lib/libqca.so
+
+# win32:LIBS += /usr/local/lib/libqca.so
 unix:LIBS += /usr/local/lib/libqca.so
 unix:LIBS += /usr/lib/qt4/plugins/crypto/libqca-ossl.so
-
 unix:LIBS += /usr/lib/libqoauth.so
 unix:LIBS += /usr/local/lib/lib/libqjson.so.0
 TARGET = streamplugin

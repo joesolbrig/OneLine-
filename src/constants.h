@@ -170,6 +170,7 @@ const QString SET_PRIORITY_KEY_STR("SET_PRIORITY_KEY_STR");
 
 const QString IS_TIMELY_ITEM_KEY_STR("IS_TIMELY_ITEM_KEY_STR");
 const QString IS_INTERMEDIATE_SOURCE_KEY("is_intermediate_source");
+const QString IS_CATEGORING_SOURCE_KEY("is_categorizing_source");
 const QString ITEM_CREATION_TIME_KEY_STR("ITEM_CREATION_TIME_KEY_STR");
 const QString ARG_TYPE_KEY_STR("ARG_TYPE_KEY_STR");
 const QString ARG_VALUE_KEY_STR("ARG_VALUE_KEY_STR");
@@ -349,6 +350,8 @@ const QString VERB_TAKES_URIS("VERB_TAKES_URIS_KEY");
 #define SOURCE_LOGIN_SIG "loginSig_key"
 
 //Duplicates..
+const QString PARENT_SOURCE_ITEM_LABEL("Parent_Source");
+
 const QString XSLT_SOURCE_STR("XSLT_SOURCE_STR");
 
 const QString XSLT_ITEM_STR("Xlst Plugin Item");
@@ -598,6 +601,7 @@ const QString ITEM_TYPE_CONFIG_FIEILD("Item_Type");
 const QString ITEM_SYNONYM_PATH("Item_Synonym_Path");
 const QString ITEM_PARENT_CONFIG_FIELD ("Item_Parent_Path");
 const QString ITEM_CHILD_CONFIG_FIELD ("Item_Child_Path");
+const QString ITEM_SECTION_CHILD_CONFIG_FIELD ("Item_Child_Section");
 const QString ITEM_WEIGHT_CONFIG_FIELD("Item_Weight");
 const QString FILTER_SUBDIR("xslt_sources");
 const QString ITEM_TEMPLATE_DIR("item_templates");
@@ -615,6 +619,7 @@ const int MAX_FULL_WEIGHT(DOUBLE_SCALE_FACTOR*DOUBLE_SCALE_FACTOR);
 const int MAX_MAX_FULL_WEIGHT(DOUBLE_SCALE_FACTOR*DOUBLE_SCALE_FACTOR*10);
 const unsigned int WEIGHT_TICS(10);
 const int ITEM_TYPE_LEVEL(WEIGHT_TICS-2);
+const int MAX_EXTRA_ORGANIZING_SOURCES(2);
 const int TOP_ITEMS_TO_UPDATE(100);
 
 //Total weight scale items by their sources
@@ -1185,6 +1190,9 @@ const int UI_MAIN_ICON_SIZE=48;
 #define KEYWORD_ICON_NAME "folder"
 
 //Stock Icon
+
+#define DOWN_ARROW "down"
+#define UP_ARROW "up"
 #define ARROW_ICON_NAME "media-playback-start"
 #define PLUS_ICON_NAME "add"
 #define PIN_ICON_NAME "stock_pin"

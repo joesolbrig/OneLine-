@@ -171,6 +171,7 @@ public:
             case CatItem::VERB:
             case CatItem::OPERATION: c = QColor("#FBFBFF");
                 break;
+            case CatItem::PUBLIC_FEED:
             case CatItem::PUBLIC_DOCUMENT: c = QColor("#FFFAFC");
                 break;
             case CatItem::PERSON: c = QColor("#FBFFFA");
@@ -180,6 +181,8 @@ public:
                 break;
             case CatItem::MESSAGE: c = QColor("#FFEFFC");
                 break;
+            case CatItem::LOCAL:
+            case CatItem::LOCAL_DATA_DOCUMENT:
             default:
                 return c;
         }

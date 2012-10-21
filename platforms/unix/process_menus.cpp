@@ -126,6 +126,8 @@ static CatItem walk_directory(GMenuTreeDirectory *directory, int previousWeight)
   dirItem.setExternalWeight(previousWeight, gnomeMenuBaseItem());
   dirItem.setTagLevel(CatItem::POSSIBLE_TAG);
   dirItem.setSortingType(CatItem::VERB);
+  dirItem.setIsAction(false);
+  Q_ASSERT(!dirItem.getIsAction());
   //This is atomic meaning it can't be extended or have things added to it... currently
   dirItem.setUseDescription(true);
 

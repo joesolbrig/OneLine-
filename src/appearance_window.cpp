@@ -125,7 +125,7 @@ MainUserWindow::MainUserWindow(QWidget *parent,  PlatformBase * plat, bool rescu
             this, SLOT(choiceListKeyEvent(QKeyEvent*)));
 
     m_inputDisplay = new MultiTextDisplay(this);
-    m_inputDisplay->setObjectName("input");
+    m_inputDisplay->setObjectName("textInputArea");
     m_inputDisplay->setFeedbackText(UI_MAIN_GREETING);
 
     connect(m_inputDisplay, SIGNAL(rectangleResizingSignal()),

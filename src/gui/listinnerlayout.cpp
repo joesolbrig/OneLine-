@@ -30,8 +30,6 @@ ListInnerLayout::ListInnerLayout(QWidget* parent, CatItem contextItem) :
     IconDelegate* listDelegate = new IconDelegate(this,contextItem);
     m_realItemList->setItemDelegate(listDelegate);
 
-
-
     setMargin(0);
     setContentsMargins(0,0,0,0);
     //addWidget(m_realItemList,1,Qt::AlignTop | Qt::AlignCenter);

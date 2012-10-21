@@ -342,6 +342,14 @@ QList<AbstractReader*> StreamPlugin::createStreamReader(CatItem item, UserEvent:
         }
     }
 
+    if(item.hasLabel(PARENT_SOURCE_ITEM_LABEL)){
+        QList<CatItem> childs = item.getChildren();
+        for(int i=0; i<childs.count(); i++){
+            qDebug() << "creating readers recursively";
+            feedDownloaders.append(createStreamReader(item, lt));
+        }
+    }
+
     if(item.hasLabel(FILE_CATALOG_PLUGIN_STR)){
         if(item.hasLabel(STREAM_SOURCE_PATH)){
             qDebug() << "creating xml file reader";

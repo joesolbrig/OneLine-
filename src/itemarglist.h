@@ -2029,6 +2029,18 @@ public:
         return res;
     }
 
+    void formatActionList(QList<CatItem>& listItems, CatItem contextItem){
+        for(int i=0; i < listItems.count(); i++){
+            CatItem& litem = listItems[i];
+            QString actionDescription =
+                    asFormattedString(contextItem,0,0,false);
+            if(!actionDescription.isEmpty()){
+                litem.setTemporaryName(actionDescription);
+            }
+        }
+    }
+
+
     QList<CatItem> getListItems()
         { return inputData[m_itemPosition].getListItems(); }
 
@@ -2239,8 +2251,6 @@ public:
     }
 
 
-
-
     QString asFormattedString(CatItem substituteItem= CatItem(),
                               int* beginFieldPos=0, int* endFieldPos=0, bool usePath=true){
         Q_ASSERT(m_itemPosition < inputData.count() &&(m_itemPosition>-1));
@@ -2273,7 +2283,7 @@ public:
         } else {
             addOperationStr(formatedStr);
         }
-
+        formatedStr = formatedStr.simplified();
         return (formatedStr);
     }
 

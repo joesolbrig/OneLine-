@@ -1782,6 +1782,10 @@ fixup_layout_node (GMarkupParseContext   *context,
                    MenuLayoutNode        *node,
                    GError              **error)
 {
+    context = context;
+    parser = parser;
+    error = error;
+
   MenuLayoutNode *child;
   MenuLayoutNode *last_all;
   MenuLayoutNode *last_menus;

@@ -14,6 +14,7 @@ MarginWindow::MarginWindow(QWidget *, PlatformBase* plat, bool rescue):
 
     activateWindow();
     show();
+    raise();
     gMainWidget->raise();
 }
 

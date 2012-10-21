@@ -132,9 +132,7 @@ class Cat_Store {
         QList<CatItem> getHighestRatedItems(ItemFilter* filter, long i = MAX_SOURCE_COUNT,int* initialPos=0);
         QList<CatItem> getHighestRatedMessages(ItemFilter* filter, long i = MAX_SOURCE_COUNT,int* initialPos=0);
         QList<CatItem> getAssociatedDocuments(ItemFilter* , CatItem filterItem, int itemsDesired);
-        QList<CatItem> docListFromTypelist(QList<CatItem> types, int desired);
         QList<CatItem> getTypeChildItems(CatItem filterItem, int count);
-        QList<CatItem> getTypeParentItems(CatItem childItem, bool onlyBest);
 
 
     public:
@@ -160,8 +158,6 @@ class Cat_Store {
         qreal getSourceRatio(CatItem source);
         void setSourceToRatio(CatItem source, qreal ratio);
 
-        QList<CatItem> coalateBySources(ItemFilter* filter, QList<CatItem>,
-                       int* initialPos, long limit= MAX_SOURCE_COUNT);
         //This could be called often,
         //So perhaps we should do source reweighting elsewhere
         void addVisibilityEvent(CatItem it, UserEvent evt);
@@ -185,6 +181,8 @@ class Cat_Store {
 
         QList<CatItem> getCustomVerbByActionTypeNamedPrivate(CatItem argType);
     protected:
+        QList<CatItem> docListFromTypelist(QList<CatItem> types, int desired);
+        QList<CatItem> getActionTypeParents(CatItem childItem, bool onlyBest);
         QList<CatItem> getInitialMessages(int initialSlots, ItemFilter* filter, long limit = MAX_SOURCE_COUNT,
                                           int* initialPos=0);
 

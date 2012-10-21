@@ -23,7 +23,7 @@ void FormDisplayer::formatFieldRectangle(FieldRectangle& fr,
     fr.totalRemainSpace=heightAvailable;
 
     fr.baseLabelIndent=0;
-    fr.baseFieldIndent=CUSTOM_LABEL_RIGHTMARGIN;
+    fr.baseFieldIndent=CUSTOM_LABEL_LEFTMARGIN;
 
     fr.painter = painter;
 }

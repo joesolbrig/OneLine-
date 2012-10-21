@@ -19,6 +19,7 @@ FB_PERMISSION_TOKEN_URL=?client_id=$FB_App_ID&redirect_uri=$REDIRECT_URI&scope=r
 [FacebookAccount]
 Item_Name="Facebook Account of $user_name"
 Message_Source="Facebook Account of $user_name"
+is_categorizing_source=1
 child_gen_facebookSource=facebookSource
 Item_Path="feed://facebook_account/$user_name"
 JSON_ACCESS_TOKEN=$oathkey
@@ -114,6 +115,7 @@ command=http://www.facebook.com/$id'\d+'/posts/$id'_\d+'
 ICON_URL_KEY=$ico
 authenticate_str=$authenticate_str
 HTML_PREVIEW_KEY=<p>from:$from.name $created_time:IETF_RFC_3339_TIME<br>$message[<br>$name][<br>$caption][<br>$description]</p>
+is_categorizing_source=1
 
 [link]
 ;The actual link
@@ -201,6 +203,7 @@ RELEVANCE_WEIGHT_KEY_STR=5120
 SOURCE_WEIGHT_KEY_STR=5120
 UPDATEABLE_SOURCE_KEY=1
 USE_TYPE_DESCRIPTION_KEY_STR=1
+is_categorizing_source=1
 
 [tag]
 ;Note that the tag is within "contacts"

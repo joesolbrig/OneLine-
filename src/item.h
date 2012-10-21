@@ -212,7 +212,7 @@ inline QString picklHashToEscdString(QHash<QString, QString> h){
 
 inline QString formatStringByKey(QString str,
         QList<int> matchIndex, QString keyColor = KEY_COLOR,
-        QString extraAttribs =""){
+        QString extraAttribs ="", int limit=-1){
    QString formatedStr;
    int k = 0;
    int l = -1;
@@ -220,11 +220,11 @@ inline QString formatStringByKey(QString str,
    if(indexLen > 0){
        l = matchIndex[k]; k++;
    } else {
-       return str;
+       return str.left(limit);
    }
    bool doingColor = false;
    formatedStr.reserve(str.length() + l);
-   for(int j=0;j < str.length();j++){
+   for(int j=0;j < str.length() &&(limit==-1||j<limit) ;j++){
        if(j == l ){
            if(!doingColor){
                doingColor = true;

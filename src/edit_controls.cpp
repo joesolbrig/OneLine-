@@ -73,7 +73,8 @@ MyListWidget::MyListWidget(QWidget* parent) :
             SLOT(operateOnItem(QString , CatItem )));
 
     connect(this, SIGNAL(showOptionsMenu(QString, QPoint)),
-            (QObject*)gMainWidget, SLOT(listMenuEvent(QString, QPoint)));
+            (QObject*)gMainWidget, SLOT(listMenuEvent(QString, QPoint)),
+            Qt::QueuedConnection);
 
     setMouseTracking(true);
     m_hoveStart = QTime::currentTime();
@@ -232,8 +233,11 @@ void MyListWidget::sendMenuEvent(QContextMenuEvent* event){
     QPoint pos = event->pos();
     QPersistentModelIndex index = indexAt(pos);
     QString path = index.data(ROLE_ITEM_PATH).toString();
-    QPoint globalPos = QWidget::mapToGlobal(pos);
-    emit showOptionsMenu(path, globalPos);
+//    QPoint globalPos = QWidget::mapToGlobal(pos);
+//    emit showOptionsMenu(path, globalPos);
+//    QPoint mainWidgetPos = mapTo((QWidget*)gMarginWidget,pos);
+    QPoint mainWidgetPos = this->mapToGlobal(pos);
+    emit showOptionsMenu(path, mainWidgetPos);
 
 }
 

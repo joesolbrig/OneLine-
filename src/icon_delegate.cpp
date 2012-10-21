@@ -76,20 +76,6 @@ QImage blurred(const QImage& image, const QRect& rect, int radius, bool alphaOnl
     return result;
 }
 
-//int main(int argc, char *argv[])
-//{
-//    QApplication a(argc, argv);
-//    QLabel label;
-//    QImage image("image.png");
-//    image =  blurred(image,image.rect(),10,false);
-//    label.setPixmap(QPixmap::fromImage(image));
-//    label.show();
-//
-//    return a.exec();
-//}
-
-
-
 void make_grayscale(QImage& in){
     if(in.format()!=QImage::Format_Indexed8){
         in = in.convertToFormat(QImage::Format_Indexed8);

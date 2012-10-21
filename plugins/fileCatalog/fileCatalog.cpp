@@ -58,8 +58,11 @@ void FilecatalogPlugin::getCatalog(QList<CatItem>* items){
     QSettings* set = *settings;
 
     //The system has the problem you can't be sure the state of the settings...
-    set->endGroup();
-    set->endGroup();
+    QString endGroup = set->group();
+    while(!endGroup.isEmpty()){
+        set->endGroup();
+        endGroup = set->group();
+    }
     set->beginGroup(FILE_SETTINGS_KEY);
     bool getMenuItems = set->value(GET_MENU_ITEMS_KEY, true).toBool();
     if(getMenuItems){

@@ -8,13 +8,13 @@
 #include "list_item.h"
 
 
-TextBarItem::TextBarItem(TextMessageBar *p, ListItem it) :
-        QObject(p), m_item(it)  {
+TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
+        QObject(parent), m_item(it)  {
     setAcceptsHoverEvents(true);
 
-    connect(this, SIGNAL(itemClicked(ListItem, bool)),p, SLOT(itemClicked(ListItem, bool)));
+    connect(this, SIGNAL(itemClicked(ListItem, bool)),parent, SLOT(itemClicked(ListItem, bool)));
     connect(this, SIGNAL(miniIconRightClicked(ListItem, QPoint )),
-            (QObject*)gMainWidget, SLOT(miniIconListMenuEvent(ListItem, QPoint )));
+            (QObject*)gMainWidget, SLOT(listMenuEvent(ListItem, QPoint )));
     prepareGeometryChange();
     m_animation = 0;
     m_animating = false;
@@ -23,14 +23,13 @@ TextBarItem::TextBarItem(TextMessageBar *p, ListItem it) :
     m_textItem=0;
 
     m_textItem = new QGraphicsTextItem();
-    QFont fnt = m_item.getDisplayFont();
-
-    fnt.setBold(true);
+    m_font = m_item.getDisplayFont();
+    m_font.setBold(true);
     if(m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY){
-        fnt.setPointSize(fnt.pointSize()+2);
+        m_font.setPointSize(m_font.pointSize()+2);
         m_textItem->setDefaultTextColor(UI_ICONBAR_ITEM_COLOR);
     } else if(m_item.getFilterRole() == CatItem::CATEGORY_FILTER){
-        fnt.setPointSize(fnt.pointSize()+1);
+        m_font.setPointSize(m_font.pointSize()+1);
         if(it.getOrganizeingType() !=CatItem::MIN_TYPE){
             QColor typeColor = ListItem::colorFromType((CatItem::ItemType)
                                             it.getOrganizeingType());
@@ -39,20 +38,30 @@ TextBarItem::TextBarItem(TextMessageBar *p, ListItem it) :
             m_textItem->setDefaultTextColor(UI_ICONBAR_ITEM_COLOR);
         }
     } else if(m_item.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
-        fnt.setPointSize(fnt.pointSize()-1);
+        m_font.setPointSize(m_font.pointSize()-1);
         m_textItem->setDefaultTextColor(UI_ICONBAR_ITEM_COLOR);
     } else {
-        fnt.setPointSize(fnt.pointSize());
+        m_font.setPointSize(m_font.pointSize());
         m_textItem->setDefaultTextColor(UI_ICONBAR_MESSAGE_COLOR);
     }
-    m_textItem->setFont(fnt);
+    m_textItem->setFont(m_font);
     m_textItem->document()->setTextWidth((-1)); //never break
-    QString htmlText = tagAs(QString(m_item.getNameForEditLine()),"center");
-    m_textItem->setHtml(htmlText);
+
+//    QFontMetrics fm(m_font);
+//    qreal w = boundingRect().width();
+//    qDebug() << "w: " << w;
+//    qreal acw = fm.averageCharWidth();
+//    qDebug() << "acw: " << acw;
+//    int charsAllowed = (w/acw);
+//    qDebug() << "charsAllowed: " << charsAllowed;
+//    QString nme = m_item.getNameForEditLine(KEY_COLOR,0,charsAllowed);
+//    qDebug() << "nme" << nme;
+//    QString htmlText = tagAs((nme),"center");
+//    m_textItem->setHtml(htmlText);
     m_textItem->document()->setDocumentMargin(0); //default is 4!
     m_textItem->document()->setIndentWidth(0);
-    m_textItem->document()->setDefaultFont(fnt);
-    if(m_item.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
+    m_textItem->document()->setDefaultFont(m_font);
+    if(m_item.getFilterRole() == CatItem::SUBCATEGORY_FILTER) {
         m_textItem->document()->setDefaultStyleSheet(UI_MINIBAR_DEFAULT_STYLE);
     } else {
         m_textItem->document()->setDefaultStyleSheet(UI_MINIBAR_DEFAULT_STYLE);
@@ -63,7 +72,8 @@ TextBarItem::TextBarItem(TextMessageBar *p, ListItem it) :
     m_textItem->setZValue(zValue()+1);
     m_textItem->show();
     m_textItem->setAcceptHoverEvents(false);
-    p->addTextItem(m_textItem);
+    parent->addTextItem(m_textItem);
+    updateText();
     m_aC = QColor(100,100,100);
     m_bC = QColor(225,225,220);
     //m_currentBackgroundColor = m_aC;
@@ -114,13 +124,24 @@ void TextBarItem::setText(QString text){
 void TextBarItem::updateText(){
     if(!m_textItem){ return;}
 
+
+    QFontMetrics fm(m_font);
+    qreal w = boundingRect().width();
+    qDebug() << "w: " << w;
+    qreal acw = fm.averageCharWidth();
+    qDebug() << "acw: " << acw;
+    int charsAllowed = (w/acw);
+    qDebug() << "charsAllowed: " << charsAllowed;
     bool altDn = gMainWidget->st_altKeyDown;
+    QString text;
     if(altDn ){
-        m_item.getNameForEditLine();
-        m_textItem->setHtml(tagAs(QString(m_item.formattedName(false)),"center"));
+        //m_item.getNameForEditLine(KEY_COLOR,"",charsAllowed);
+        text = m_item.formattedName(false);
     } else {
-        m_textItem->setHtml(tagAs(QString(m_item.getName()),"center"));
+        text = m_item.getName();
     }
+    text = text.left(charsAllowed);
+    text = (tagAs(QString(text),"center"));
     m_textItem->setZValue(zValue()+1);
     m_textItem->document()->setDefaultStyleSheet(UI_MINIBAR_DEFAULT_STYLE);
     m_textItem->update();
@@ -220,11 +241,14 @@ void TextBarItem::setBigness(qreal b){
 void TextBarItem::mousePressEvent(QGraphicsSceneMouseEvent * evt) {
     Qt::MouseButtons bts = evt->buttons();
     Qt::MouseButton bt = evt->button();
-    if(bts | Qt::RightButton || (bt ==Qt::RightButton)) {
+    if(bts & Qt::RightButton || (bt ==Qt::RightButton)) {
         if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){ return;}
         setSelected(!m_activated);
-        emit miniIconRightClicked(m_item, pos().toPoint());
-
+        //QPoint mainWidgetPos = mapTo(gMainWidget,pos().toPoint());
+        QPointF parPointF = mapToParent(pos());
+        QPoint parPoint = parPointF.toPoint();
+        QPoint globPoint = ((TextMessageBar*)parent())->mapToGlobal(parPoint);
+        emit miniIconRightClicked(m_item, globPoint);
     } else {
         if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){ return;}
         setSelected(!m_activated);
@@ -411,6 +435,7 @@ void TextMessageBar::itemClicked(ListItem it, bool selected){
     } else {
         m_activeItem = ListItem();
     }
+
     emit miniIconClicked(it, selected);
     update();
 }

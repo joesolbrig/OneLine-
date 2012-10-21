@@ -59,6 +59,8 @@ private:
     QColor m_bC;
     QColor m_currentBackgroundColor;
 
+    QFont m_font;
+
 
 public:
     QGraphicsTextItem* m_textItem;
