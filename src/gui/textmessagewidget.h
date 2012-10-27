@@ -194,6 +194,7 @@ class TextMessageBar : public QWidget
     int m_icon_size;
 
     ListItem m_activeItem;
+    ListItem m_subActiveItem;
 
     QGraphicsPixmapItem*  m_backgroundItem;
 

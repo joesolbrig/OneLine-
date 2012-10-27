@@ -1,7 +1,6 @@
 PREFIX=/usr
 ONELINE_DIR=.oneline
 
-#SKINS_PATH=$(PREFIX)/share/oneline/skins
 SKINS_PATH=~/$(ONELINE_DIR)/skins
 PLUGINS_PATH=$(PREFIX)/lib/oneline/plugins
 SCRIPT_PATH=$(PREFIX)/lib/oneline/scripts
@@ -58,12 +57,19 @@ install_debug:: debug
 	-install -d $(DESTDIR)$(PLATFORMS_PATH)
 	install -m 644 debug/libplatform_unix.so $(DESTDIR)$(PLATFORMS_PATH)/
 	-install -d $(DESTDIR)$(PLUGINS_PATH)
+	-install -d $(DESTDIR)$(SCRIPT_PATH)/custom_actions
+	-install -m 666 script/custom_actions/*.* $(DESTDIR)$(SCRIPT_PATH)/custom_actions
+	-install -d $(DESTDIR)$(SCRIPT_PATH)/js
+	-install m 666 script/js/*.* $(DESTDIR)$(SCRIPT_PATH)/js
+	-install -d $(DESTDIR)$(SCRIPT_PATH)/xsl_code
+	install -m 666 script/xsl_code/*.* $(DESTDIR)$(SCRIPT_PATH)/xsl_code
+	-install -d $(DESTDIR)$(SCRIPT_PATH)/shell
+	install -m 666 script/shell/*.* $(DESTDIR)$(SCRIPT_PATH)/shell	
 	install -m 644 debug/libplatform_gnome.so $(DESTDIR)$(PLATFORMS_PATH)/
 	-install -d $(DESTDIR)$(PLUGINS_PATH)
 	install -m 644 debug/plugins/*.so $(DESTDIR)$(PLUGINS_PATH)/ 
 	-install -d $(DESTDIR)$(PLUGINS_PATH)/icons
 	-install -d $(SKINS_PATH)
-	#cp -r skins $(DESTDIR)$(PREFIX)/share/oneline/
 	cp -r skins ~/$(ONELINE_DIR)
 	install -d $(DESTDIR)$(DESKTOP_PATH)/
 	install -m 644 linux/oneline.desktop $(DESTDIR)$(DESKTOP_PATH)/
@@ -96,9 +102,8 @@ install:: release
 	install -m 666 release/plugins/*.so $(DESTDIR)$(PLUGINS_PATH)/ 
 	-install -d $(DESTDIR)$(PLUGINS_PATH)/icons
 	-install -d -o`logname` $(SKINS_PATH)
-	#cp -r skins $(DESTDIR)$(PREFIX)/share/oneline/
 	cp -r skins ~/$(ONELINE_DIR)
-	cp -r script $(DESTDIR)$(PREFIX)/share/oneline/
+	cp -r script $(DESTDIR)$(PREFIX)/lib/oneline/
 	install -d $(DESTDIR)$(DESKTOP_PATH)/
 	install -m 666 linux/oneline.desktop $(DESTDIR)$(DESKTOP_PATH)/
 	install -d $(DESTDIR)$(ICON_PATH)/
@@ -119,6 +124,7 @@ uninstall::
 	-rm -rf $(PLUGINS_PATH)
 	-rm -rf $(PLATFORMS_PATH)
 	-rm -rf $(SKINS_PATH)
+	-rm -rf $(PREFIX)/share/oneline
 	-rm $(DESTDIR)$(DESKTOP_PATH)/oneline.desktop
 	-rm $(DESTDIR)$(ICON_PATH)/oneline.ico
 	-rm -rf ~/$(ONELINE_DIR)

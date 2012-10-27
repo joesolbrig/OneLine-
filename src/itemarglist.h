@@ -2029,11 +2029,11 @@ public:
         return res;
     }
 
-    void formatActionList(QList<CatItem>& listItems, CatItem contextItem){
+    void formatActionList(QList<CatItem>& listItems){
         for(int i=0; i < listItems.count(); i++){
             CatItem& litem = listItems[i];
             QString actionDescription =
-                    asFormattedString(contextItem,0,0,false);
+                    asFormattedString(litem,0,0,false);
             if(!actionDescription.isEmpty()){
                 litem.setTemporaryName(actionDescription);
             }
@@ -2178,7 +2178,6 @@ public:
 
     }
 
-
     QString getPathText(int spaceAvailable){
         if(atFirstSlot()){
             return inputData[m_itemPosition].getExplorePath(spaceAvailable);
@@ -2187,7 +2186,6 @@ public:
         }
 
     }
-
 
 //    ListItem getStateMessageItem(int spaceAvailable){
 //        QString msg = getPathText();
@@ -2289,8 +2287,13 @@ public:
 
 
 
-    QString addOperationStr(QString stmt, CatItem substituteItem=CatItem()){
-        if(m_opIndex==-1){ return stmt; }
+    QString addOperationStr(QString& stmt, CatItem substituteItem=CatItem()){
+        if(m_opIndex==-1){
+            if(substituteItem.getItemType()== CatItem::OPERATION){
+                stmt = substituteItem.getPrefixName() + " " + stmt;
+            }
+            return stmt;
+        }
         QString tagName;
         if((m_itemPosition==m_opIndex ||
             m_opIndex==-1)  &&
@@ -2308,7 +2311,8 @@ public:
             }
             tagName = (opName + " " + tagName).simplified();
         }
-        return tagName;
+        stmt = tagName + stmt;
+        return stmt;
     }
 
 
@@ -2351,11 +2355,14 @@ public:
         QString formatedStr;
         for(int i=0; i< inputData.count();i++){
             if(i==m_opIndex) { continue; }
+
             if(i == m_verbIndex && i-1==m_nounsBeginIndex && i>0)
                 { formatedStr += WITH_PHRASE; }
             if(i-1 == m_verbIndex && i==m_nounsBeginIndex && i>0)
                 { formatedStr += TO_PHRASE; }
-            if(i==m_nounsBeginIndex){
+            if(i==m_nounsBeginIndex
+                    && substituteItem.getItemType()!=CatItem::OPERATION
+                    && m_opIndex==-1){
                 formatedStr += OPEN_PHRASE;
             } else if(i==m_verbIndex && m_verbIndex < m_nounsBeginIndex){
                 formatedStr += USE_PHRASE; }

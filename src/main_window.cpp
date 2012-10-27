@@ -188,7 +188,7 @@ void MainUserWindow::startTasks(){
     gMarginWidget->gSetAppPos();
 
     activateWindow();
-    raise();
+    ::gMarginWidget->raise();
 
 }
 
@@ -230,7 +230,6 @@ void MainUserWindow::choiceUnderstoodTimeout(){
             }
         }}
 
-        //explicit searching - this is the fastest thing
         { static int lastupdate=0;
             if(abs(now - lastupdate) > (FORGROUND_SEARCH_DELAY*5)){
 
@@ -1103,7 +1102,7 @@ void MainUserWindow::listMenuEvent(QString itemPath, QPoint p) {
         il.addSlot();
         QList<CatItem> outItems;
         CatBuilder::getItemsFromQuery(il, outItems, MAX_ITEMS);
-        il.formatActionList(outItems, item);
+        il.formatActionList(outItems);
         FancyContextMenu* cm = new FancyContextMenu(item,outItems);
         QPoint mp = ::gMarginWidget->mapFromGlobal(p);
         Q_ASSERT(cm);
@@ -1520,7 +1519,8 @@ void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
     if(setTheItem){
         if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
             m_inputList.setSubFilterItem(it);
-        } else if(it.getFilterRole() == CatItem::CATEGORY_FILTER){
+        } else if(it.getFilterRole() == CatItem::CATEGORY_FILTER
+                  || it.getFilterRole() == CatItem::ACTIVE_CATEGORY ){
             m_inputList.setFilterItem(it);
             CatBuilder::getMiniIcons(m_inputList);
         } else if(it.getItemType() == CatItem::LOCAL_DATA_FOLDER){
@@ -1532,8 +1532,9 @@ void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
             m_inputList.setSubFilterItem(ListItem());
         } else {
             m_inputList.setFilterItem(ListItem());
+            m_inputList.setSubFilterItem(ListItem());
+            CatBuilder::getMiniIcons(m_inputList);
         }
-        CatBuilder::getMiniIcons(m_inputList);
     }
     st_ListFilled = false;
     m_inputList.setExpanded(false);

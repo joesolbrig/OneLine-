@@ -1934,6 +1934,7 @@ fixup_move_node (GMarkupParseContext   *context,
                  MenuLayoutNode        *node,
                  GError              **error)
 {
+  parser=parser;
   MenuLayoutNode *child;
   int             n_old;
   int             n_new;
@@ -2240,6 +2241,8 @@ passthrough_handler (GMarkupParseContext  *context,
                      gpointer              user_data,
                      GError              **error)
 {
+  passthrough_text=passthrough_text;
+  text_len=text_len;
   MenuParser *parser = user_data;
   MenuLayoutNode *node;
 

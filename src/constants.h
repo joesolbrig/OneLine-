@@ -43,6 +43,7 @@
 
 #define DEFAULT_APP_DIR "/.oneline/"
 #define APP_HOME_KEY_DIRS "apphome"
+#define SCRIPT_HOME_KEY_DIRS "scripthome"
 #define LOCAL_DIR "localDir"
 #ifndef STANDALONE_CMDLINE
 #define USER_APP_DIR (gDirs->value( LOCAL_DIR )[0])
@@ -50,9 +51,13 @@
 #define USER_APP_DIR QString(QDir::homePath() + DEFAULT_APP_DIR)
 #endif
 
+#define SCRIPT_KEY "script"
+#define USER_SCRIPT_DIR (gDirs->value( SCRIPT_KEY )[0])
+
 
 //#define PUSER_APP_DIR (QString(PluginInterface::ms_homeDir.toAscii()))
 #define PUSER_APP_DIR ((PluginInterface::getHomeDir()))
+#define PSCRIPT_DIR ((PluginInterface::getHomeDir()))
 #define USER_APP_INI (gDirs->value("config")[0])
 #define BROWSER_OPTION_DIR "browser_view_codes/"
 #define BROWSER_STYLE_SHEET "style.css"
@@ -163,6 +168,7 @@ const QString IS_FOR_LATER_KEY_STR("IS_FOR_LATER_KEY_STR");
 const QString TEMPORARY_DESCRIPTION_KEY_STR("TEMPORARY_DESCRIPTION_KEY_STR");
 const QString TEMPORARY_LONG_HTML_KEY_STR("TEMPORARY_LONG_HTML_KEY_STR");
 const QString TEMPORARY_NAME_KEY_STR("TEMPORARY_NAME_KEY_STR");
+const QString PREFIX_NAME_KEY_STR("PREFIX_NAME_KEY_STR");
 const QString TEMP_LOW_PATH_KEY_STR("TEMP_LOW_NAME_KEY_STR");
 const QString TEMP_NAME_KEY_STR("TEMP_NAME_KEY_STR");
 const QString TEMPORARY_PRIORITY_KEY_STR("TEMPORARY_PRIORITY_KEY_STR");
@@ -901,30 +907,17 @@ const QString GOTO_CHILDREN_MESSAGE("expand item");
 #define ONELINE_ALWAY_VISIBLE gSettings->value("GenOps/hideiflostfocus", false).toBool()
 
 const QString JAVA_FILTER_FILESOURCE("Webview_js_filter_path");
-#ifndef STANDALONE_CMDLINE
-#define JAVA_SCRIPT_DEFAULT_PATH \
-    gSettings->value("GenOps/reader_path", gDirs->value("script")[0]).toString() \
-            + "js/reader.js"
-#else
-#define JAVA_SCRIPT_DEFAULT_PATH "../../script"
-#endif
 
 const QString CSS_FILTER_PATH_KEY("CSS_FILTER_PATH_KEY");
-#ifndef STANDALONE_CMDLINE
-#define PREVIEW_CSS_DEFAULT_PATH \
-    gSettings->value("GenOps/reader_path", gDirs->value("script")[0]).toString() \
-    + "js/reader.css"
-#else
-#define PREVIEW_CSS_DEFAULT_PATH "../../script"
-#endif
 
 #ifndef STANDALONE_CMDLINE
-#define JAVA_SCRIPT_DEFAULT_PATH \
-    gSettings->value("GenOps/reader_path", gDirs->value("script")[0]).toString() \
-            + "js/reader.js"
+    #define SCRIPT_DEFAULT_PATH "/usr/lib/oneline/script/"
 #else
-#define JAVA_SCRIPT_DEFAULT_PATH "../../script"
+    #define SCRIPT_DEFAULT_PATH "../../script"
 #endif
+
+#define PREVIEW_CSS_DEFAULT_PATH SCRIPT_DEFAULT_PATH "/js/reader.css"
+#define JAVA_SCRIPT_DEFAULT_PATH SCRIPT_DEFAULT_PATH "/js/reader.js"
 
 
 

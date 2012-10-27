@@ -199,44 +199,30 @@ QHash<QString, QList<QString> > PlatformGnome::GetDirectories(QString base, QSet
     Q_ASSERT(d.exists());
 
     Q_ASSERT(setPtr);
-    QString shareBase =
-            setPtr->value("GenOps/shared_code_base", "/usr/share/oneline/").toString();
     QString libBase =
             setPtr->value("GenOps/lib_base", "/usr/lib/oneline/").toString();
 
     out[LOCAL_DIR] += QDir::homePath() + base;
-    out["skins"] += shareBase + "/skins";
-    //out["skins"] += qApp->applicationDirPath() + "/skins";
+    out["skins"] += libBase + "/skins";
     out["skins"] += QDir::homePath() + base +"/skins";
-
-    out["plugins"] += libBase + "/plugins";
-    out["plugins"] += qApp->applicationDirPath() + "/plugins";
-    out["plugins"] += QDir::homePath() + base +"/plugins";
-
-    out["script"] += shareBase +"/script";
-//    out["script"] += qApp->applicationDirPath() +"/script";;
-//    out["script"] += QDir::homePath() + base +"/script";;
-
-    out["config"] += QDir::homePath() + base + "oneline.ini";
-    out["portConfig"] += qApp->applicationDirPath() + "/oneline.ini";
-    out["db"] += QDir::homePath() + base + "oneline.db";
-    out["portDB"] += qApp->applicationDirPath() + "/oneline.db";
-
     if (QFile::exists(out["skins"].last() + "/Default")){
         out["defSkin"] += out["skins"].last() + "/Default/";
     } else {
         out["defSkin"] += out["skins"].first() + "/Default/";
     }
 
+    out["plugins"] += libBase + "/plugins";
+    out["plugins"] += qApp->applicationDirPath() + "/plugins";
+    out["plugins"] += QDir::homePath() + base +"/plugins";
+
+    out[SCRIPT_KEY] += libBase +"/script";
+
+    out["config"] += QDir::homePath() + base + "oneline.ini";
+
+
     out["platforms"] += qApp->applicationDirPath();
 
     qDebug() << "got dirs:" << out;
-    
-//    QList<QString> skins = out["skins"];
-//    for(int i=0; i<skins.count(); i++){
-//        QDir::setSearchPaths("icons", skins[i]);
-//    }
-    
 
     return out;
 }

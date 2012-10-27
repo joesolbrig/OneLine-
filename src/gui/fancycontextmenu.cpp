@@ -62,7 +62,8 @@ FancyContextMenu::FancyContextMenu(CatItem priorityItem, QList<CatItem> actionCh
 
     //menu
     for(int i=0; i<actionChildren.count();i++){
-        QString name = actionChildren[i].getName();
+        CatItem actionItem = actionChildren[i];
+        QString name = actionItem.getName();
         if(m_optionItems.contains(name)){
             qDebug() << "warning: " << name << "from" << actionChildren[i].getPath();
             //Q_ASSERT(false);

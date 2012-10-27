@@ -22,7 +22,7 @@ TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
     m_activated = m_item.hasLabel(ACTIVE_FILTER_ITEM_KEY);
     m_textItem=0;
 
-    m_textItem = new QGraphicsTextItem();
+    m_textItem = new QGraphicsTextItem(this);
     m_font = m_item.getDisplayFont();
     m_font.setBold(true);
     if(m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY){
@@ -61,11 +61,6 @@ TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
     m_textItem->document()->setDocumentMargin(0); //default is 4!
     m_textItem->document()->setIndentWidth(0);
     m_textItem->document()->setDefaultFont(m_font);
-    if(m_item.getFilterRole() == CatItem::SUBCATEGORY_FILTER) {
-        m_textItem->document()->setDefaultStyleSheet(UI_MINIBAR_DEFAULT_STYLE);
-    } else {
-        m_textItem->document()->setDefaultStyleSheet(UI_MINIBAR_DEFAULT_STYLE);
-    }
     m_textItem->document()->setTextWidth((-1)); //never break
     //qDebug() << "Text miniItem Width" << m_textItem->textWidth();
     m_textItem->setPos(QPointF(0,0));
@@ -124,7 +119,6 @@ void TextBarItem::setText(QString text){
 void TextBarItem::updateText(){
     if(!m_textItem){ return;}
 
-
     QFontMetrics fm(m_font);
     qreal w = boundingRect().width();
     qDebug() << "w: " << w;
@@ -139,11 +133,22 @@ void TextBarItem::updateText(){
         text = m_item.formattedName(false);
     } else {
         text = m_item.getName();
+        text = text.left(charsAllowed);
     }
-    text = text.left(charsAllowed);
     text = (tagAs(QString(text),"center"));
     m_textItem->setZValue(zValue()+1);
-    m_textItem->document()->setDefaultStyleSheet(UI_MINIBAR_DEFAULT_STYLE);
+
+//    if(m_item.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
+//        m_textItem->document()->setDefaultStyleSheet(UI_MINIBAR_DEFAULT_STYLE);
+//    } else if(m_item.getFilterRole() == CatItem::CATEGORY_FILTER){
+//        m_textItem->document()->setDefaultStyleSheet(UI_MINIBAR_DEFAULT_STYLE);
+//    } else if(m_item.getItemType() == CatItem::LOCAL_DATA_FOLDER){
+//        m_textItem->document()->setDefaultStyleSheet(UI_MINIBAR_DEFAULT_STYLE);
+//    } else {
+//        m_textItem->document()->setDefaultStyleSheet(UI_MINIBAR_DEFAULT_STYLE);
+//    }
+
+    m_textItem->setHtml(text);
     m_textItem->update();
 }
 
@@ -252,6 +257,9 @@ void TextBarItem::mousePressEvent(QGraphicsSceneMouseEvent * evt) {
     } else {
         if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){ return;}
         setSelected(!m_activated);
+        if(m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY){
+            m_item.setFilterRole(CatItem::CATEGORY_FILTER);
+        }
         emit itemClicked(m_item, m_activated);
     }
 }
@@ -259,7 +267,8 @@ void TextBarItem::mousePressEvent(QGraphicsSceneMouseEvent * evt) {
 void TextBarItem::setSelected(bool sel){
     if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){ return;}
     m_activated = sel;
-    if(m_activated || (m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY)){
+    if(m_activated || (m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY)
+        || (m_item.getFilterRole() == CatItem::CATEGORY_FILTER)){
         m_textItem->setDefaultTextColor(UI_ICONBAR_ITEM_COLOR);
     } else {
         m_textItem->setDefaultTextColor(UI_ICONBAR_ACTIVE_ITEM_COLOR);
@@ -424,17 +433,33 @@ int TextMessageBar::addTextItem(ListItem li, int left){
 }
 
 void TextMessageBar::itemClicked(ListItem it, bool selected){
+    if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
+        if(selected){
+            m_subActiveItem = it;
+        } else {
+            m_subActiveItem = ListItem();
+        }
+    } else if(it.getFilterRole() == CatItem::CATEGORY_FILTER
+              ||it.getFilterRole() == CatItem::ACTIVE_CATEGORY){
+        m_subActiveItem = ListItem();
+        if(selected){
+            m_activeItem = it;
+        } else {
+            m_activeItem = ListItem();
+        }
+    } else if(it.getItemType() == CatItem::LOCAL_DATA_FOLDER){
+        m_subActiveItem = ListItem();
+        m_activeItem = ListItem();
+    }
+
     for(int i=0; i < m_textButtons.count(); i++){
         TextBarItem* tb = m_textButtons[i];
-        if((tb->getItemName()!= it.getName() )){
+        if((tb->getItemName()!= m_activeItem.getName()
+            && tb->getItemName()!= m_subActiveItem.getName())){
             tb->setSelected(false);
         }
     }
-    if(selected){
-        m_activeItem = it;
-    } else {
-        m_activeItem = ListItem();
-    }
+
 
     emit miniIconClicked(it, selected);
     update();

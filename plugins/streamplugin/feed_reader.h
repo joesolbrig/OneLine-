@@ -183,7 +183,7 @@ class HttpHeadReader : public XSLTFeedReader {
 public:
     HttpHeadReader(QObject* parent, CatItem it): XSLTFeedReader(parent,it)  {
         m_filt.setRequestUrl(it.getPath());
-        QString filterPath = PUSER_APP_DIR + XLS_SUBDIR + RSS_HEADER_XSLT;
+        QString filterPath = QString(SCRIPT_DEFAULT_PATH) + XLS_SUBDIR + RSS_HEADER_XSLT;
         m_filt.setFilterFilePath(filterPath);
         m_finished = false;
         connect(parent, SIGNAL(end_current_downloads()), this, SLOT(do_abort()));

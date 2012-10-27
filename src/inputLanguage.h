@@ -225,6 +225,8 @@ public:
                         val = QDir::homePath();
                     } else if(e.valRef.accessValue==APP_HOME_KEY_DIRS){
                         val = USER_APP_DIR;
+                    } else if(e.valRef.accessValue==SCRIPT_HOME_KEY_DIRS){
+                        val = SCRIPT_DEFAULT_PATH;
                     } else if(gDirs->contains(e.valRef.accessValue) ){
                         //empty string return 0 in toInt..
                         int index = e.valRef.initialValue.toInt();
@@ -236,10 +238,6 @@ public:
                     qDebug() << "syntax error - unknown function: " << e.valRef.funct << " at" << e.name;
                     continue;
                 }
-//                if(!rEntry.value.isEmpty() && rEntry.value!=rEntry.valRef.initialValue){
-//                    qDebug() << "warn - skipping asigned Value " << refField ;
-//                    continue;
-//                }
                 e.value = val;
                 e.valRef.initialValue = initialVal;
                 qDebug() << "got final val: " << val;

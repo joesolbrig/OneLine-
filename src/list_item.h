@@ -232,7 +232,7 @@ public:
         }
 
 
-        Q_ASSERT(!a.isEmpty());
+        if(a.isEmpty()){ return -1; }
         int i;
         for(i=0;  (i<a.m_componentList.count() && (i< m_componentList.count())) && a.m_componentList[i]== m_componentList[i];i++){ }
         return i;

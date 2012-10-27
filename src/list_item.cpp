@@ -532,7 +532,7 @@ QString ListItem::sect(int s, int e){
 //First support classes and functions...
 QString ListItem::formattedName(bool fullHtml){
     QString formatedStr = getName();
-    if(this->hasLabel(OVERRIDE_FORMATTED_NAME_KEY)){
+    if(!getCustomString(OVERRIDE_FORMATTED_NAME_KEY).isEmpty()){
         formatedStr =getCustomString(OVERRIDE_FORMATTED_NAME_KEY);
     } else if(!m_useDisplayPathForNextKey){
         QStringList l;

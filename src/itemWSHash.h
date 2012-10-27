@@ -646,7 +646,7 @@ public:
 
     QString getNameForEditLine(QString keyColor = KEY_COLOR,
                              QString extraAttribs ="",
-                             int limit=0) const{
+                             int limit=-1) const{
         return formatStringByKey(getName(),getMatchIndex(),keyColor,extraAttribs, limit );
     }
 
@@ -1148,7 +1148,7 @@ public:
     }
 
     qint32 getSourceWeight(){
-        return getCustomValue(SOURCE_WEIGHT_KEY_STR,0);
+        return getCustomValue(SOURCE_WEIGHT_KEY_STR,SOURCE_WEIGHT_DEFAULT);
     }
     void setSourceWeight(qint32 v){
         setCustomPluginValue(SOURCE_WEIGHT_KEY_STR,v);
@@ -1985,6 +1985,7 @@ public:
         res.setLabel(TYPE_PARENT_KEY);
         res.setSourceWeight(MEDIUM_EXTERNAL_WEIGHT);
         res.setTagLevel(CatItem::INTERNAL_SOURCE);
+        res.setFilterRole(CatItem::CATEGORY_FILTER);
         res.setStub(true);
         return res;
 
@@ -2006,6 +2007,21 @@ public:
     }
 
     void setTemporaryName(QString v){
+        Q_ASSERT(!v.isEmpty());
+        setCustomPluginInfo(TEMPORARY_NAME_KEY_STR,v);
+    }
+
+    QString getPrefixName(){
+        if(!d->m_data.contains(PREFIX_NAME_KEY_STR)){
+            QStringList sl = getName().split(" ");
+            if(sl.count()>0){
+                return sl[0];
+            } else { return ""; }
+        }
+        return this->getCustomString(PREFIX_NAME_KEY_STR);
+    }
+
+    void setPrefixName(QString v){
         Q_ASSERT(!v.isEmpty());
         setCustomPluginInfo(TEMPORARY_NAME_KEY_STR,v);
     }

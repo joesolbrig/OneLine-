@@ -806,6 +806,7 @@ template <class VALUE, class INDEX_TYPE>   class MultiTree {
 
             Q_ASSERT(m_subtrees.contains(subkey));
             Q_ASSERT(!newLevel.isEmpty());
+            if(v.isEmpty()){ return Tuple();}
 
             //Tuple itemInternalId = itemList.getInternalId(v);
             Tuple itemInternalId = m_itemList.insertOrReplace(v);

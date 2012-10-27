@@ -21,6 +21,10 @@ ListInnerLayout::ListInnerLayout(QWidget* parent, CatItem contextItem) :
 
     m_realItemList->setVisible(true);
     m_realItemList->raise();
+    QRect parRect = parent->geometry();
+    parRect.moveTopLeft(QPoint(0,0));
+    m_realItemList->setGeometry(parRect);
+
 
     m_previewPane = new PreviewPane(parent);
     m_previewPane->setVisible(false);
@@ -68,6 +72,7 @@ void ListInnerLayout::removeCatItem(CatItem item){
 
 void ListInnerLayout::setListWidth(int w){
     QRect lG = m_realItemList->geometry();
+    lG.moveTopLeft(QPoint(0,0));
     lG.setWidth(w);
     m_realItemList->setGeometry(lG);
     m_realItemList->update();

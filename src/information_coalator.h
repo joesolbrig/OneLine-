@@ -80,6 +80,7 @@ class OHash {
         }
 
         void addToStore(ListItem c){
+            Q_ASSERT(!c.isEmpty());
             if(!m_hash.contains(c.getId())){
                 m_hash[c.getId()] = c;
             } else {
@@ -405,6 +406,7 @@ public:
         at(pos).setBaseSplitI();
         if(pos>0 && (pos < this->count())){
             int index = at(pos-1).dirDiff( at(pos));
+            if(index==-1){ return;}
             //at(pos-1).setCharsAvailable(this->m_charsAvail);
             at(pos-1).setSplitIndex(index);
             at(pos).setSplitIndex(index);

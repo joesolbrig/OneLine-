@@ -213,18 +213,21 @@ inline QString picklHashToEscdString(QHash<QString, QString> h){
 inline QString formatStringByKey(QString str,
         QList<int> matchIndex, QString keyColor = KEY_COLOR,
         QString extraAttribs ="", int limit=-1){
-   QString formatedStr;
-   int k = 0;
-   int l = -1;
-   int indexLen = matchIndex.size();
-   if(indexLen > 0){
-       l = matchIndex[k]; k++;
-   } else {
-       return str.left(limit);
-   }
-   bool doingColor = false;
-   formatedStr.reserve(str.length() + l);
-   for(int j=0;j < str.length() &&(limit==-1||j<limit) ;j++){
+    QString formatedStr;
+    int k = 0;
+    int l = -1;
+    int indexLen = matchIndex.size();
+    if(indexLen > 0){
+        l = matchIndex[k]; k++;
+    } else if(limit==-1){
+        return str;
+    } else {
+        return str.left(limit);
+    }
+
+    bool doingColor = false;
+    formatedStr.reserve(str.length() + l);
+    for(int j=0;j < str.length() &&(limit==-1||j<limit) ;j++){
        if(j == l ){
            if(!doingColor){
                doingColor = true;
@@ -242,11 +245,11 @@ inline QString formatStringByKey(QString str,
                formatedStr += "</font>";
            }
        }
-   }
-   if (doingColor){
+    }
+    if (doingColor){
        formatedStr += "</font>";
-   }
-   return formatedStr;
+    }
+    return formatedStr;
 }
 
 

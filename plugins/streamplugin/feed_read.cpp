@@ -306,9 +306,6 @@ QByteArray XSLTFeedReader::processRawStream(QByteArray response){
         return QByteArray();
     }
 
-
-
-
     QString code;
     if(m_filt.hasLabel(STREAM_FILTER_SOURCE)){
         code = m_filt.getCustomString(STREAM_FILTER_SOURCE);

@@ -286,6 +286,8 @@ handle_nonexistent_menu_file_changed (MenuMonitor      *monitor,
 				      const char       *path,
 				      GMenuTree        *tree)
 {
+  monitor = monitor;
+  path= path;
   if (event == MENU_MONITOR_EVENT_CHANGED ||
       event == MENU_MONITOR_EVENT_CREATED)
     {
@@ -304,6 +306,8 @@ handle_menu_file_changed (MenuMonitor      *monitor,
 			  const char       *path,
                           GMenuTree        *tree)
 {
+  monitor = monitor;
+  path= path;
   menu_verbose ("\"%s\" %s, marking tree for recanicalization\n",
 		path,
 		event == MENU_MONITOR_EVENT_CREATED ? "created" :
@@ -319,6 +323,7 @@ handle_menu_file_directory_changed (MenuMonitor      *monitor,
 				    const char       *path,
 				    GMenuTree        *tree)
 {
+  monitor = monitor;
   if (!g_str_has_suffix (path, ".menu"))
     return;
 

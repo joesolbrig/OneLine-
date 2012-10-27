@@ -361,18 +361,19 @@ QList<ListItem> Cat_Store::getOrganizingSources(ItemFilter* inputList){
     QList<ListItem> res;
     if(parentItem.isEmpty() ){
         if(!filterItem.isEmpty()){
-            if(filterItem.getOrganizeingType()!=CatItem::MIN_TYPE){
-                QList<CatItem::ItemType>  types = filterItem.getOrganizingTypeList();
-                for(int i=0; i< types.count();i++){
-                    res.append(getSubSourcesFromType(types[i],UI_MINI_COUNT_LIMIT));
-                    ListItem typeRep(CatItem::createTypeParent(types[i]));
+            QList<CatItem::ItemType> types = filterItem.getOrganizingTypeList();
+            for(int i=0; i< types.count();i++){
+                QList<ListItem> subTypes = getSubSourcesFromType(types[i],UI_MINI_COUNT_LIMIT);
+                for(int j=0; j< subTypes.count();j++){
+                    //ListItem typeRep(CatItem::createTypeParent(types[j]));
+                    ListItem typeRep = subTypes[j];
                     typeRep.setFilterRole(CatItem::SUBCATEGORY_FILTER);
                     if(!(typeRep == filterItem)){
                         res.append(typeRep);
                     }
                 }
             }
-            res.append(coalatedSources(inputList));
+            //res.append(coalatedSources(inputList));
             if(!res.isEmpty()){
                 ListItem lfi(filterItem);
                 lfi.setFilterRole(CatItem::ACTIVE_CATEGORY);
@@ -533,13 +534,16 @@ QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* 
         CatItem type = types[i];
         QList<CatItem> subTypes = type.getOrganizingTypeItems();
         for(int j=0; j< subTypes.count();j++){
-            sourceItems.append(subTypes);
-            priorityItems.append(getItemChildrenProtected(
-                    filter,subTypes[j], limit, intialPos));
+            QList<CatItem> typeRes = getItemChildrenProtected(
+                    filter,subTypes[j], limit, intialPos);
+            if(!typeRes.isEmpty()){
+                sourceItems.append(subTypes[j]);
+                priorityItems.append(typeRes);
+            }
         }
     }
 
-    QMap<qreal, CatItem> itemSorter;
+    QMap<long long, CatItem> itemSorter;
     QSet<QString> itemsUsedGuard;
     Q_ASSERT(priorityItems.count() == sourceItems.count());
     for(int i=0;i<priorityItems.count();i++){
@@ -559,11 +563,14 @@ QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* 
                         { continue; }
                 }
             }
-            if(itemsUsedGuard.contains(item.getPath())){ continue;}
+            if( itemsUsedGuard.contains(item.getPath())){ continue;}
             itemsUsedGuard.insert(item.getPath());
-            qreal modWeight = item.getPositiveTotalWeight() *
+            long long modWeight = item.getPositiveTotalWeight() *
                               source.getSourceWeight();
-            itemSorter[modWeight] = item;
+
+            if(!item.isEmpty()){
+                itemSorter.insertMulti(modWeight, item);
+            }
         }
     }
     QList<CatItem> res = itemSorter.values();
@@ -1089,6 +1096,7 @@ void Cat_Store::reweightItems(QList<CatItem>* forExtension){
 //So perhaps we should do source reweighting elsewhere
 void Cat_Store::addVisibilityEvent(CatItem item, UserEvent evt){
     QMutexLocker locker(&catalogMutex);
+    if(item.isEmpty()){ return; }
 
     time_t n = appGlobalTime();
     if(evt.event_type == UserEvent::NEW_MESSAGES_NOTED){
@@ -1440,21 +1448,23 @@ QList<CatItem> Cat_Store::findRecentUnseenReadProtected(time_t cutOff){
     return res;
 }
 
-QList<CatItem> Cat_Store::getItemChildrenProtected(ItemFilter* inputList,CatItem it,
+QList<CatItem> Cat_Store::getItemChildrenProtected(ItemFilter* inputList,CatItem parent,
         long limit, int* intialPos){
-    if(it == CatItem::createTypeParent(CatItem::MESSAGE)){
+    if(parent == CatItem::createTypeParent(CatItem::MESSAGE)){
         return getInitialMessages(limit, inputList, limit, intialPos);
     }
 
     int offset = intialPos? *intialPos: 0;
     vector<DbChildRelation> crs = child_index.get_range(
-            Tuple(it.getItemId()), Tuple(it.getItemId()+1), C_BY_PARENTID_RELW, limit,offset);
+            Tuple(parent.getItemId()), Tuple(parent.getItemId()+1), C_BY_PARENTID_RELW, limit,offset);
     QList<CatItem> items;
     for(unsigned int i=0; i< crs.size();i++){
+        if(crs.at(i).getParentPath() != parent.getPath()){ continue;}
         CatItem child = item_index.getValue(crs.at(i).getChildPath());
         child.clearRelations();
-        if(crs.at(i).getParentPath() != it.getPath()){continue;}
+        if(crs.at(i).getParentPath() != parent.getPath()){continue;}
         if(inputList && !inputList->acceptItem(&child)){continue;}
+        Q_ASSERT(!child.isEmpty());
         items.append(child);
     }
     return items;

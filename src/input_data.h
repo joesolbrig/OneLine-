@@ -485,7 +485,7 @@ public:
     QList<ListItem> getFilterItems(int itemsHigh, int charsAvail, int minWeight){
         QList<ListItem> list = curState().getOrganizingFiltersItems(itemsHigh, charsAvail, minWeight);
         for(int i=0; i<list.count(); i++){
-            if(list[i] == this->getFilterItem()){
+            if(list[i] == curState().getFilterItem()){
                 list[i].setLabel(ACTIVE_FILTER_ITEM_KEY);
             }
         }
