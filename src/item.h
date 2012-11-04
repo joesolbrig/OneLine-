@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "qapplication.h"
 #include "qdesktopwidget.h"
 
-#include "globals.h"
+//#include "globals.h"
 
 /*This is included nearly everywhere, so it includes some general purpose routines and classes
 
@@ -562,7 +562,7 @@ class BaseChildRelation {
 
 //#include "itemWFields.h"
 //#include "itemWHash.h"
-#include "globals.h"
+//#include "globals.h"
 #include "itemWSHash.h"
 
 class DetachedChildRelation : public BaseChildRelation {

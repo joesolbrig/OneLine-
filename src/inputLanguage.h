@@ -13,7 +13,7 @@
 #include "item.h"
 #include "list_item.h"
 //#include "input_list.h"
-#include "globals.h"
+//#include "globals.h"
 
 
 struct ExtraFieldReference{
@@ -223,17 +223,16 @@ public:
                 } else if(e.valRef.funct == DIR_FUNCTION){
                     if(e.valRef.accessValue=="home"){
                         val = QDir::homePath();
-                    } else if(e.valRef.accessValue==APP_HOME_KEY_DIRS){
-                        val = USER_APP_DIR;
                     } else if(e.valRef.accessValue==SCRIPT_HOME_KEY_DIRS){
                         val = SCRIPT_DEFAULT_PATH;
-                    } else if(gDirs->contains(e.valRef.accessValue) ){
-                        //empty string return 0 in toInt..
-                        int index = e.valRef.initialValue.toInt();
-                        if(gDirs->value(e.valRef.accessValue).length()>0){
-                            val = gDirs->value(e.valRef.accessValue)[index];
-                        }
                     }
+//                    else if(gDirs->contains(e.valRef.accessValue) ){
+//                        //empty string return 0 in toInt..
+//                        int index = e.valRef.initialValue.toInt();
+//                        if(gDirs->value(e.valRef.accessValue).length()>0){
+//                            val = gDirs->value(e.valRef.accessValue)[index];
+//                        }
+//                    }
                 } else {
                     qDebug() << "syntax error - unknown function: " << e.valRef.funct << " at" << e.name;
                     continue;

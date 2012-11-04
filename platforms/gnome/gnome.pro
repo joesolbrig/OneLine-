@@ -32,7 +32,8 @@ SOURCES = platform_x11_hotkey.cpp \
     ../unix/platform_unix_util.cpp \
     ../../src/itemarglist.cpp \
     ../../src/inputLanguage.cpp \
-    hookGnomeWindows.cpp
+    hookGnomeWindows.cpp \
+    ../../src/globals.cpp
 HEADERS = platform_base.h \
     platform_gnome.h \
     platform_base_hotkey.h \
@@ -48,7 +49,6 @@ CONFIG += link_pkgconfig
 PKGCONFIG += gtk+-2.2 \
     libgnomeui-2.0 \
     libwnck-1.0
-
 
 # gnome-desktop-2.2
 LIBS += -lX11 \

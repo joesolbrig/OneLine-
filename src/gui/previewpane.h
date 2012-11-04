@@ -11,7 +11,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-#include "globals.h"
+//#include "globals.h"
 #include "item.h"
 #include "url_change_receiver.h"
 

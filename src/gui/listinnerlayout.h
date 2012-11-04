@@ -19,7 +19,7 @@
 #include "list_item.h"
 #include "icon_delegate.h"
 //#include "iconspreadwindow.h"
-#include "../globals.h"
+//#include "../globals.h"
 
 #include "previewpane.h"
 #include "borderwindow.h"

@@ -291,6 +291,29 @@ void ListWithDisplay::addMiniIconList(QList<ListItem> items){
     setBaseGeometry();
 }
 
+void ListWithDisplay::setGeometry(QRect r){
+    if(r.height() > UI_RECT_YRADIUS*2 &&
+            r.width() > UI_RECT_XRADIUS*2 ){
+        setMask(FancyEnclosingRect::getStandardBox(r));
+    }
+    QWidget::setGeometry(r);
+}
+
+void ListWithDisplay::setFullGeometry(QRect r){
+    if(r.height() > UI_RECT_YRADIUS*2 &&
+            r.width() > UI_RECT_XRADIUS*2 ){
+        setMask(FancyEnclosingRect::getStandardBox(r));
+    }
+    m_width = r.width();
+    for(int i=0; i< m_viewStack.count();i++){
+        QRect r = m_viewStack[i]->geometry();
+        r.setWidth(MIN(r.width(),m_width));
+        m_viewStack[i]->setGeometry(r);
+    }
+    QWidget::setGeometry(r);
+}
+
+
 void ListWithDisplay::hideIconList(){
     m_miniIconBar->setVisible(false);
     m_showIconList = false;

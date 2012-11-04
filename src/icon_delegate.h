@@ -3,7 +3,7 @@
 
 #include <QAbstractItemDelegate>
 #include "constants.h"
-#include "globals.h"
+//#include "globals.h"
 #include "item.h"
 
 

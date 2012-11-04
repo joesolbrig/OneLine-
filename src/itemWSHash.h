@@ -11,7 +11,9 @@
 
 #include "constants.h"
 #include "item.h"
+//#include "platform_base.h"
 
+class PlatformBase;
 #define USING_ITEM_HASH_CLASS
 #define USING_STRING_HASH
 
@@ -1112,7 +1114,7 @@ public:
         weight = MIN(weight, MAX_MAX_FULL_WEIGHT);
         setSourceWeight(weight);
         Q_ASSERT(getSourceWeight()==weight);
-        Q_ASSERT(abs(((log2(weight)*WEIGHT_TICS)/maxWeightSection)-i)<=1);
+        Q_ASSERT(abs((long long)(((log2(weight)*WEIGHT_TICS)/maxWeightSection)-i))<=1);
         int tic = getSourceWeightTics();
         tic = tic;
         Q_ASSERT(abs(tic-i)<=1);

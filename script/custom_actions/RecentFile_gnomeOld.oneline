@@ -1,6 +1,6 @@
-Xlst_Filter_Source_Path=$dir.apphome/xsl_code/oorecent_items.xsl
+Xlst_Filter_Source_Path=$dir.scripthome/xsl_code/oorecent_items.xsl
 STREAM_FILTER_FILESOURCE=1
-Stream_Source_Path=$dir.home/recently-used
+Stream_Source_Path=$dir.scripthome/recently-used
 EXTERNAL_WEIGHT_KEY_STR=5120
 SOURCE_WEIGHT_KEY_STR="1000000"
 TAG_LEVEL_KEY_STR=5

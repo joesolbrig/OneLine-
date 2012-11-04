@@ -5,7 +5,7 @@
 #include <QLabel>
 #include <QPropertyAnimation>
 
-#include "globals.h"
+//#include "globals.h"
 #include "item.h"
 
 #define SECTION_HEIGHT 5

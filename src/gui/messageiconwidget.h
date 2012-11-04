@@ -28,7 +28,7 @@
 
 #include "information_coalator.h"
 #include "fancyHorizontallabel.h"
-#include "globals.h"
+//#include "globals.h"
 #include "main.h"
 
 class MessageIconWidget;

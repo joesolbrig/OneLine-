@@ -15,7 +15,7 @@
 
 #include "history_item.h"
 #include "trie_node.h"
-#include "globals.h"
+//#include "globals.h"
 
 //This is an "object database" layer living on top of Kyoto cabinet
 //and a series of custom b-tree indices

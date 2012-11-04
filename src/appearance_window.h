@@ -31,7 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "edit_controls.h"
 #include "catalog.h"
 #include "icon_delegate.h"
-#include "globals.h"
+//#include "globals.h"
 #include "list_item.h"
 #include "cat_builder.h"
 
@@ -256,6 +256,8 @@ public:
     bool tryShowPreview();
     bool tryHidePreview();
     void hidePreview();
+    void trySetFocus();
+    void tryHideMenu();
     virtual bool refreshExtendCatalog(bool forceLoad=false, bool forceExtend=false);
     void extendSelectedItem();
 

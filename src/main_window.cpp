@@ -681,11 +681,9 @@ void MainUserWindow::focusOutEvent ( QFocusEvent * evt) {
             return;
         }
     } else {
-        //My main window is greedy and ALWAYS wants the focus
+        //Main window wants focus if nothing's on top
         qDebug() << "lost focus 'cause" << evt->reason();
-        if(!st_OptionsOpen){
-            setFocus();
-        }
+        trySetFocus();
     }
     savePosition();
 }
@@ -696,14 +694,8 @@ void MainUserWindow::focusInEvent ( QFocusEvent *) {
         qDebug() << "show list cause I gained focus...";
         m_itemChoiceList->setVisible(true);
     }
-    if(m_contextMenu){
-        FancyContextMenu* t = m_contextMenu;
-        m_contextMenu = 0;
-        t->close();
-        t->deleteLater();
-    }
-
-    setFocus();
+    tryHideMenu();
+    trySetFocus();
 }
 
 void MainUserWindow::itemsUpdatedFromBackground(QList<CatItem> its){
@@ -1020,10 +1012,29 @@ void MainUserWindow::updateDisplay() {
     }
     showitemList();
     setItem();
-    setFocus();
     st_updatingDisplay = false;
     gMarginWidget->gSetAppPos();
+    trySetFocus();
 }
+
+void MainUserWindow::trySetFocus(){
+    if(!st_OptionsOpen && !m_contextMenu){
+        setFocus();
+    } else if(m_contextMenu){
+        m_contextMenu->raise();
+        m_contextMenu->setFocus();
+    }
+}
+void MainUserWindow::tryHideMenu(){
+    if(m_contextMenu){
+        FancyContextMenu* t = m_contextMenu;
+        m_contextMenu = 0;
+        Q_ASSERT(!m_contextMenu);
+        t->close();
+        t->deleteLater();
+    }
+}
+
 
 void MainUserWindow::showTaskBar(){
     m_inputDisplay->setEditVisibility(false);
@@ -1095,7 +1106,7 @@ void MainUserWindow::menuEvent(QContextMenuEvent* evt) {
 
 void MainUserWindow::listMenuEvent(QString itemPath, QPoint p) {
     CatItem item = m_inputList.getItemByPath(itemPath);
-    if(!m_contextMenu && m_inputList.slotPosition()==0 && !item.isEmpty()){
+    if(!m_contextMenu && m_inputList.atFirstSlot() && !item.isEmpty()){
         CatBuilder::updateItem(item,2,UserEvent::SELECTED, true);
         InputList il;
         il.setItem(item);
@@ -1351,7 +1362,7 @@ void MainUserWindow::textChanged(QString newText, QString /* curWord */, int cur
     st_UserChoiceChanged = true;
     st_KeyFromEdit = true;
     m_inputList.modifyUserText(newText, cursorLocation);
-    setFocus();
+    trySetFocus();
 }
 
 void MainUserWindow::inputKeyPressEvent(QKeyEvent* key) {
@@ -1625,6 +1636,7 @@ void MainUserWindow::operateOnItem(QString path, const CatItem opItem){
                 st_TakeItemFromList = true;
             }
             st_UserChoiceChanged = true;
+            tryHideMenu();
         }
     }
     updateDisplay();
@@ -2016,11 +2028,10 @@ bool MainUserWindow::processControlKey(QKeyEvent* controlKey){
             }
             break;
         default:
-            setFocus();
+            trySetFocus();
             return false; //We can't do anything so continue normal processing
     }
     updateDisplay();
-    setFocus();
     return handled;
 }
 

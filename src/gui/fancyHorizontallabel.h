@@ -6,7 +6,7 @@
 #include <QPropertyAnimation>
 
 #include "item.h"
-#include "globals.h"
+//#include "globals.h"
 
 #define SECTION_WIDTH 20
 

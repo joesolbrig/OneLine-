@@ -60,7 +60,7 @@ install_debug:: debug
 	-install -d $(DESTDIR)$(SCRIPT_PATH)/custom_actions
 	-install -m 666 script/custom_actions/*.* $(DESTDIR)$(SCRIPT_PATH)/custom_actions
 	-install -d $(DESTDIR)$(SCRIPT_PATH)/js
-	-install m 666 script/js/*.* $(DESTDIR)$(SCRIPT_PATH)/js
+	-install -m 666 script/js/*.* $(DESTDIR)$(SCRIPT_PATH)/js
 	-install -d $(DESTDIR)$(SCRIPT_PATH)/xsl_code
 	install -m 666 script/xsl_code/*.* $(DESTDIR)$(SCRIPT_PATH)/xsl_code
 	-install -d $(DESTDIR)$(SCRIPT_PATH)/shell

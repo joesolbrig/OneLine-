@@ -2,7 +2,7 @@
 #include "is_test.h"
 #define THE_APP_MAIN
 #include <QKeyEvent>
-#include "globals.h"
+//#include "globals.h"
 #include "marginwindow.h"
 #include "constants.h"
 

@@ -38,6 +38,7 @@ FancyContextMenu::FancyContextMenu(CatItem priorityItem, QList<CatItem> actionCh
             this, SLOT(sourceChanged()));
     connect(&m_slider, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)));
     m_topLabel.setItemList(priorityParents);
+    sourceChanged();
 //    int w = priorityParent.getSourceWeightTics();
 //    qDebug() << "FancyContextMenu setting scaledWeight:" << w;
 //    m_slider.setValue(w);

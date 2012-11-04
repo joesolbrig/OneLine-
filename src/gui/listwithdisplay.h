@@ -18,7 +18,7 @@
 #include "list_item.h"
 #include "icon_delegate.h"
 //#include "iconspreadwindow.h"
-#include "../globals.h"
+//#include "../globals.h"
 
 #include "previewpane.h"
 #include "borderwindow.h"
@@ -80,27 +80,8 @@ class ListWithDisplay : public QWidget {
 public:
     ListWithFrame * m_previewFrame;
 
-    void setGeometry(QRect r=QRect()){
-        if(r.height() > UI_RECT_YRADIUS*2 &&
-                r.width() > UI_RECT_XRADIUS*2 ){
-            setMask(FancyEnclosingRect::getStandardBox(r));
-        }
-        QWidget::setGeometry(r);
-    }
-
-    void setFullGeometry(QRect r=QRect()){
-        if(r.height() > UI_RECT_YRADIUS*2 &&
-                r.width() > UI_RECT_XRADIUS*2 ){
-            setMask(FancyEnclosingRect::getStandardBox(r));
-        }
-        m_width = r.width();
-        for(int i=0; i< m_viewStack.count();i++){
-            QRect r = m_viewStack[i]->geometry();
-            r.setWidth(MIN(r.width(),m_width));
-            m_viewStack[i]->setGeometry(r);
-        }
-        QWidget::setGeometry(r);
-    }
+    void setGeometry(QRect r=QRect());
+    void setFullGeometry(QRect r=QRect());
 
     bool showingSidePreview() {return (m_previewFrame!=0);}
 

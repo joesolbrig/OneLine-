@@ -21,7 +21,7 @@
 
 #include "information_coalator.h"
 #include "fancyHorizontallabel.h"
-#include "globals.h"
+//#include "globals.h"
 
 
 //#include "GnomeSignalReceiver.h"

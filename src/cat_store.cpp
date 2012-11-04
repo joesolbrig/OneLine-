@@ -2,6 +2,7 @@
 #include "cat_store.h"
 #include "cat_builder.h"
 #include "itemarglist.h"
+#include "globals.h"
 
 //First six chars digitized in order, ignoring anything but alpha differences
 long codeStringStart(QString str){
@@ -15,8 +16,6 @@ long codeStringStart(QString str){
     }
     return res;
 }
-
-
 
 Cat_Store::Cat_Store(bool shouldRestore, QString overideDir) :
     RELEVANTCE_BUCKET_COUNT(10),
@@ -530,6 +529,7 @@ QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* 
 
     QList<CatItem> types = getHighestSourceParents(filter);
     QList<CatItem> sourceItems;
+    int totalItems=0;
     for(int i=0; i< types.count();i++){
         CatItem type = types[i];
         QList<CatItem> subTypes = type.getOrganizingTypeItems();
@@ -539,6 +539,7 @@ QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* 
             if(!typeRes.isEmpty()){
                 sourceItems.append(subTypes[j]);
                 priorityItems.append(typeRes);
+                totalItems+=typeRes.count();
             }
         }
     }
@@ -565,8 +566,9 @@ QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* 
             }
             if( itemsUsedGuard.contains(item.getPath())){ continue;}
             itemsUsedGuard.insert(item.getPath());
-            long long modWeight = item.getPositiveTotalWeight() *
-                              source.getSourceWeight();
+//            long long modWeight = item.getPositiveTotalWeight() *
+//                              source.getSourceWeight();
+            long long modWeight = (totalItems - j*log(source.getSourceWeight()+2));
 
             if(!item.isEmpty()){
                 itemSorter.insertMulti(modWeight, item);
