@@ -110,7 +110,7 @@ class Cat_Store {
                         CatItem::ItemType end_type=(CatItem::ItemType)(((int)CatItem::MAX_TYPE)));
         QList<CatItem> getItemsByKey(QString keystrokes, ItemFilter* filter,
                                      int count=-1, int* beginPos=0);
-        QList<ListItem> getBaseSources();
+        //QList<ListItem> getBaseSources();
         QList<ListItem> getCondensedSources();
         QList<ListItem> getOrganizingSources(ItemFilter* inputList);
         QList<ListItem> getSubSourcesFromType(CatItem::ItemType type, int limit=UI_MINI_COUNT_LIMIT);

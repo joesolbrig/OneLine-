@@ -223,98 +223,98 @@ QList<ListItem> Cat_Store::getFileSources(){
 
 }
 
-QList<ListItem> Cat_Store::getBaseSources(){
-    time_t now = ::appGlobalTime();
-    QList<ListItem> results;
-
-    QList<ListItem> fileChars = getFileSources();
-
-    CatItem verbs_i(VERB_TYPE_PATH,VERB_NAME);
-    ListItem verbs(verbs_i);
-    verbs.setOrganizingType(CatItem::VERB);
-    verbs.setItemType(CatItem::ORGANIZING_TYPE);
-    verbs.setIcon(UI_NEXTACTION_PLACEHOLDER_ICON);
-    results.append(verbs);
-
-    CatItem files_i(FILE_TYPE_PATH,FILES_NAME);
-    ListItem files(files_i);
-    files.setOrganizingType(CatItem::LOCAL_DATA_DOCUMENT);
-    files.setItemType(CatItem::ORGANIZING_TYPE);
-    files.setIcon(FILE_TYPE_ICON);
-    for(int i=0; i< fileChars.count(); i++){
-        files.addChild(fileChars[i]);
-    }
-    results.append(files);
-
-
-    CatItem sites_i(WEBADDRESS_PATH, WEBPAGE_NAME);
-    ListItem sites(sites_i);
-    sites.setOrganizingType(CatItem::PUBLIC_DOCUMENT);
-    sites.setItemType(CatItem::ORGANIZING_TYPE);
-    sites.setIcon(TAG_TYPE_ICON);
-    results.append(sites);
-
-    CatItem categories_i(CATEGORY_TYPE_PATH, CATEGORY_NAME);
-    ListItem categories(categories_i);
-    categories.setOrganizingType(CatItem::TAG);
-    categories.setItemType(CatItem::ORGANIZING_TYPE);
-    categories.setIcon(TAG_TYPE_ICON);
-
-    CatItem messages_i(UNSEEN_MSG_ITEMS_PATH, MESSAGES_NAME);
-    ListItem messages(messages_i);
-    messages.setOrganizingType(CatItem::MESSAGE);
-    messages.setItemType(CatItem::ORGANIZING_TYPE);
-    messages.setIcon(MESSAGE_TYPE_ICON);
-    results.append(messages);
-
-    CatItem people_i(PEOPLE_PATH, PEOPLE_NAME);
-    ListItem people(people_i);
-    people.setOrganizingType(CatItem::PERSON);
-    people.setItemType(CatItem::ORGANIZING_TYPE);
-    people.setIcon(PERSON_TYPE_ICON);
-
-    CatItem newsItems_i(UNSEEN_ITEMS_PATH, NEW_POSTS_NAME);
-    ListItem newsItems(newsItems_i);
-    newsItems.setOrganizingType(CatItem::PUBLIC_POST);
-    newsItems.setItemType(CatItem::ORGANIZING_TYPE);
-    newsItems.setIcon(FEED_TYPE_ICON);
-
-    Tuple endMessageTuple((CatItem::MESSAGE),now);
-    Tuple startMessageTuple((CatItem::MESSAGE),now-m_lastViewUpdate);
-    int unseenMessages=item_index.get_range_count(
-            startMessageTuple,endMessageTuple, I_BY_MESSAGETIME);
-    Tuple endWebTuple((CatItem::PUBLIC_DOCUMENT),now);
-    Tuple startWebTuple((CatItem::PUBLIC_DOCUMENT),now-m_lastViewUpdate);
-    int unseenItems=item_index.get_range_count(
-            startWebTuple,endWebTuple, I_BY_MESSAGETIME);;
-
-//            vector<CatItem> scrs = item_index.get_range_by_pos(now-lastViewUpdate,now,I_BY_TIME);
-//            for(unsigned int i=0;i<scrs.size();i++) {
-//                if(scrs[i].getItemType()==CatItem::MESSAGE)
-//                    { unseenMessages++;}
-//                if(scrs[i].getItemType()==CatItem::PUBLIC_DOCUMENT)
-//                    { unseenItems++; }
-//            }
-
-    messages.setCustomPluginValue(NEW_ITEM_OF_TYPE_KEY,unseenMessages);
-    newsItems.setCustomPluginValue(NEW_ITEM_OF_TYPE_KEY,unseenItems);
-
-    results.append(newsItems);
-    results.append(people);
-    results.append(categories);
-
-//            CatItem typeParent(addPrefix(TYPE_PREFIX,QString::number(CatItem::ORGANIZING_TYPE)));
-//            QList<ListItem> otherTypes = getTypeChildItems(typeParent,100);
+//QList<ListItem> Cat_Store::getBaseSources(){
+//    time_t now = ::appGlobalTime();
+//    QList<ListItem> results;
 //
-//            for(int i=0; i<otherTypes.count(); i++){
-//                if(otherTypes[i].hasLabel(TYPE_PREFIX)
-//                    && !otherTypes[i].getName().isEmpty()
-//                    && (otherTypes[i].hasLabel(ORGANIZING_CHARACTERISTIC_KEY))){
-//                    res.append(otherTypes[i]);
-//                }
-//            }
-    return results;
-}
+//    QList<ListItem> fileChars = getFileSources();
+//
+//    CatItem verbs_i(VERB_TYPE_PATH,VERB_NAME);
+//    ListItem verbs(verbs_i);
+//    verbs.setOrganizingType(CatItem::VERB);
+//    verbs.setItemType(CatItem::ORGANIZING_TYPE);
+//    verbs.setIcon(UI_NEXTACTION_PLACEHOLDER_ICON);
+//    results.append(verbs);
+//
+//    CatItem files_i(FILE_TYPE_PATH,FILES_NAME);
+//    ListItem files(files_i);
+//    files.setOrganizingType(CatItem::LOCAL_DATA_DOCUMENT);
+//    files.setItemType(CatItem::ORGANIZING_TYPE);
+//    files.setIcon(FILE_TYPE_ICON);
+//    for(int i=0; i< fileChars.count(); i++){
+//        files.addChild(fileChars[i]);
+//    }
+//    results.append(files);
+//
+//
+//    CatItem sites_i(WEBADDRESS_PATH, WEBPAGE_NAME);
+//    ListItem sites(sites_i);
+//    sites.setOrganizingType(CatItem::PUBLIC_DOCUMENT);
+//    sites.setItemType(CatItem::ORGANIZING_TYPE);
+//    sites.setIcon(TAG_TYPE_ICON);
+//    results.append(sites);
+//
+//    CatItem categories_i(CATEGORY_TYPE_PATH, CATEGORY_NAME);
+//    ListItem categories(categories_i);
+//    categories.setOrganizingType(CatItem::TAG);
+//    categories.setItemType(CatItem::ORGANIZING_TYPE);
+//    categories.setIcon(TAG_TYPE_ICON);
+//
+//    CatItem messages_i(UNSEEN_MSG_ITEMS_PATH, MESSAGES_NAME);
+//    ListItem messages(messages_i);
+//    messages.setOrganizingType(CatItem::MESSAGE);
+//    messages.setItemType(CatItem::ORGANIZING_TYPE);
+//    messages.setIcon(MESSAGE_TYPE_ICON);
+//    results.append(messages);
+//
+//    CatItem people_i(PEOPLE_PATH, PEOPLE_NAME);
+//    ListItem people(people_i);
+//    people.setOrganizingType(CatItem::PERSON);
+//    people.setItemType(CatItem::ORGANIZING_TYPE);
+//    people.setIcon(PERSON_TYPE_ICON);
+//
+//    CatItem newsItems_i(UNSEEN_ITEMS_PATH, NEW_POSTS_NAME);
+//    ListItem newsItems(newsItems_i);
+//    newsItems.setOrganizingType(CatItem::PUBLIC_POST);
+//    newsItems.setItemType(CatItem::ORGANIZING_TYPE);
+//    newsItems.setIcon(FEED_TYPE_ICON);
+//
+//    Tuple endMessageTuple((CatItem::MESSAGE),now);
+//    Tuple startMessageTuple((CatItem::MESSAGE),now-m_lastViewUpdate);
+//    int unseenMessages=item_index.get_range_count(
+//            startMessageTuple,endMessageTuple, I_BY_MESSAGETIME);
+//    Tuple endWebTuple((CatItem::PUBLIC_DOCUMENT),now);
+//    Tuple startWebTuple((CatItem::PUBLIC_DOCUMENT),now-m_lastViewUpdate);
+//    int unseenItems=item_index.get_range_count(
+//            startWebTuple,endWebTuple, I_BY_MESSAGETIME);;
+//
+////            vector<CatItem> scrs = item_index.get_range_by_pos(now-lastViewUpdate,now,I_BY_TIME);
+////            for(unsigned int i=0;i<scrs.size();i++) {
+////                if(scrs[i].getItemType()==CatItem::MESSAGE)
+////                    { unseenMessages++;}
+////                if(scrs[i].getItemType()==CatItem::PUBLIC_DOCUMENT)
+////                    { unseenItems++; }
+////            }
+//
+//    messages.setCustomPluginValue(NEW_ITEM_OF_TYPE_KEY,unseenMessages);
+//    newsItems.setCustomPluginValue(NEW_ITEM_OF_TYPE_KEY,unseenItems);
+//
+//    results.append(newsItems);
+//    results.append(people);
+//    results.append(categories);
+//
+////            CatItem typeParent(addPrefix(TYPE_PREFIX,QString::number(CatItem::ORGANIZING_TYPE)));
+////            QList<ListItem> otherTypes = getTypeChildItems(typeParent,100);
+////
+////            for(int i=0; i<otherTypes.count(); i++){
+////                if(otherTypes[i].hasLabel(TYPE_PREFIX)
+////                    && !otherTypes[i].getName().isEmpty()
+////                    && (otherTypes[i].hasLabel(ORGANIZING_CHARACTERISTIC_KEY))){
+////                    res.append(otherTypes[i]);
+////                }
+////            }
+//    return results;
+//}
 
 QList<ListItem> Cat_Store::getCondensedSources(){
     time_t now = ::appGlobalTime();
@@ -358,6 +358,7 @@ QList<ListItem> Cat_Store::getOrganizingSources(ItemFilter* inputList){
     CatItem parentItem = inputList->getParentItem();
     CatItem filterItem = inputList->getFilterItem();
     QList<ListItem> res;
+    QSet<QString> dupGuard;
     if(parentItem.isEmpty() ){
         if(!filterItem.isEmpty()){
             QList<CatItem::ItemType> types = filterItem.getOrganizingTypeList();
@@ -366,13 +367,13 @@ QList<ListItem> Cat_Store::getOrganizingSources(ItemFilter* inputList){
                 for(int j=0; j< subTypes.count();j++){
                     //ListItem typeRep(CatItem::createTypeParent(types[j]));
                     ListItem typeRep = subTypes[j];
+                    if(dupGuard.contains(typeRep.getPath())){ continue; }
+                    dupGuard.insert(typeRep.getPath());
+                    if((typeRep == filterItem)){ continue;}
                     typeRep.setFilterRole(CatItem::SUBCATEGORY_FILTER);
-                    if(!(typeRep == filterItem)){
-                        res.append(typeRep);
-                    }
+                    res.append(typeRep);
                 }
             }
-            //res.append(coalatedSources(inputList));
             if(!res.isEmpty()){
                 ListItem lfi(filterItem);
                 lfi.setFilterRole(CatItem::ACTIVE_CATEGORY);
@@ -380,7 +381,6 @@ QList<ListItem> Cat_Store::getOrganizingSources(ItemFilter* inputList){
                 return res;
             }
         }
-        //return getCondensedSources();
         return ListItem::convertList(getHighestSourceParents(inputList));
     } else if(parentItem.hasLabel(FILE_CATALOG_PLUGIN_STR)){
         return getFileSources();
@@ -394,15 +394,20 @@ QList<ListItem> Cat_Store::getSubSourcesFromType(CatItem::ItemType type, int lim
     QList<ListItem> res;
     //CatItem typeParent(addPrefix(TYPE_PREFIX,QString::number(type)));
     CatItem typeParent = CatItem::createTypeParent(type);
+    if(typeParent.isASource()){
+        res.append(ListItem(typeParent));
+    }
 
     vector<DbChildRelation> crs = child_index.get_range(
-            Tuple(typeParent.getItemId()), Tuple(typeParent.getItemId()+1), C_SOURCE_BY_PARENT_TYPE,limit);
+            Tuple(typeParent.getItemId()), Tuple(typeParent.getItemId()+1), C_SOURCE_BY_PARENT_TYPE,limit*5);
     for(unsigned int i=0; i< MIN(crs.size(),(unsigned)limit);i++){
         QString path = (crs[i].getChildPath());
         CatItem item = this->getItemByPathPrivate(path,1);
+        if(item.getSourceWeightTics() <= STANDARD_TICS){ continue;}
         if(item.isEmpty()){ continue;}
-        if(!item.hasSourceWeight()){ continue;}
+        if(!item.isASource()){ continue;}
         ListItem li(item);
+        li.setLabel(CLOSABLE_ORGANIZING_SOURCE_KEY);
         res.append(li);
     }
 
@@ -492,6 +497,7 @@ QList<CatItem> Cat_Store::getHighestSourceParents(ItemFilter* filter){
 
         for(int i=0;  i< highSourceItems.count(); i++){
             CatItem source = highSourceItems[i];
+            source.setLabel(CLOSABLE_ORGANIZING_SOURCE_KEY);
             if(!source.isCategorizingSource()){continue; }
             if(!source.isUserItem()){ continue; }
             if(!addedType && (source.getSourceWeightTics() < ITEM_TYPE_LEVEL
@@ -1419,7 +1425,7 @@ void Cat_Store::addItemEntryProtected(CatItem itemToAdd){
     //Q_ASSERT(items_by_keys.find(toAdd.shortName,3,0).contains(it));
     if(itemToAdd.isUpdatableSource()){
         int totalSourceUpdateWeight(0);
-        if(itemToAdd.hasSourceWeight()){
+        if(itemToAdd.isASource()){
             totalSourceUpdateWeight = calcUpdatability(itemToAdd);
         }
         totalSourceUpdateWeight = MAX(totalSourceUpdateWeight, itemToAdd.getPositiveTotalWeight()/10);
@@ -1548,7 +1554,7 @@ int Cat_Store::restoreRelationByIndex(CatItem& it, QString index, int depth){
 }
 
 CatItem Cat_Store::addItemProtected(CatItem itemToAdd, int recur){
-    if(itemToAdd.hasSourceWeight()){
+    if(itemToAdd.isASource()){
         qDebug() << "got source: " << itemToAdd.getPath();
 
     }
@@ -1770,18 +1776,22 @@ void Cat_Store::addRelation(DetachedChildRelation cr, int recur){
         Tuple sibTuple(cr.getParentId(),cr.getSiblingOrder());
         child_index.addEntry( sibTuple, dbR, C_BY_PARENTID_SIBLING_CHILDS);
     }
-
-    if(cr.getChildType() == BaseChildRelation::WEIGHT_SOURCE
-       ||( child.hasSourceWeight())){
-        if(cr.getSourceWeight()>=0 ){
-            Tuple swTuple(parentId, cr.getSourceWeight());
-            child_index.addEntry( swTuple, dbR, C_SOURCE_BY_PARENT_TYPE);
-        } else if(child.getSourceWeight()>0){
-            Tuple swTuple(parentId, child.getSourceWeight());
-            qDebug() << "added source parent: " << child.getPath();
-            child_index.addEntry( swTuple, dbR, C_SOURCE_BY_PARENT_TYPE);
-        }
+    if(child.isASource()){
+        Tuple swTuple(parentId, child.getSourceWeight());
+        qDebug() << "added source parent: " << child.getPath();
+        child_index.addEntry( swTuple, dbR, C_SOURCE_BY_PARENT_TYPE);
     }
+//    if(cr.getChildType() == BaseChildRelation::WEIGHT_SOURCE
+//       ||( child.isASource())){
+//        if(cr.getSourceWeight()>=0 ){
+//            Tuple swTuple(parentId, cr.getSourceWeight());
+//            child_index.addEntry( swTuple, dbR, C_SOURCE_BY_PARENT_TYPE);
+//        } else if(child.getSourceWeight()>0){
+//            Tuple swTuple(parentId, child.getSourceWeight());
+//            qDebug() << "added source parent: " << child.getPath();
+//            child_index.addEntry( swTuple, dbR, C_SOURCE_BY_PARENT_TYPE);
+//        }
+//    }
 
     if(dbR.getIsAction() && (child.getActionType() == CatItem::VERB_ACTION)){
         child_index.addEntry( parentId, dbR, C_VERB_BY_ACTIONPARENT);

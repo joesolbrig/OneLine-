@@ -14,7 +14,50 @@
 #include "listwithframe.h"
 #include "fancycontextmenu.h"
 
-//Qt::FramelessWindowHint | Qt::Tool
+
+
+MultiItemLabel::MultiItemLabel(FancyContextMenu* parent): QLabel(parent) {
+//Done by parent
+//    connect(this, SIGNAL(itemChanged()),
+//            parent, SLOT(sourceChanged()));
+    m_currentItemIndex=-1;
+}
+
+
+
+
+
+
+void MultiItemLabel::paintEvent(QPaintEvent * evt){
+    QLabel::paintEvent(evt);
+    if(m_items.count()==1){ return;}
+
+    QIcon down_triangle = QIcon::fromTheme(DOWN_ARROW);
+    QIcon up_triangle = QIcon::fromTheme(UP_ARROW);
+    Q_ASSERT(m_currentItemIndex<=m_items.count()-1);
+    Q_ASSERT(m_currentItemIndex>=0);
+
+    if(this->m_currentItemIndex==0){
+        up_triangle = IconDelegate::grayIfy(up_triangle);
+    }
+    if(m_currentItemIndex==m_items.count()-1){
+        down_triangle = IconDelegate::grayIfy(down_triangle);
+    }
+
+
+    QPainter painter(this);
+    painter.drawImage(
+            downRect(),
+            down_triangle.pixmap(downRect().size()).toImage()
+    );
+
+    painter.drawImage(
+            upRect(),
+            up_triangle.pixmap(upRect().size()).toImage()
+    );
+}
+
+
 
 FancyContextMenu::FancyContextMenu(CatItem priorityItem, QList<CatItem> actionChildren):
         QWidget((QWidget*)gMarginWidget,
@@ -39,19 +82,6 @@ FancyContextMenu::FancyContextMenu(CatItem priorityItem, QList<CatItem> actionCh
     connect(&m_slider, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)));
     m_topLabel.setItemList(priorityParents);
     sourceChanged();
-//    int w = priorityParent.getSourceWeightTics();
-//    qDebug() << "FancyContextMenu setting scaledWeight:" << w;
-//    m_slider.setValue(w);
-//    connect(&m_slider, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)));
-//
-//    QFont f = ListItem(priorityParent).getDisplayFont();
-//    m_topLabel.setFont(f);
-//    m_topLabel.setText(
-//            tagAs(priorityParent.getName(),"b")
-//            + QString(" priority ") );
-//    m_topLabel.setMargin(0);
-//    m_topLabel.setIndent(0);
-//    m_topLabel.adjustSize();
     QFont f = ListItem(m_topLabel.curentItem()).getDisplayFont();
     QRect r = m_topLabel.geometry();
     QFontMetrics fm(f);
@@ -99,6 +129,8 @@ FancyContextMenu::FancyContextMenu(CatItem priorityItem, QList<CatItem> actionCh
     setFocus();
 }
 
+
+
 void FancyContextMenu::focusOutEvent ( QFocusEvent * evt) {
     QWidget::focusOutEvent(evt);
 }
@@ -115,10 +147,15 @@ FancyContextMenu::~FancyContextMenu(){
 
 void FancyContextMenu::sliderChanged(int value){
 
+    QString itemPath = m_topLabel.curentItem().getPath();
+    Q_ASSERT(!itemPath.isEmpty());
     if(m_topLabel.curentItem().getSourceWeightTics() !=value){
+        m_topLabel.curentItem().setWeightTics(value);
+
         CatItem setPrioritItem(addPrefix(OPERATION_PREFIX,SET_PRIORIT_OPERATION));
-        m_topLabel.curentItem().setCustomValue(SET_PRIORITY_KEY_STR,value);
-        emit operateOnItem(m_topLabel.curentItem().getPath(),setPrioritItem);
+        setPrioritItem.setCustomValue(SET_PRIORITY_KEY_STR,value);
+        setPrioritItem.setLabel(RESET_FILTER_ICONS_KEY);
+        gMainWidget->operateOnItem(m_priorityItem.getPath(),setPrioritItem);
     }
 }
 
@@ -127,8 +164,6 @@ void FancyContextMenu::sourceChanged(){
     int w = priorityParent.getSourceWeightTics();
     qDebug() << "FancyContextMenu setting scaledWeight:" << w;
     m_slider.setValue(w);
-
-
 }
 
 
@@ -140,8 +175,8 @@ void FancyContextMenu::optionChosen(){
     Q_ASSERT(!optionItem.isEmpty());
     CatItem activateOptionItem(addPrefix(OPERATION_PREFIX,ACTIVATE_OPTION_ITEM));
     activateOptionItem.addChild(optionItem);
-    emit operateOnItem(m_priorityItem.getPath(),activateOptionItem);
-    //gMainWidget->operateOnItem(m_priorityItem.getPath(),activateOptionItem);
+    //emit operateOnItem(m_priorityItem.getPath(),activateOptionItem);
+    gMainWidget->operateOnItem(m_priorityItem.getPath(),activateOptionItem);
     this->end();
 }
 

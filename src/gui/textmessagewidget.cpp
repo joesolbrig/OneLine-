@@ -8,21 +8,37 @@
 #include "list_item.h"
 
 
+CloseToolItem::CloseToolItem(TextBarItem* parent): QGraphicsPixmapItem(parent){
+    QIcon ic = QIcon::fromTheme(DEPRICATE_ICON_NAME);
+    QPixmap pm = ic.pixmap(4,4);
+    setPixmap(pm);
+    connect(this, SIGNAL(closeToolClicked()),parent, SLOT(closeToolClicked()));
+
+}
+
+void CloseToolItem::mousePressEvent(QGraphicsSceneMouseEvent *){
+    emit closeToolClicked();
+}
+
 TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
         QObject(parent), m_item(it)  {
     setAcceptsHoverEvents(true);
 
     connect(this, SIGNAL(itemClicked(ListItem, bool)),parent, SLOT(itemClicked(ListItem, bool)));
-    connect(this, SIGNAL(miniIconRightClicked(ListItem, QPoint )),
-            (QObject*)gMainWidget, SLOT(listMenuEvent(ListItem, QPoint )));
+    connect(this, SIGNAL(closeToolClicked(ListItem)),parent, SLOT(closeToolClicked(ListItem)));
+    connect(this, SIGNAL(miniIconRightClicked(QString, QPoint )),
+            (QObject*)gMainWidget, SLOT(listMenuEvent(QString, QPoint )));
     prepareGeometryChange();
     m_animation = 0;
     m_animating = false;
     m_hovered = false;
     m_activated = m_item.hasLabel(ACTIVE_FILTER_ITEM_KEY);
     m_textItem=0;
+    m_closerTool=0;
 
     m_textItem = new QGraphicsTextItem(this);
+
+
     m_font = m_item.getDisplayFont();
     m_font.setBold(true);
     if(m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY){
@@ -38,7 +54,7 @@ TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
             m_textItem->setDefaultTextColor(UI_ICONBAR_ITEM_COLOR);
         }
     } else if(m_item.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
-        m_font.setPointSize(m_font.pointSize()-1);
+        m_font.setPointSize(m_font.pointSize()-2);
         m_textItem->setDefaultTextColor(UI_ICONBAR_ITEM_COLOR);
     } else {
         m_font.setPointSize(m_font.pointSize());
@@ -47,17 +63,6 @@ TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
     m_textItem->setFont(m_font);
     m_textItem->document()->setTextWidth((-1)); //never break
 
-//    QFontMetrics fm(m_font);
-//    qreal w = boundingRect().width();
-//    qDebug() << "w: " << w;
-//    qreal acw = fm.averageCharWidth();
-//    qDebug() << "acw: " << acw;
-//    int charsAllowed = (w/acw);
-//    qDebug() << "charsAllowed: " << charsAllowed;
-//    QString nme = m_item.getNameForEditLine(KEY_COLOR,0,charsAllowed);
-//    qDebug() << "nme" << nme;
-//    QString htmlText = tagAs((nme),"center");
-//    m_textItem->setHtml(htmlText);
     m_textItem->document()->setDocumentMargin(0); //default is 4!
     m_textItem->document()->setIndentWidth(0);
     m_textItem->document()->setDefaultFont(m_font);
@@ -74,25 +79,16 @@ TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
     //m_currentBackgroundColor = m_aC;
     setBigness(0);
     m_savedRectF = boundingRect();
+    if(m_item.hasLabel(CLOSABLE_ORGANIZING_SOURCE_KEY) && m_item.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
+        m_closerTool = new CloseToolItem(this);
+        m_closerTool->hide();
+    }
 }
 
 void TextBarItem::paint( QPainter * painter,
              const QStyleOptionGraphicsItem * , QWidget * ){
 
     QRectF b = fixedRect();
-//    QRectF textR = m_textItem->boundingRect();
-//    b.moveCenter(textR.center());  text.document()->size().width();
-
-    //boundingRect();
-    //b.setHeight(m_pixmap_sz.height());
-//    painter->save();
-//    QPen pn;
-//    pn.setColor(UI_SELECTED_MINI_ICON_BACKGROUND);
-//    pn.setWidth(UI_SELECTED_MINI_ICON_PENWIDTH);
-//    painter->setPen(pn);
-//    painter->drawRect(b.toRect());
-//    painter->restore();
-
     painter->save();
     if(m_activated || (m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY)){
         painter->fillRect(b, m_bC);
@@ -129,15 +125,12 @@ void TextBarItem::updateText(){
     bool altDn = gMainWidget->st_altKeyDown;
     QString text;
     if(altDn ){
-        //m_item.getNameForEditLine(KEY_COLOR,"",charsAllowed);
         text = m_item.formattedName(false);
     } else {
         text = m_item.getName();
         text = text.left(charsAllowed);
     }
     text = (tagAs(QString(text),"center"));
-    m_textItem->setZValue(zValue()+1);
-
 //    if(m_item.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
 //        m_textItem->document()->setDefaultStyleSheet(UI_MINIBAR_DEFAULT_STYLE);
 //    } else if(m_item.getFilterRole() == CatItem::CATEGORY_FILTER){
@@ -147,8 +140,9 @@ void TextBarItem::updateText(){
 //    } else {
 //        m_textItem->document()->setDefaultStyleSheet(UI_MINIBAR_DEFAULT_STYLE);
 //    }
-
     m_textItem->setHtml(text);
+
+    m_textItem->setZValue(zValue()+1);
     m_textItem->update();
 }
 
@@ -202,6 +196,18 @@ void TextBarItem::hoverEnterEvent(QGraphicsSceneHoverEvent *){
             m_animation->start();
         }
     }
+    if(m_closerTool){
+        QRectF closerRect = m_closerTool->boundingRect();
+        closerRect.moveTopRight(
+            QPointF(
+                m_savedRectF.width() - (closerRect.width()/2),
+                (closerRect.height()/2) - (m_savedRectF.height()/2)
+            )
+        );
+        m_closerTool->setPos(closerRect.center());
+        m_closerTool->setZValue(m_textItem->zValue()+1);
+        m_closerTool->show();
+    }
     update();
 }
 
@@ -213,6 +219,9 @@ void TextBarItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *){
     }
     updateText();
     update();
+    if(m_closerTool){
+        m_closerTool->hide();
+    }
 }
 
 void TextBarItem::animationDone(){
@@ -253,7 +262,7 @@ void TextBarItem::mousePressEvent(QGraphicsSceneMouseEvent * evt) {
         QPointF parPointF = mapToParent(pos());
         QPoint parPoint = parPointF.toPoint();
         QPoint globPoint = ((TextMessageBar*)parent())->mapToGlobal(parPoint);
-        emit miniIconRightClicked(m_item, globPoint);
+        emit miniIconRightClicked(m_item.getPath(), globPoint);
     } else {
         if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){ return;}
         setSelected(!m_activated);
@@ -314,7 +323,8 @@ TextMessageBar::TextMessageBar(QWidget* par, ListItem psuedoParentItem): QWidget
     connect(this, SIGNAL(miniIconClicked(ListItem,bool)),
             (QObject*)gMainWidget, SLOT(miniIconClicked(ListItem,bool)));
 
-    addBackground();
+    connect(this, SIGNAL(operateOnItem(QString, const CatItem )),
+            gMainWidget, SLOT(operateOnItem(QString, const CatItem )));    addBackground();
 }
 
 
@@ -462,6 +472,33 @@ void TextMessageBar::itemClicked(ListItem it, bool selected){
 
 
     emit miniIconClicked(it, selected);
+    update();
+}
+
+void TextMessageBar::closeToolClicked(ListItem it){
+
+    if(m_subActiveItem == it){
+        m_subActiveItem = ListItem();
+    }
+
+    int buttonIndex = -1;
+    for(int i=0; i < m_textButtons.count(); i++){
+        TextBarItem* tb = m_textButtons[i];
+        if((tb->getItem().getPath()== it.getPath())){
+            buttonIndex = i;
+            m_scene->removeItem(tb->m_textItem);
+            //it->m_textItem->deleteLater();
+            tb->m_textItem = 0;
+            m_scene->removeItem(tb);
+        }
+    }
+    m_textButtons.removeAt(buttonIndex);
+
+    CatItem setPrioritItem(addPrefix(OPERATION_PREFIX,SET_PRIORIT_OPERATION));
+    setPrioritItem.setCustomValue(SET_PRIORITY_KEY_STR,0);
+
+    emit miniIconClicked(it, false);
+    emit operateOnItem(it.getPath(),setPrioritItem);
     update();
 }
 

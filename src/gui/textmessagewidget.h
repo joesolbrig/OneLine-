@@ -28,7 +28,7 @@
 class TextItemAnimation;
 class TextMessageBar;
 
-//Just to remove some stupid warnings...
+//To remove some warnings...
 class MyQGraphicsItemBridge : public QGraphicsItem {
 
 public:
@@ -36,6 +36,21 @@ public:
 private:
     Q_DISABLE_COPY(MyQGraphicsItemBridge)
 
+
+};
+
+class TextBarItem;
+
+class CloseToolItem : public QObject, public QGraphicsPixmapItem  {
+    Q_OBJECT
+
+public:
+    CloseToolItem(TextBarItem* parent);
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent *);
+
+signals:
+    void closeToolClicked();
 
 };
 
@@ -64,6 +79,7 @@ private:
 
 public:
     QGraphicsTextItem* m_textItem;
+    CloseToolItem* m_closerTool;
     QString getItemName(){ return m_item.getName();}
     void setSelected(bool sel);
 
@@ -121,13 +137,14 @@ protected:
 
 public slots:
     void animationDone();
+    void closeToolClicked(){ emit closeToolClicked(m_item); }
 
 
 signals:
     void painted();
     void itemClicked(ListItem li, bool selected);
-    void miniIconRightClicked(ListItem it, QPoint p);
-
+    void miniIconRightClicked(QString it, QPoint p);
+    void closeToolClicked(ListItem it);
 };
 
 class TextItemAnimation : public QPropertyAnimation {
@@ -284,11 +301,13 @@ public:
 signals:
     //void itemClick();
     void miniIconClicked(ListItem it, bool selected);
+    void miniIconCloseClicked(ListItem it);
+    void operateOnItem(QString, const CatItem );
 
 public slots:
 
     void itemClicked(ListItem it, bool selected);
-
+    void closeToolClicked(ListItem it);
     void itemsFound(QList<ListItem> ci){
         addItems(ci);
     }

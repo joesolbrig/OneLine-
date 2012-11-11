@@ -370,7 +370,6 @@ QList<AbstractReader*> StreamPlugin::createStreamReader(CatItem item, UserEvent:
             }
             feedDownloaders.append(rdr);
         }
-
     }
     return feedDownloaders;
 }

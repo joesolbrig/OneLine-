@@ -103,7 +103,7 @@ public:
 
     IconDelegate(QObject *parent = 0, CatItem it = CatItem());
 
-    QIcon grayIfy(QIcon icon, int rotate=0);
+    static QIcon grayIfy(QIcon icon, int rotate=0);
     QIcon makeGlow(QIcon ic);
 
 

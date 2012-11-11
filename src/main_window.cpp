@@ -1564,6 +1564,7 @@ void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
 
 void MainUserWindow::operateOnItem(QString path, const CatItem opItem){
     CatItem item = m_inputList.getItemByPath(path);
+    Q_ASSERT(!item.isEmpty());
     CatItem operationItem = opItem;
 
     QList<CatItem> children = operationItem.getChildren();
@@ -1581,9 +1582,13 @@ void MainUserWindow::operateOnItem(QString path, const CatItem opItem){
             item.setWeightTics(w);
             CatBuilder::addItem(item);
             CatBuilder::updateItem(item,1,UserEvent::STANDARD_UPDATE);
-            searchOnInput();
-            CatBuilder::getMiniIcons(m_inputList);
-            addMiniIcons();
+            st_UserChoiceChanged = true;
+            st_TakeItemFromList = false;
+            //searchOnInput();
+            if(opItem.hasLabel(RESET_FILTER_ICONS_KEY)){
+                CatBuilder::getMiniIcons(m_inputList);
+                addMiniIcons();
+            }
             if(!m_inputList.isOrganizingItem(item)){
                 m_inputList.addSingleListItem(item,m_savedPosition);
                 m_itemChoiceList->updateItem(ListItem(item));
@@ -1607,6 +1612,7 @@ void MainUserWindow::operateOnItem(QString path, const CatItem opItem){
             CatBuilder::addItem(item);
             m_inputList.removeItem(item);
             m_itemChoiceList->removeItem(item);
+            updateDisplay();
         } else if(operationItem.getPath() ==
                   addPrefix(OPERATION_PREFIX,ACTIVATE_OPTION_ITEM)){
             Q_ASSERT(children.length()==1);
@@ -1622,6 +1628,7 @@ void MainUserWindow::operateOnItem(QString path, const CatItem opItem){
                     tabAction(Qt::Key_Tab,&ke);
                 }
             }
+            updateDisplay();
         } else if(operationItem.getPath() ==
                   addPrefix(OPERATION_PREFIX,SELECTION_OPERATION_NAME)){
             if(m_inputList.getItemByPath(path).isEmpty()
@@ -1638,8 +1645,8 @@ void MainUserWindow::operateOnItem(QString path, const CatItem opItem){
             st_UserChoiceChanged = true;
             tryHideMenu();
         }
+        updateDisplay();
     }
-    updateDisplay();
 }
 
 

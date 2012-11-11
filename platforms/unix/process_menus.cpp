@@ -44,7 +44,7 @@ CatItem gnomeMenuBaseItem(){
                        CatItem::createTypeParent(CatItem::LOCAL));
 //    CatItem typeParent = CatItem::createTypeParent(CatItem::LOCAL);
 //    gm.addParent(typeParent);
-    Q_ASSERT(gm.hasSourceWeight());
+    Q_ASSERT(gm.isASource());
     return gm;
 }
 
@@ -83,7 +83,7 @@ static CatItem process_entry(GMenuTreeEntry *entry, int impliedWeight)
   CatItem parent = gnomeMenuBaseItem();
   childItem.setExternalWeight(impliedWeight, parent);
   Q_ASSERT(childItem.hasParent(parent));
-  Q_ASSERT(childItem.getTypeParent(CatItem::ORGANIZING_TYPE).hasSourceWeight());
+  Q_ASSERT(childItem.getTypeParent(CatItem::ORGANIZING_TYPE).isASource());
   childItem.setItemType(CatItem::VERB);
 
   childItem.setTagLevel(CatItem::ATOMIC_ELEMENT);

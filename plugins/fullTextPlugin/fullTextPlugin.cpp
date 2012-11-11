@@ -162,7 +162,7 @@ void FullTextPlugin::indexAFileItem(CatItem& id, QFileInfo fi, QList<CatItem>* r
         id.setSourceUpdateTime((fi.lastModified().toTime_t()-100));
     } else {
         id.setIsUpdatableSource(false);
-        if(id.hasSourceWeight() &&
+        if(id.isASource() &&
                 id.getSourceParents().contains(getPluginRep())){
             id.setSourceWeight(MEDIUM_EXTERNAL_WEIGHT, getPluginRep());
             id.setSourceUpdateTime(fi.lastModified().toTime_t());

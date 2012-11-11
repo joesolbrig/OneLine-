@@ -712,9 +712,6 @@ CatItem CatItem::getUpdateSourceParent(qint32 w){
 
 QList<CatItem> CatItem::getSearchSourceParents(){
     QList<CatItem> res;
-    if(isCategorizingSource()){
-        res.append(*this);
-    }
 
     //if(this->hasSourceWeight()){ return *this; }
 
@@ -732,6 +729,9 @@ QList<CatItem> CatItem::getSearchSourceParents(){
             }
         }
     }
+    if(isCategorizingSource()){
+        res.push_front(*this);
+    }
     if(res.count()>0){ return res;}
 
     int w=0;
@@ -739,7 +739,7 @@ QList<CatItem> CatItem::getSearchSourceParents(){
         if(d->children_detached_list[i].getChildPath() == getPath() ){
             CatItem possiblePar = d->children_detached_list[i].getParent();
             int weight;
-            if(possiblePar.hasSourceWeight()){
+            if(possiblePar.isASource()){
                 weight = possiblePar.getSourceWeight();
                 if(weight>w){
                     w = weight;
@@ -799,7 +799,7 @@ void CatItem::setSourceWeight(qint32 weight, CatItem par){
     qint32 maxW = getWeightFromSources();
     setCustomPluginValue(SOURCE_WEIGHT_KEY_STR,maxW);
     Q_ASSERT(maxW >= weight);
-    Q_ASSERT(hasSourceWeight());
+    Q_ASSERT(isASource());
 }
 
 qint32 CatItem::getUpdatingSourceWeight(){

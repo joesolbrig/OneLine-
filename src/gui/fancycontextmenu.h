@@ -8,6 +8,8 @@
 #include "itemarglist.h"
 #include "constants.h"
 
+class FancyContextMenu;
+
 class MultiItemLabel: public QLabel {
     Q_OBJECT
 
@@ -16,9 +18,7 @@ class MultiItemLabel: public QLabel {
 
 public:
 
-    MultiItemLabel(QWidget* parent=0): QLabel(parent) {
-        m_currentItemIndex=-1;
-    }
+    MultiItemLabel(FancyContextMenu* parent=0);
 
     void setItemList(QList<CatItem> items){
         Q_ASSERT(items.count()>0);
@@ -31,34 +31,20 @@ public:
         return m_items[m_currentItemIndex];
     }
 
-    void paintEvent(QPaintEvent * evt){
-        QLabel::paintEvent(evt);
-        if(m_items.count()==1){ return;}
-
-        QIcon down_triangle = QIcon::fromTheme(DOWN_ARROW);
-        QIcon up_triangle = QIcon::fromTheme(UP_ARROW);
-
-        QPainter painter(this);
-        painter.drawImage(
-                downRect(),
-                down_triangle.pixmap(downRect().size()).toImage()
-        );
-
-        painter.drawImage(
-                upRect(),
-                up_triangle.pixmap(upRect().size()).toImage()
-        );
-    }
+    void paintEvent(QPaintEvent * evt);
 
     void mousePressEvent( QMouseEvent * event  ){
         if(m_items.count()==1){ return;}
 
         QPoint pos = event->pos();
-        if(upRect().contains(pos) && (m_currentItemIndex<m_items.count())){
+        if(downRect().contains(pos) && (m_currentItemIndex<m_items.count()-1)){
             m_currentItemIndex++;
-        }
-        if(downRect().contains(pos) && (m_currentItemIndex >0)){
+            update();
+            emit itemChanged();
+        } else  if(upRect().contains(pos) && (m_currentItemIndex >0)){
             m_currentItemIndex--;
+            update();
+            emit itemChanged();
         }
         setItem();
     }
@@ -75,13 +61,15 @@ public:
     }
 
     QRect upRect(){
-        QRect right = geometry();
-        right.setLeft(right.right() + right.height());
+        QRect right = downRect();
+        right.moveLeft(right.left() - right.height());
         return right;
+
     }
     QRect downRect(){
-        QRect right = upRect();
-        right.setLeft(right.right() + right.height());
+        QRect right = geometry();
+        right.moveTopLeft(QPoint(0,0));
+        right.setLeft(right.right() - right.height());
         return right;
     }
 

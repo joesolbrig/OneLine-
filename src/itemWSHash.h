@@ -1109,11 +1109,13 @@ public:
         if(i==getSourceWeightTics()){ return; }
         double maxWeightSection = log2(MAX_MAX_FULL_WEIGHT);
         double baseWeightSection = (i*maxWeightSection)/WEIGHT_TICS;
-        long weight = pow(2,(int)(baseWeightSection+0.3));
+        qint32 weight = pow(2,(int)(baseWeightSection+0.3));
         weight = MAX(weight, 1);
         weight = MIN(weight, MAX_MAX_FULL_WEIGHT);
         setSourceWeight(weight);
-        Q_ASSERT(getSourceWeight()==weight);
+        qint32 newW = getSourceWeight();
+        newW = newW;
+        Q_ASSERT(newW==weight);
         Q_ASSERT(abs((long long)(((log2(weight)*WEIGHT_TICS)/maxWeightSection)-i))<=1);
         int tic = getSourceWeightTics();
         tic = tic;
@@ -1150,14 +1152,28 @@ public:
     }
 
     qint32 getSourceWeight(){
-        return getCustomValue(SOURCE_WEIGHT_KEY_STR,SOURCE_WEIGHT_DEFAULT);
+        if(hasLabel(SOURCE_WEIGHT_KEY_STR)){
+            return getCustomValue(SOURCE_WEIGHT_KEY_STR,SOURCE_WEIGHT_DEFAULT);
+        }
+        if(isASource()){
+            return SOURCE_WEIGHT_DEFAULT;
+        }
+        return 0;
+
     }
     void setSourceWeight(qint32 v){
         setCustomPluginValue(SOURCE_WEIGHT_KEY_STR,v);
     }
 
-    bool hasSourceWeight() const {
-        return hasLabel(SOURCE_WEIGHT_KEY_STR);
+    bool isASource() const {
+        if(getItemType() == CatItem::LOCAL_DATA_FOLDER
+           || getItemType() == CatItem::PERSON
+           || getItemType() == CatItem::ORGANIZING_TYPE
+           || hasLabel(STREAM_SOURCE_PATH)
+           || hasLabel(SOURCE_WEIGHT_KEY_STR)){
+            return true;
+        }
+        return false;
     }
 
     bool hasWeightInfo(){
