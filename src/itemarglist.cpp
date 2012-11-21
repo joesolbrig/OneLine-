@@ -908,9 +908,9 @@ bool InputList::acceptItem(CatItem* item) {
     //Skip tags...
     if((int)item->getTagLevel() >= (int)CatItem::KEY_WORD ){
 
-        //If we're in it
-        if(item->getLowName().simplified()  == getUserKeys().toLower().simplified()){
-            return false;}
+//        //If we're in it
+//        if(item->getLowName().simplified()  == getUserKeys().toLower().simplified()){
+//            return false;}
 
         //If it was just created implicitly...
         CatItem::MatchType mt = item->getBestMatchType();
@@ -926,7 +926,6 @@ bool InputList::acceptItem(CatItem* item) {
 
     if(!parentOrFilterItem.isEmpty() ){
         CatItem::ItemType organizingType = parentOrFilterItem.getOrganizeingType();
-
 
         //For the tagging operation
         if(organizingType == CatItem::TAG && parentOrFilterItem.getItemType()==CatItem::OPERATION){
@@ -945,6 +944,8 @@ bool InputList::acceptItem(CatItem* item) {
               (organizingType== CatItem::TAG); }
 
         if(CatItem::matchOrganizingTypes(organizingType, item->getItemType()))
+            { return true; }
+        if(CatItem::matchOrganizingTypes(organizingType, item->getSortingType()))
             { return true; }
         if(organizingType== CatItem::TAG && item->getItemType()==CatItem::LOCAL_DATA_FOLDER)
             { return true; }
@@ -1770,6 +1771,7 @@ bool InputList::atEnd(){
 }
 
 void InputList::setFilterItem(ListItem filterItem){
+    setSubFilterItem(ListItem());
     inputData[m_itemPosition].filterByItem(filterItem);
 }
 

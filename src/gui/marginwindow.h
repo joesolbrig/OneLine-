@@ -12,8 +12,6 @@ class MarginWindow : public QWidget
 {
 
     QWidget* mainUserWindow();
-    QRect listWindowRect();
-    QRect previewWindowRect();
 
     int m_vOrient;
     int m_hOrient;
@@ -36,6 +34,8 @@ public:
     ~MarginWindow() { QApplication::instance()->quit();}
     void gSetAppPos(int vOrient=-1, int hOrient=-1);
     void createPreviewArrow(QRect previewRect);
+    QRect listWindowRect();
+    QRect previewWindowRect();
 
 
 };

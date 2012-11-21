@@ -60,6 +60,60 @@ QSize MarginWindow::sizeHint()
     return r.size();
 }
 
+void MarginWindow::createPreviewArrow(QRect previewRect){
+    QRect focusRect = gMainWidget->focusRect();
+
+    if(previewRect.isEmpty()){
+        m_previewArrow = QPair < QPainterPath,QBrush >();
+        return;
+    }
+
+    qreal rightHeight = MIN( previewRect.height()*(UI_PREVIEW_ARROW_RIGHT_RATIO), focusRect.height()*3);
+    rightHeight = MAX( rightHeight, 20);
+
+    QRect left = focusRect;
+    int leftBorder = m_marginRect.right()-UI_BORDER_WINDOW_RIGHT_MARGIN*2;// left.right();
+    int leftCenter = left.center().y();
+
+    QPointF centerLeft(leftBorder, leftCenter);
+
+    QRect rightRect = previewRect;
+    rightRect.adjust(-1,-1,1,1);
+    int rightBorder = rightRect.left();
+    //int rightCenter = right.center().y();
+
+    QPointF topRight(rightBorder, leftCenter-rightHeight/2);
+    QPointF bottomRight(rightBorder, leftCenter+rightHeight/2);
+
+    QPainterPath path;
+    QPainterPath littlePath;
+    path.moveTo(centerLeft);
+    littlePath.moveTo(centerLeft);
+    path.lineTo(topRight);
+    littlePath.lineTo(topRight);
+    if(gMainWidget->m_itemChoiceList &&
+       gMainWidget->m_itemChoiceList->m_previewFrame &&
+        ((gMainWidget->m_itemChoiceList->m_previewFrame->m_layout->m_previewPane
+            && gMainWidget->m_itemChoiceList->m_previewFrame->m_layout->m_previewPane->isVisible()) ||
+        (gMainWidget->m_itemChoiceList->m_previewFrame->m_layout->m_realItemList &&
+            gMainWidget->m_itemChoiceList->m_previewFrame->m_layout->m_realItemList->isVisible()))){
+        path.lineTo(rightRect.topLeft());
+        path.lineTo(rightRect.topRight());
+        path.lineTo(rightRect.bottomRight());
+        path.lineTo(rightRect.bottomLeft());
+    }
+    path.lineTo(bottomRight);
+    littlePath.lineTo(bottomRight);
+    path.lineTo(centerLeft);
+    littlePath.lineTo(centerLeft);
+    path.closeSubpath();
+    littlePath.closeSubpath();
+    m_previewArrowInside = littlePath;
+    m_previewArrow.first = path;
+    QBrush b(Qt::black);
+    m_previewArrow.second = b;
+
+}
 
 void MarginWindow::gSetAppPos(int vOrient, int hOrient){
     if(hOrient!=-1){ m_hOrient = hOrient;}
@@ -166,60 +220,7 @@ void MarginWindow::gSetAppPos(int vOrient, int hOrient){
     //update();
 }
 
-void MarginWindow::createPreviewArrow(QRect previewRect){
-    QRect focusRect = gMainWidget->focusRect();
 
-    if(previewRect.isEmpty()){
-        m_previewArrow = QPair < QPainterPath,QBrush >();
-        return;
-    }
-
-    qreal rightHeight = MIN( previewRect.height()*(UI_PREVIEW_ARROW_RIGHT_RATIO), focusRect.height()*3);
-    rightHeight = MAX( rightHeight, 20);
-
-    QRect left = focusRect;
-    int leftBorder = m_marginRect.right()-UI_BORDER_WINDOW_RIGHT_MARGIN*2;// left.right();
-    int leftCenter = left.center().y();
-
-    QPointF centerLeft(leftBorder, leftCenter);
-
-    QRect rightRect = previewRect;
-    rightRect.adjust(-1,-1,1,1);
-    int rightBorder = rightRect.left();
-    //int rightCenter = right.center().y();
-
-    QPointF topRight(rightBorder, leftCenter-rightHeight/2);
-    QPointF bottomRight(rightBorder, leftCenter+rightHeight/2);
-
-    QPainterPath path;
-    QPainterPath littlePath;
-    path.moveTo(centerLeft);
-    littlePath.moveTo(centerLeft);
-    path.lineTo(topRight);
-    littlePath.lineTo(topRight);
-    if(gMainWidget->m_itemChoiceList &&
-       gMainWidget->m_itemChoiceList->m_previewFrame &&
-        ((gMainWidget->m_itemChoiceList->m_previewFrame->m_layout->m_previewPane
-            && gMainWidget->m_itemChoiceList->m_previewFrame->m_layout->m_previewPane->isVisible()) ||
-        (gMainWidget->m_itemChoiceList->m_previewFrame->m_layout->m_realItemList &&
-            gMainWidget->m_itemChoiceList->m_previewFrame->m_layout->m_realItemList->isVisible()))){
-        path.lineTo(rightRect.topLeft());
-        path.lineTo(rightRect.topRight());
-        path.lineTo(rightRect.bottomRight());
-        path.lineTo(rightRect.bottomLeft());
-    }
-    path.lineTo(bottomRight);
-    littlePath.lineTo(bottomRight);
-    path.lineTo(centerLeft);
-    littlePath.lineTo(centerLeft);
-    path.closeSubpath();
-    littlePath.closeSubpath();
-    m_previewArrowInside = littlePath;
-    m_previewArrow.first = path;
-    QBrush b(Qt::black);
-    m_previewArrow.second = b;
-
-}
 
 QWidget* MarginWindow::mainUserWindow(){
     return gMainWidget;

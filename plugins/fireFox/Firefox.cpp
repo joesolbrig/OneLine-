@@ -65,7 +65,20 @@ void FirefoxPlugin::checkRefreshTempFile(){
 //    m_db.setConnectOptions("QSQLITE_OPEN_READONLY");
 
     bool refreshingPlaceInfo = false;
-    QDir baseDir(QDir::homePath() + PUSER_APP_DIR);
+    if(!settings){
+        qDebug() << "Firefox Null setTING!!! ";
+        Q_ASSERT(false);
+        return;
+    }
+    QSettings* set = *settings;
+    if(!set){
+        qDebug() << "Firefox Null set ";
+        Q_ASSERT(false);
+        return;
+    }
+    QFileInfo f(set->fileName());
+    QDir baseDir = f.dir();
+    //QDir baseDir(QDir::homePath() + PUSER_APP_DIR);
     QString firefoxPlacePath = getFirefoxPath();
     if(firefoxPlacePath.length() == 0){return;}
     templatePlacePath = baseDir.absoluteFilePath("tempPlaces.sqlite");
@@ -85,7 +98,7 @@ void FirefoxPlugin::checkRefreshTempFile(){
         }
         bool success = ffp.copy(templatePlacePath);
         if(!success){
-            qDebug() << ffp.errorString();
+            qDebug() << "Firefox copy ERROR: " << ffp.errorString();
         }
     }
     m_db.setDatabaseName(templatePlacePath);
@@ -284,11 +297,11 @@ QString FirefoxPlugin::getFirefoxPath()
 {
 	QString path;
 	QString iniPath;
-	QString appData;
 	QString osPath;
 
 #ifdef Q_WS_WIN
-	GetShellDir(CSIDL_APPDATA, appData);
+        QString appData;
+        GetShellDir(CSIDL_APPDATA, appData);
 	osPath = appData + "/Mozilla/Firefox/";
 #endif
 

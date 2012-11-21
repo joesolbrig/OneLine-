@@ -903,6 +903,12 @@ public:
     QString itemPath;
     QMutex* gMutexPtr;
     virtual void getName(QString*)=0;
+    //static QString ms_homeDir;
+    static QChar* ms_homeDirStr;
+    static int ms_homeDirLen;
+
+public:
+
     void addHomeDir(QString home){
         QChar* str = home.data();
         ms_homeDirLen = home.length();
@@ -910,11 +916,7 @@ public:
         memcpy(ms_homeDirStr,str,ms_homeDirLen*sizeof(QChar));
         Q_ASSERT(getHomeDir() == home);
     }
-    //static QString ms_homeDir;
-    static QChar* ms_homeDirStr;
-    static int ms_homeDirLen;
 
-public:
     static QString getHomeDir(){
         return QString(ms_homeDirStr, ms_homeDirLen);
 

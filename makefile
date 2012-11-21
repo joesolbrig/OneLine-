@@ -7,7 +7,6 @@ SCRIPT_PATH=$(PREFIX)/lib/oneline/scripts
 PLATFORMS_PATH=$(PREFIX)/lib/oneline/
 DESKTOP_PATH=$(PREFIX)/share/applications
 ICON_PATH=$(PREFIX)/share/pixmaps
-#QMAKE=qmake-qt4
 QMAKE=qmake
 
 DEFS=SKINS_PATH=\\\"$(SKINS_PATH)\\\" PLUGINS_PATH=\\\"$(PLUGINS_PATH)\\\" \
@@ -124,7 +123,6 @@ uninstall::
 	-rm -rf $(PLUGINS_PATH)
 	-rm -rf $(PLATFORMS_PATH)
 	-rm -rf $(SKINS_PATH)
-	-rm -rf $(PREFIX)/share/oneline
 	-rm $(DESTDIR)$(DESKTOP_PATH)/oneline.desktop
 	-rm $(DESTDIR)$(ICON_PATH)/oneline.ico
 	-rm -rf ~/$(ONELINE_DIR)

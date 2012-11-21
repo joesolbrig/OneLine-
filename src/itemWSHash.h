@@ -28,11 +28,12 @@ public:
     friend QDataStream &operator<<(QDataStream &out, const CatItem &item);
     friend class DetachedChildRelation;
     enum FilterRole{
-        MESSAGE_ELEMENT=0,
-        CATEGORY_FILTER=1,
-        ACTIVE_CATEGORY=2,
-        SUBCATEGORY_FILTER=3,
-        ERROR_MESSAGE=4
+        UNDEFINED_ELEMENT=0,
+        MESSAGE_ELEMENT,
+        CATEGORY_FILTER,
+        ACTIVE_CATEGORY,
+        SUBCATEGORY_FILTER,
+        ERROR_MESSAG
     };
 
     enum TagLevel{
@@ -246,11 +247,15 @@ public:
             setPath(set->value(PATH_KEY_STR).toString());
         } else {
             setPath(addPrefix(CUSTOM_VERB_PREFIX,set->fileName()));
+            QFileInfo fi(set->fileName());
+            QString name = fi.baseName();
+            setName(name);
         }
 
         this->setCustomPluginInfo(FILLIN_GEN_FILE_KEY, set->fileName());
 
-        setName(set->value(NAME_KEY_STR).toString());
+        QString keyedName = set->value(NAME_KEY_STR).toString();
+        if(!keyedName.isEmpty()){ setName(keyedName); }
         setDescription(set->value(ITEM_DESCRIPTION_CONFIG_FIELD).toString());
         setVerbDescription( set->value(ITEM_DESCRIPTION_GEN_FIELD).toString());
         QStringList sl = set->childKeys();
@@ -405,6 +410,51 @@ public:
                                               UserEvent::LoadType lt,
                                               PlatformBase* thePlatform,
                                               CatItem pluginRep);
+
+    static CatItem getPrimaryCategory(QSet<CatItem> possibleParents);
+    static QString getCannonicalFieldName(QString key) {
+        if(key == PATH_KEY_STR || key == "path"){
+            return ANY_ITEM_NAME;
+        } if(key == NUMBER_NAME || key == NAME_KEY_STR || key == "name" || key== SHORT_TEXT_NAME){
+             return SHORT_TEXT_NAME;
+        } else if(key == WEB_ADDRESS_NAME  || key == DEFAULT_HTML_MIME_TYPE){
+            return WEB_ADDRESS_NAME;
+        } else if(key==RFC_EMAIL_MESSAGE_NAME || (key=="message")){
+            { return MESSAGE_NAME; }
+        } else if(key == LONG_TEXT_NAME || key == USER_DESCRIPTION_KEY_STR || key == "description")
+            { return LONG_TEXT_NAME; }
+        return key;
+
+    }
+
+    static bool atUserDataField(QString argType){
+        argType = getCannonicalFieldName(argType);
+        if(argType == WEB_ADDRESS_NAME){ return false; }
+        if(argType == EMAIL_ADDRESS_NAME){ return false; }
+        if(argType == YOUR_EMAIL_ADDRESS_NAME){ return true; }
+        if(argType == RFC_EMAIL_MESSAGE_NAME){ return false; }
+        if(argType == FILE_NAME){ return false; }
+        if(argType == FOLDER_NAME){ return false; }
+        if(argType == ANY_ITEM_NAME){ return false; }
+        if(argType == SHORT_TEXT_NAME){ return true; }
+        if(argType == LONG_TEXT_NAME){ return true; }
+        return true;
+    }
+
+    static bool atItemSelectOnlyField(QString){
+        return false;
+    }
+    static CatItem& addChildInternal(CatItem& parentItem, CatItem& childItem, QString pluginName,
+                          BaseChildRelation::ChildRelType isDefault=BaseChildRelation::NORMAL,
+                          bool isDefaultAppType=false);
+
+    static CatItem& addParentInternal(CatItem& parentItem, CatItem &childItem, QString pluginName,
+                          BaseChildRelation::ChildRelType isDefault=BaseChildRelation::NORMAL,
+                          bool isDefaultAppType=false);
+    static CatItem createTypeParent(CatItem::ItemType type);
+
+    void setName(QString rawName);
+    void setPath(QString rawPath);
 
     void makePseudoChild(int index, int total){
         CatItem it;
@@ -756,7 +806,6 @@ public:
     QList<DetachedChildRelation> getParentRelations() const;
     bool hasParentType(QString pluginId) const;
     QList<CatItem> getCategories() const;
-    static CatItem getPrimaryCategory(QSet<CatItem> possibleParents);
     QList<DetachedChildRelation> getChildRelations() const;
     QList<DetachedChildRelation> getSiblingOrderRels() const;
     QList<DetachedChildRelation> getRelations()  const {  return d->children_detached_list; }
@@ -859,38 +908,7 @@ public:
         } else {return defaultValue;}
     }
 
-    static QString getCannonicalFieldName(QString key) {
-        if(key == PATH_KEY_STR || key == "path"){
-            return ANY_ITEM_NAME;
-        } if(key == NUMBER_NAME || key == NAME_KEY_STR || key == "name" || key== SHORT_TEXT_NAME){
-             return SHORT_TEXT_NAME;
-        } else if(key == WEB_ADDRESS_NAME  || key == DEFAULT_HTML_MIME_TYPE){
-            return WEB_ADDRESS_NAME;
-        } else if(key==RFC_EMAIL_MESSAGE_NAME || (key=="message")){
-            { return MESSAGE_NAME; }
-        } else if(key == LONG_TEXT_NAME || key == USER_DESCRIPTION_KEY_STR || key == "description")
-            { return LONG_TEXT_NAME; }
-        return key;
 
-    }
-
-    static bool atUserDataField(QString argType){
-        argType = getCannonicalFieldName(argType);
-        if(argType == WEB_ADDRESS_NAME){ return false; }
-        if(argType == EMAIL_ADDRESS_NAME){ return false; }
-        if(argType == YOUR_EMAIL_ADDRESS_NAME){ return true; }
-        if(argType == RFC_EMAIL_MESSAGE_NAME){ return false; }
-        if(argType == FILE_NAME){ return false; }
-        if(argType == FOLDER_NAME){ return false; }
-        if(argType == ANY_ITEM_NAME){ return false; }
-        if(argType == SHORT_TEXT_NAME){ return true; }
-        if(argType == LONG_TEXT_NAME){ return true; }
-        return true;
-    }
-
-    static bool atItemSelectOnlyField(QString){
-        return false;
-    }
 
 
     QString getValueSection() const {
@@ -923,13 +941,7 @@ public:
                    BaseChildRelation::ChildRelType defaultType=BaseChildRelation::UNDETERMINED_REL,
                    bool isDefaultAppType= false);
 
-    static CatItem& addChildInternal(CatItem& parentItem, CatItem& childItem, QString pluginName,
-                          BaseChildRelation::ChildRelType isDefault=BaseChildRelation::NORMAL,
-                          bool isDefaultAppType=false);
 
-    static CatItem& addParentInternal(CatItem& parentItem, CatItem &childItem, QString pluginName,
-                          BaseChildRelation::ChildRelType isDefault=BaseChildRelation::NORMAL,
-                          bool isDefaultAppType=false);
 
     void addChildren(QList<CatItem> children){
         for(int i=0; !(i==children.size());i++){
@@ -984,7 +996,9 @@ public:
 
     //Weighting and weighing based functions
     bool isCategorizingSource() const {
-        if(hasLabel(IS_CATEGORING_SOURCE_KEY)){ return true; }
+        if(hasLabel(IS_CATEGORING_SOURCE_KEY)){
+            return (bool)getCustomValue(IS_CATEGORING_SOURCE_KEY);
+        }
         if(hasLabel(IS_INTERMEDIATE_SOURCE_KEY)){return false; }
         if(hasLabel(FIREFOX_PLUGIN_NAME) &&
            hasLabel(STREAM_SOURCE_PATH)){ return true; }
@@ -1737,115 +1751,10 @@ public:
         return d->m_name.length()>0 && d->m_data.contains(NAME_KEY_STR);
     }
 
-    QString getActionName() const{
-        QString dd = getCustomString(TEMPORARY_NAME_KEY_STR);
-        if(!dd.isEmpty()){ return dd; }
-        dd = getName();
-        if(!dd.isEmpty()){ return dd; }
-        return d->m_path;
-    }
+    QString getActionName() const;
 
-    QString getArgPath() const{
-        QString dd = getCustomString(ARG_PATH_KEY_STR);
-        if(!dd.isEmpty()){ return dd; }
-        if(d->m_path==RUN_PSEUDO_ITEM_PATH){return "";}
-        return d->m_path;
-    }
+    QString getArgPath() const;
 
-    void setName(QString rawName){
-
-        const QString codedSpace("%20");
-        const QString codedAt("%40");
-
-        QString v;
-        if(!(rawName.contains(codedSpace)||
-             rawName.contains(codedAt))){
-            v = rawName;
-        } else {
-            for(int i=0; i<rawName.length();i++){
-                if(rawName[i]=='%'){
-                    if(rawName.mid(i,3)==codedSpace){
-                        v[i]=' ';
-                        i+=2;
-                    }
-                    if(rawName.mid(i,3)==codedAt){
-                        v[i]=' ';
-                        i+=2;
-                    }
-                } else {
-                    v[i] = rawName[i];
-                }
-            }
-        }
-
-        if(v.isEmpty()){
-            d->m_data.remove(NAME_KEY_STR);
-            v = this->getName();
-        } else {
-            d->m_data[NAME_KEY_STR] = v;
-        }
-        d->m_name = v;
-        d->m_lowName = d->m_name.toLower();
-        if(d->m_data.contains(TEMP_LOW_PATH_KEY_STR)){
-            d->m_data.remove(TEMP_LOW_PATH_KEY_STR);
-        }
-    }
-
-    void setPath(QString rawPath){
-        QString p;
-
-        //A trailing slash seems to be alway serpufluous
-        if(rawPath.size() >1 && rawPath.endsWith(CHAR_PATH_SEP)){
-            p = rawPath.left(rawPath.size()-1);
-        }  else if(!rawPath.startsWith(FILE_PREFIX)){
-            p = rawPath;
-        } else {
-            int toTake = FILE_PREFIX.length()-1;
-            while(rawPath.length()>toTake+1
-                    && rawPath[toTake]=='/'
-                    && rawPath[toTake+1]=='/' && (toTake<=0 ||(rawPath[toTake-1]!=':'))){
-                toTake++;
-            }
-            rawPath = rawPath.mid(toTake);
-            const QString codedSpace("%20");
-            const QString codedAt("%40");
-            int i=0;
-
-            if(rawPath.contains('%')){
-                while(i<rawPath.length()){
-                    if(rawPath[i]=='%'){
-                        if(rawPath.mid(i,3)==codedSpace){
-                            p.append(' ');
-                            i+=3;
-                            continue;
-                        }
-                        if(rawPath.mid(i,3)==codedAt){
-                            p.append('@');
-                            i+=3;
-                            continue;
-                        }
-                    }
-                    p.append(rawPath[i]);
-                    i++;
-                }
-            }
-        }
-        p = p.simplified();;
-        adjustChildrensPath(p);
-
-        d->m_path = p;
-        if(d->m_name.isEmpty()){
-            //Need to "cache" toLower result
-            QStringList sl = d->m_path.split("/");
-            if(sl.count()>0 && !sl[sl.count()-1].isEmpty()){
-                d->m_data[TEMP_LOW_PATH_KEY_STR] = sl[sl.count()-1].toLower();
-            } else if(sl.count()>1 && !sl[sl.count()-2].isEmpty()){
-                d->m_data[TEMP_LOW_PATH_KEY_STR] = sl[sl.count()-2].toLower();
-            } else {
-                d->m_data[TEMP_LOW_PATH_KEY_STR] = p.toLower();
-            }
-        }
-    }
 
     void adjustChildrensPath(QString newPath);
 
@@ -1915,99 +1824,6 @@ public:
         return kwItem;
     }
 
-    static CatItem createTypeParent(CatItem::ItemType type){
-        Q_ASSERT(type >= (int)CatItem::MIN_TYPE &&
-                 type <= CatItem::MAX_TYPE);
-
-        QString name;
-        QString icon;
-        switch(type){
-            case MIN_TYPE:
-                name = "Everything";
-                icon = FILE_TYPE_ICON;
-                break;
-            case VERB:
-                name = VERB_NAME;
-                icon = UI_NEXTACTION_PLACEHOLDER_ICON;
-                break;
-            case TAG:
-                name = CATEGORY_NAME;
-                icon = TAG_TYPE_ICON;
-                break;
-            case OPERATION:
-                name = OPERATIONS_NAME;
-                icon = FILE_TYPE_ICON;
-                break;
-            case LOCAL_DATA_DOCUMENT:
-                name = FILES_NAME;
-                icon = FILE_TYPE_ICON;
-                break;
-            case LOCAL:
-                name = LOCAL_NAME;
-                icon = FILE_TYPE_ICON;
-                break;
-            case LOCAL_DATA_FOLDER:
-                name = FOLDERS_NAME;
-                icon = FILE_TYPE_ICON;
-                break;
-            case ACTION_TYPE:
-                name = "Mime Types";
-                icon = TAG_TYPE_ICON;
-                break;
-            case ORGANIZING_TYPE:
-                name = "Types";
-                icon = TAG_TYPE_ICON;
-                break;
-            case PLUGIN_TYPE:
-                name = "Plugins";
-                icon = TAG_TYPE_ICON;
-                break;
-            case PUBLIC_DOCUMENT:
-                name = WEBPAGE_NAME;
-                icon = SITE_TYPE_ICON;
-                break;
-            case PUBLIC_FEED:
-                name = FEED_NAME;
-                icon = FEED_TYPE_ICON;
-                break;
-            case PUBLIC_POST:
-                name = NEW_POSTS_NAME;
-                icon = FEED_TYPE_ICON;
-                break;
-            case PERSON:
-                name = PEOPLE_NAME;
-                icon = PERSON_TYPE_ICON;
-                break;
-            case MESSAGE:
-                name = MESSAGES_NAME;
-                icon = MESSAGE_TYPE_ICON;
-                break;
-            case ALERT:
-                name = "Alerts";
-                icon = FILE_TYPE_ICON;
-                break;
-            case VALUE:
-                name = "Values";
-                icon = FILE_TYPE_ICON;
-                break;
-            case MAX_TYPE:
-                name = "Shouldn't Appear";
-                icon = FILE_TYPE_ICON;
-                break;
-        }
-
-        QString path = addPrefix(TYPE_PREFIX,QString::number(type));
-        CatItem res(path, name);
-        res.setItemType(CatItem::ORGANIZING_TYPE);
-        res.setOrganizingType(type);
-        res.setLabel(TYPE_PARENT_KEY);
-        res.setSourceWeight(MEDIUM_EXTERNAL_WEIGHT);
-        res.setTagLevel(CatItem::INTERNAL_SOURCE);
-        res.setFilterRole(CatItem::CATEGORY_FILTER);
-        res.setStub(true);
-        return res;
-
-    }
 
 
     void setAccountItem(QString accountPath){
@@ -2121,8 +1937,19 @@ public:
         if(hasLabel(SORTING_TYPE_KEY)){
             return (CatItem::ItemType)getCustomValue(SORTING_TYPE_KEY);
         } else {
+            QStringList sl = d->m_path.split("://");
+            if(sl.count()>1){
+                QString body = sl[1];
+                bool ok=false;
+                int typeNum = body.toInt(&ok);
+                if(typeNum!=0 && ok){
+                    CatItem::ItemType type = (CatItem::ItemType)typeNum;
+                    return type;
+                }
+            }
             return getItemType();
         }
+
     }
 
     bool getTakesAnykeys(){
@@ -2208,7 +2035,7 @@ public:
     }
 
     FilterRole getFilterRole(){
-        return( (FilterRole)getCustomValue(FILTER_ROLE_KEY,CatItem::CATEGORY_FILTER));
+        return( (FilterRole)getCustomValue(FILTER_ROLE_KEY,CatItem::UNDEFINED_ELEMENT));
     }
 
     void setFilterRole(FilterRole b){
@@ -2238,43 +2065,14 @@ public:
         setCustomPluginValue(ORGANIZING_TYPE_KEY,(int)v);
     }
 
-    static bool matchOrganizingTypes( ItemType organizingType, ItemType itemType){
-        if(organizingType==CatItem::MIN_TYPE ){
-            return true;
-        }
-        if(itemType == organizingType){
-            return true;
-        }
-        if(organizingType == CatItem::LOCAL){
-            if(itemType== CatItem::VERB){
-                return true;
-            }
-            if(itemType== CatItem::LOCAL_DATA_DOCUMENT){
-                return true;
-            }
-            if(itemType== CatItem::LOCAL_DATA_FOLDER){
-                return true;
-            }
-        }
-        if(organizingType == CatItem::PUBLIC_FEED){
-            if(itemType== CatItem::PUBLIC_POST){
-                return true;
-            }
-            if(itemType== CatItem::PUBLIC_DOCUMENT){
-                return true;
-            }
-        }
-        if(organizingType == CatItem::TAG){
-            if(itemType== CatItem::LOCAL_DATA_FOLDER){
-                return true;
-            }
-
-        }
-        return false;
-    }
+    static bool matchOrganizingTypes( ItemType organizingType, ItemType itemType);
 
     QList<ItemType> getOrganizingTypeList(){
         ItemType organizingType = this->getOrganizeingType();
+        return getOrganizingTypeList(organizingType);
+    }
+
+    static QList<ItemType> getOrganizingTypeList(ItemType organizingType){
         QList<ItemType> res;
         if(organizingType==CatItem::MIN_TYPE ){
             return res;
@@ -2301,8 +2099,8 @@ public:
             res.append(*this);
             return res;
         }
-
-        QList<ItemType> types = getOrganizingTypeList();
+        ItemType organizingType = getSortingType();
+        QList<ItemType> types = getOrganizingTypeList(organizingType);
         for(int i=0; i< types.count(); i++){
             res.append(createTypeParent(types[i]));
         }

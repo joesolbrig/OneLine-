@@ -23,7 +23,8 @@ void CloseToolItem::mousePressEvent(QGraphicsSceneMouseEvent *){
 TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
         QObject(parent), m_item(it)  {
     setAcceptsHoverEvents(true);
-
+    Q_ASSERT(parent);
+    m_parent = parent;
     connect(this, SIGNAL(itemClicked(ListItem, bool)),parent, SLOT(itemClicked(ListItem, bool)));
     connect(this, SIGNAL(closeToolClicked(ListItem)),parent, SLOT(closeToolClicked(ListItem)));
     connect(this, SIGNAL(miniIconRightClicked(QString, QPoint )),
@@ -47,7 +48,7 @@ TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
     } else if(m_item.getFilterRole() == CatItem::CATEGORY_FILTER){
         m_font.setPointSize(m_font.pointSize()+1);
         if(it.getOrganizeingType() !=CatItem::MIN_TYPE){
-            QColor typeColor = ListItem::colorFromType((CatItem::ItemType)
+            QColor typeColor = ListItem::colorFromType(
                                             it.getOrganizeingType());
             m_textItem->setDefaultTextColor(typeColor);
         } else {
@@ -76,10 +77,13 @@ TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
     updateText();
     m_aC = QColor(100,100,100);
     m_bC = QColor(225,225,220);
+    m_cC = QColor(165,165,165);
     //m_currentBackgroundColor = m_aC;
     setBigness(0);
     m_savedRectF = boundingRect();
-    if(m_item.hasLabel(CLOSABLE_ORGANIZING_SOURCE_KEY) && m_item.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
+    if(m_item.hasLabel(CLOSABLE_ORGANIZING_SOURCE_KEY)
+        && (m_item.getCustomValue(CLOSABLE_ORGANIZING_SOURCE_KEY)!=0)
+        && m_item.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
         m_closerTool = new CloseToolItem(this);
         m_closerTool->hide();
     }
@@ -90,7 +94,9 @@ void TextBarItem::paint( QPainter * painter,
 
     QRectF b = fixedRect();
     painter->save();
-    if(m_activated || (m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY)){
+    if(m_activated ){
+        painter->fillRect(b, m_bC);
+    } else if((m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY)){
         painter->fillRect(b, m_bC);
     }
     painter->restore();
@@ -116,7 +122,7 @@ void TextBarItem::updateText(){
     if(!m_textItem){ return;}
 
     QFontMetrics fm(m_font);
-    qreal w = boundingRect().width();
+    qreal w = baseBoundingRect().width();
     qDebug() << "w: " << w;
     qreal acw = fm.averageCharWidth();
     qDebug() << "acw: " << acw;
@@ -125,7 +131,7 @@ void TextBarItem::updateText(){
     bool altDn = gMainWidget->st_altKeyDown;
     QString text;
     if(altDn ){
-        text = m_item.formattedName(false);
+        text = m_item.formattedName(false,charsAllowed);
     } else {
         text = m_item.getName();
         text = text.left(charsAllowed);
@@ -163,6 +169,11 @@ QRectF TextBarItem::baseBoundingRect() const{
     //b.setWidth(m_textItem->textWidth());
     QFontMetrics fm(this->m_textItem->font());
     qreal w = fm.width(m_item.getName());
+
+    qreal maxW = gMarginWidget->listWindowRect().width()/4-2;
+    qDebug() << "TextBarItem::baseBoundingRect() maxW" << maxW;
+//    qreal maxW = ((TextMessageBar*)parent())->geometry().width()/3;
+    w = MIN(w, maxW);
     b.setWidth(w);
     QSize s = ((TextMessageBar*)parent())->getChildSize();
     b.setWidth(MAX(b.width(),s.width()));
@@ -175,7 +186,8 @@ void TextBarItem::hoverEnterEvent(QGraphicsSceneHoverEvent *){
     if(!m_textItem){ return;}
     if(!m_hovered){
         m_hovered=true;
-        m_textItem->setHtml(tagAs(m_item.formattedName(false),"center"));
+        updateText();
+        //m_textItem->setHtml(tagAs(m_item.formattedName(false),"center"));
         if(!m_animating){
             m_savedRectF = baseBoundingRect();
             int textWidth = m_textItem->document()->textWidth();
@@ -257,7 +269,7 @@ void TextBarItem::mousePressEvent(QGraphicsSceneMouseEvent * evt) {
     Qt::MouseButton bt = evt->button();
     if(bts & Qt::RightButton || (bt ==Qt::RightButton)) {
         if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){ return;}
-        setSelected(!m_activated);
+        //setSelected(!m_activated);
         //QPoint mainWidgetPos = mapTo(gMainWidget,pos().toPoint());
         QPointF parPointF = mapToParent(pos());
         QPoint parPoint = parPointF.toPoint();
@@ -265,11 +277,12 @@ void TextBarItem::mousePressEvent(QGraphicsSceneMouseEvent * evt) {
         emit miniIconRightClicked(m_item.getPath(), globPoint);
     } else {
         if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){ return;}
-        setSelected(!m_activated);
-        if(m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY){
-            m_item.setFilterRole(CatItem::CATEGORY_FILTER);
-        }
-        emit itemClicked(m_item, m_activated);
+        //setSelected(!m_activated);
+//        if(m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY){
+//            m_item.setFilterRole(CatItem::CATEGORY_FILTER);
+//            Q_ASSERT(!m_activated);
+//        }
+        emit itemClicked(m_item, !m_activated);
     }
 }
 
@@ -427,18 +440,22 @@ void TextMessageBar::update(){
 
 
 int TextMessageBar::addTextItem(ListItem li, int left){
-    TextBarItem* textItem = new TextBarItem(this,li);
+    TextBarItem* textBarItem = new TextBarItem(this,li);
     if(li == m_activeItem){
-        textItem->setActiveFilterIcon(true);;
+        textBarItem->setActiveFilterIcon(true);;
     }
-    QRectF r = textItem->boundingRect();
+    if(li.getFilterRole() == CatItem::ACTIVE_CATEGORY){
+        m_activeItem = li;
+    }
 
-    textItem->setPos(QPointF(left,m_horzPadding));
-    m_textButtons.append(textItem);
-    m_scene->addItem(textItem);
+    QRectF r = textBarItem->boundingRect();
+
+    textBarItem->setPos(QPointF(left,m_horzPadding));
+    m_textButtons.append(textBarItem);
+    m_scene->addItem(textBarItem);
     m_view->show();
     m_view->raise();
-    textItem->update();
+    textBarItem->update();
     return left + r.width();
 }
 
@@ -464,12 +481,23 @@ void TextMessageBar::itemClicked(ListItem it, bool selected){
 
     for(int i=0; i < m_textButtons.count(); i++){
         TextBarItem* tb = m_textButtons[i];
-        if((tb->getItemName()!= m_activeItem.getName()
-            && tb->getItemName()!= m_subActiveItem.getName())){
-            tb->setSelected(false);
+        if(tb->getItemName()== m_activeItem.getName()){
+            tb->setSelected(true);
+            continue;
         }
+        if(tb->getItemName()== m_subActiveItem.getName()){
+            tb->setSelected(true);
+            continue;
+        }
+        if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER &&
+           tb->getItem().getFilterRole() == CatItem::ACTIVE_CATEGORY){
+            Q_ASSERT(false);
+            tb->setSelected(true);
+            continue;
+        }
+        tb->setSelected(false);
     }
-
+    Q_ASSERT(it.getFilterRole() != CatItem::UNDEFINED_ELEMENT);
 
     emit miniIconClicked(it, selected);
     update();

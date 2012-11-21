@@ -38,11 +38,10 @@ proclaims that it can't be used as stable API/ABI.. */
 //A couple functions to walk the subdirectory
 
 CatItem gnomeMenuBaseItem(){
-    CatItem gm(BASE_GNOME_MENU_PATH, GNOME_MENUS_NAME);
-    gm.setItemType(CatItem::ORGANIZING_TYPE);
-    gm.setSourceWeight(MAX_MAX_EXTERNAL_WEIGHT,
-                       CatItem::createTypeParent(CatItem::LOCAL));
-//    CatItem typeParent = CatItem::createTypeParent(CatItem::LOCAL);
+//    CatItem gm(BASE_GNOME_MENU_PATH, GNOME_MENUS_NAME);
+//    gm.setItemType(CatItem::ORGANIZING_TYPE);
+//    gm.setSourceWeight(MAX_MAX_EXTERNAL_WEIGHT,
+    CatItem gm = CatItem::createTypeParent(CatItem::VERB);
 //    gm.addParent(typeParent);
     Q_ASSERT(gm.isASource());
     return gm;

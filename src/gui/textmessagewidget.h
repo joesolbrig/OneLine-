@@ -60,21 +60,20 @@ class TextBarItem : public QObject, public MyQGraphicsItemBridge {
 private:
 
     ListItem m_item;
-
     bool m_hovered;
     bool m_animating;
     QPropertyAnimation* m_animation;
     bool m_activated;
     QSize m_pixmap_sz;
-
     QRectF m_savedRectF;
-
-
     QColor m_aC;
     QColor m_bC;
+    QColor m_cC;
     QColor m_currentBackgroundColor;
-
     QFont m_font;
+    TextMessageBar* m_parent;
+
+
 
 
 public:

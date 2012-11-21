@@ -530,11 +530,20 @@ QString ListItem::sect(int s, int e){
 
 
 //First support classes and functions...
-QString ListItem::formattedName(bool fullHtml){
-    QString formatedStr = getName();
+QString ListItem::formattedName(bool fullHtml, int charsAllowed){
+    QString formatedStr;
     if(!getCustomString(OVERRIDE_FORMATTED_NAME_KEY).isEmpty()){
         formatedStr =getCustomString(OVERRIDE_FORMATTED_NAME_KEY);
+        if(charsAllowed>-1){
+            formatedStr = formatedStr.right(charsAllowed);
+        }
     } else if(!m_useDisplayPathForNextKey){
+        formatedStr = getName();
+        //int offsetNextKeys = m_nextKeyIndex;
+        if(charsAllowed>-1 && formatedStr.length() > charsAllowed ){
+            //offsetNextKeys -= (formatedStr.length() - charsAllowed);
+            formatedStr = formatedStr.left(charsAllowed);
+        }
         QStringList l;
         l.append(formatedStr);
         l = highlightKey(l, m_nextKeyIndex);

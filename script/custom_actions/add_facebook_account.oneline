@@ -80,7 +80,7 @@ TakesChildrenOf=1
 child_gen_data=facebook_news_item
 
 [FACEBOOL_UPDATE_GENERATOR]
-Item_Path="verb://post_to_facebook"
+Item_Path="custom_verb://post_to_facebook"
 Item_Name="Post To Facebook Feed"
 command=curl -F 'access_token=$oathkey;' -F 'message=$$message:longtext+;'  https://graph.facebook.com/$user_name/feed
 USE_DESCRIPTION_KEY_STR=1

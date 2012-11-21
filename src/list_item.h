@@ -257,7 +257,7 @@ public:
         m_maxSplitPointIndex = 0;
     }
 
-    QString formattedName(bool useHtml=true);
+    QString formattedName(bool useHtml=true, int charsAllowed=-1);
     QString formattedSingleLine();
 
     void setFormattedPathOveride(QString alterDescription){

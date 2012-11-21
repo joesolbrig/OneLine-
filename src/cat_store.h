@@ -90,6 +90,8 @@ class Cat_Store {
         int m_returnRelationCount;
 
 
+
+
     public:
         //Everything public should be mutex-protected, show not call anything else public
         //
@@ -118,7 +120,7 @@ class Cat_Store {
         QList<CatItem> getMainApps();
         QList<CatItem> getInitialItems(ItemFilter* filter, long limit = MAX_SOURCE_COUNT, int* initialPos=0);
 
-        QList<CatItem> getHighestSourceParents(ItemFilter* filter);
+        QList<CatItem> getHighestSourceParents(ItemFilter* filter=0);
 
     public:
         void setUnseenChildCount(CatItem& it);
@@ -181,6 +183,8 @@ class Cat_Store {
 
         QList<CatItem> getCustomVerbByActionTypeNamedPrivate(CatItem argType);
     protected:
+        CatItem createTypeParent(CatItem::ItemType type);
+
         QList<CatItem> docListFromTypelist(QList<CatItem> types, int desired);
         QList<CatItem> getActionTypeParents(CatItem childItem, bool onlyBest);
         QList<CatItem> getInitialMessages(int initialSlots, ItemFilter* filter, long limit = MAX_SOURCE_COUNT,

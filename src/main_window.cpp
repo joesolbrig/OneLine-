@@ -180,6 +180,7 @@ void MainUserWindow::startTasks(){
     loadSources();
     startTimers();
     preloadIcons();
+    refreshExtendCatalog(false, true);
 
     //Preload items
     QList<CatItem> outItems;
@@ -216,19 +217,22 @@ void MainUserWindow::choiceUnderstoodTimeout(){
     //
     time_t now = appGlobalTime(); //This is in conds...
     m_timeCount++; //This is arbitrary units
-    if(m_contextMenu){ return;}
 
     //int timeSinceLastChange = (now - m_lastStateChange); //MILLISECS_IN_SECOND*
 
-    //User Keys
+    //This is our active search for changed user-choices
+
         //explicit searching - this is the fastest thing
         { static int lastupdate=0;
         if(abs(now - lastupdate) > (FORGROUND_SEARCH_DELAY )){
 
             if(foregroundSearch()) {
                 lastupdate = now;
+                return;
             }
         }}
+
+    if(m_contextMenu){ return;}
 
         { static int lastupdate=0;
             if(abs(now - lastupdate) > (FORGROUND_SEARCH_DELAY*5)){
@@ -1527,12 +1531,15 @@ bool MainUserWindow::expandInto(CatItem& baseItem, bool expandOnSide){
 
 //Miniicon stuff
 void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
+    Q_ASSERT(it.getFilterRole() != CatItem::UNDEFINED_ELEMENT);
+    qDebug() << "miniIcon: " << it.getPath() << " clicked";
     if(setTheItem){
         if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
             m_inputList.setSubFilterItem(it);
         } else if(it.getFilterRole() == CatItem::CATEGORY_FILTER
                   || it.getFilterRole() == CatItem::ACTIVE_CATEGORY ){
             m_inputList.setFilterItem(it);
+            Q_ASSERT(it == m_inputList.getFilterItem());
             CatBuilder::getMiniIcons(m_inputList);
         } else if(it.getItemType() == CatItem::LOCAL_DATA_FOLDER){
             CatItem item = it;
@@ -1544,6 +1551,7 @@ void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
         } else {
             m_inputList.setFilterItem(ListItem());
             m_inputList.setSubFilterItem(ListItem());
+            Q_ASSERT(m_inputList.getFilterItem().isEmpty());
             CatBuilder::getMiniIcons(m_inputList);
         }
     }
@@ -1564,7 +1572,10 @@ void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
 
 void MainUserWindow::operateOnItem(QString path, const CatItem opItem){
     CatItem item = m_inputList.getItemByPath(path);
-    Q_ASSERT(!item.isEmpty());
+    //Q_ASSERT(!item.isEmpty());
+    if(item.isEmpty()){
+        item = CatItem(path);
+    }
     CatItem operationItem = opItem;
 
     QList<CatItem> children = operationItem.getChildren();
@@ -1681,7 +1692,7 @@ bool MainUserWindow::goBackFrom(int , QKeyEvent* ){
         m_desiredParentPath = m_inputList.getParentItem().getPath();
         m_savedPosition = m_inputList.popParent();
     }
-    CatBuilder::getMiniIcons(m_inputList);
+    //CatBuilder::getMiniIcons(m_inputList);
     addMiniIcons();
     return true;
 

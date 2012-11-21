@@ -59,7 +59,7 @@ void MultiItemLabel::paintEvent(QPaintEvent * evt){
 
 
 
-FancyContextMenu::FancyContextMenu(CatItem priorityItem, QList<CatItem> actionChildren):
+FancyContextMenu::FancyContextMenu(CatItem theItem, QList<CatItem> actionChildren):
         QWidget((QWidget*)gMarginWidget,
                 Qt::FramelessWindowHint),
                 m_layout(QBoxLayout::TopToBottom,this),
@@ -76,7 +76,8 @@ FancyContextMenu::FancyContextMenu(CatItem priorityItem, QList<CatItem> actionCh
     m_slider.setMinimum(0);
     m_slider.setMaximum((WEIGHT_TICS-1));
 
-    QList<CatItem> priorityParents = priorityItem.getSearchSourceParents();
+    m_itemActedOn = theItem;
+    QList<CatItem> priorityParents = m_itemActedOn.getSearchSourceParents();
     connect(&m_topLabel, SIGNAL(itemChanged()),
             this, SLOT(sourceChanged()));
     connect(&m_slider, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)));
@@ -114,7 +115,6 @@ FancyContextMenu::FancyContextMenu(CatItem priorityItem, QList<CatItem> actionCh
     setGeometry(g);
     m_sublayout.addWidget(&m_menu,0, Qt::AlignRight);
 
-    m_priorityItem = priorityItem;
     m_sublayout.setMargin(0);
     m_sublayout.setContentsMargins(0,0,0,0);
     //m_sublayout.update();
@@ -155,7 +155,12 @@ void FancyContextMenu::sliderChanged(int value){
         CatItem setPrioritItem(addPrefix(OPERATION_PREFIX,SET_PRIORIT_OPERATION));
         setPrioritItem.setCustomValue(SET_PRIORITY_KEY_STR,value);
         setPrioritItem.setLabel(RESET_FILTER_ICONS_KEY);
-        gMainWidget->operateOnItem(m_priorityItem.getPath(),setPrioritItem);
+
+        //Set value here and save the value in the main item
+        m_topLabel.curentItem().setCustomValue(SET_PRIORITY_KEY_STR,value);
+        m_topLabel.curentItem().setLabel(RESET_FILTER_ICONS_KEY);
+        QString itemPath = m_topLabel.curentItem().getPath();
+        gMainWidget->operateOnItem(itemPath,setPrioritItem);
     }
 }
 
@@ -175,8 +180,7 @@ void FancyContextMenu::optionChosen(){
     Q_ASSERT(!optionItem.isEmpty());
     CatItem activateOptionItem(addPrefix(OPERATION_PREFIX,ACTIVATE_OPTION_ITEM));
     activateOptionItem.addChild(optionItem);
-    //emit operateOnItem(m_priorityItem.getPath(),activateOptionItem);
-    gMainWidget->operateOnItem(m_priorityItem.getPath(),activateOptionItem);
+    gMainWidget->operateOnItem(m_itemActedOn.getPath(),activateOptionItem);
     this->end();
 }
 

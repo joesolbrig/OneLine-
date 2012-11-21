@@ -117,6 +117,10 @@ void FilecatalogPlugin::getCatalog(QList<CatItem>* items){
         dirParent.setCustomPluginValue(FILECAT_SEARCH_DEPTH, depth);
         dirParent.setCustomPluginInfo(FILE_DIRECTORY_PLUGIN_STR,memDirs[i].toString());
         indexDirectory(extendedTypes, dirParent, items);
+        if(memDirs[i].baseWeight>0){
+            dirParent.setUpdatingSourceWeight(memDirs[i].baseWeight,getPluginRep());
+        }
+
         items->append(dirParent);
     }
 }

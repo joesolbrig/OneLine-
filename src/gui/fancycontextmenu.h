@@ -88,7 +88,7 @@ class FancyContextMenu : public QWidget
     QBoxLayout m_sublayout;
     QSlider m_slider;
     QMenu m_menu;
-    CatItem m_priorityItem;
+    CatItem m_itemActedOn;
     QHash<QString, CatItem> m_optionItems;
     QPoint m_mousePos;
 public:

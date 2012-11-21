@@ -472,6 +472,117 @@ QList<CatItem> sortCatItems(QList<CatItem> il, QString label, bool asKey){
     return res2;
 }
 
+
+QString CatItem::getActionName() const{
+    QString dd = getCustomString(TEMPORARY_NAME_KEY_STR);
+    if(!dd.isEmpty()){ return dd; }
+    dd = getName();
+    if(!dd.isEmpty()){ return dd; }
+    return d->m_path;
+}
+
+QString CatItem::getArgPath() const{
+    QString dd = getCustomString(ARG_PATH_KEY_STR);
+    if(!dd.isEmpty()){ return dd; }
+    if(d->m_path==RUN_PSEUDO_ITEM_PATH){return "";}
+    return d->m_path;
+}
+
+void CatItem::setName(QString rawName){
+
+    const QString codedSpace("%20");
+    const QString codedAt("%40");
+
+    QString v;
+    if(!(rawName.contains(codedSpace)||
+         rawName.contains(codedAt))){
+        v = rawName;
+    } else {
+        for(int i=0; i<rawName.length();i++){
+            if(rawName[i]=='%'){
+                if(rawName.mid(i,3)==codedSpace){
+                    v[i]=' ';
+                    i+=2;
+                }
+                if(rawName.mid(i,3)==codedAt){
+                    v[i]=' ';
+                    i+=2;
+                }
+            } else {
+                v[i] = rawName[i];
+            }
+        }
+    }
+
+    if(v.isEmpty()){
+        d->m_data.remove(NAME_KEY_STR);
+        v = this->getName();
+    } else {
+        d->m_data[NAME_KEY_STR] = v;
+    }
+    d->m_name = v;
+    d->m_lowName = d->m_name.toLower();
+    if(d->m_data.contains(TEMP_LOW_PATH_KEY_STR)){
+        d->m_data.remove(TEMP_LOW_PATH_KEY_STR);
+    }
+}
+
+void CatItem::setPath(QString rawPath){
+    QString p;
+
+    //A trailing slash seems to be alway serpufluous
+    if(rawPath.size() >1 && rawPath.endsWith(CHAR_PATH_SEP)){
+        p = rawPath.left(rawPath.size()-1);
+    }  else if(!rawPath.startsWith(FILE_PREFIX)){
+        p = rawPath;
+    } else {
+        int toTake = FILE_PREFIX.length()-1;
+        while(rawPath.length()>toTake+1
+                && rawPath[toTake]=='/'
+                && rawPath[toTake+1]=='/' && (toTake<=0 ||(rawPath[toTake-1]!=':'))){
+            toTake++;
+        }
+        rawPath = rawPath.mid(toTake);
+        const QString codedSpace("%20");
+        const QString codedAt("%40");
+        int i=0;
+
+        if(rawPath.contains('%')){
+            while(i<rawPath.length()){
+                if(rawPath[i]=='%'){
+                    if(rawPath.mid(i,3)==codedSpace){
+                        p.append(' ');
+                        i+=3;
+                        continue;
+                    }
+                    if(rawPath.mid(i,3)==codedAt){
+                        p.append('@');
+                        i+=3;
+                        continue;
+                    }
+                }
+                p.append(rawPath[i]);
+                i++;
+            }
+        }
+    }
+    p = p.simplified();;
+    adjustChildrensPath(p);
+
+    d->m_path = p;
+    if(d->m_name.isEmpty()){
+        //Need to "cache" toLower result
+        QStringList sl = d->m_path.split("/");
+        if(sl.count()>0 && !sl[sl.count()-1].isEmpty()){
+            d->m_data[TEMP_LOW_PATH_KEY_STR] = sl[sl.count()-1].toLower();
+        } else if(sl.count()>1 && !sl[sl.count()-2].isEmpty()){
+            d->m_data[TEMP_LOW_PATH_KEY_STR] = sl[sl.count()-2].toLower();
+        } else {
+            d->m_data[TEMP_LOW_PATH_KEY_STR] = p.toLower();
+        }
+    }
+}
+
 QString CatItem::itemCacheDir(){
     QString cachePath = QDir::convertSeparators(
             PUSER_APP_DIR
@@ -665,6 +776,101 @@ CatItem CatItem::createFileItem(QSet<QString> &extendedTypes, QFileInfo initialI
     return it;
 }
 
+CatItem CatItem::createTypeParent(CatItem::ItemType type){
+    Q_ASSERT(type >= (int)CatItem::MIN_TYPE &&
+             type <= CatItem::MAX_TYPE);
+
+    QString name;
+    QString icon;
+    switch(type){
+        case MIN_TYPE:
+            name = "Everything";
+            icon = FILE_TYPE_ICON;
+            break;
+        case VERB:
+            name = VERB_NAME;
+            icon = UI_NEXTACTION_PLACEHOLDER_ICON;
+            break;
+        case TAG:
+            name = CATEGORY_NAME;
+            icon = TAG_TYPE_ICON;
+            break;
+        case OPERATION:
+            name = OPERATIONS_NAME;
+            icon = FILE_TYPE_ICON;
+            break;
+        case LOCAL_DATA_DOCUMENT:
+            name = FILES_NAME;
+            icon = FILE_TYPE_ICON;
+            break;
+        case LOCAL:
+            name = LOCAL_NAME;
+            icon = FILE_TYPE_ICON;
+            break;
+        case LOCAL_DATA_FOLDER:
+            name = FOLDERS_NAME;
+            icon = FILE_TYPE_ICON;
+            break;
+        case ACTION_TYPE:
+            name = "Mime Types";
+            icon = TAG_TYPE_ICON;
+            break;
+        case ORGANIZING_TYPE:
+            name = "Types";
+            icon = TAG_TYPE_ICON;
+            break;
+        case PLUGIN_TYPE:
+            name = "Plugins";
+            icon = TAG_TYPE_ICON;
+            break;
+        case PUBLIC_DOCUMENT:
+            name = WEBPAGE_NAME;
+            icon = SITE_TYPE_ICON;
+            break;
+        case PUBLIC_FEED:
+            name = FEED_NAME;
+            icon = FEED_TYPE_ICON;
+            break;
+        case PUBLIC_POST:
+            name = NEW_POSTS_NAME;
+            icon = FEED_TYPE_ICON;
+            break;
+        case PERSON:
+            name = PEOPLE_NAME;
+            icon = PERSON_TYPE_ICON;
+            break;
+        case MESSAGE:
+            name = MESSAGES_NAME;
+            icon = MESSAGE_TYPE_ICON;
+            break;
+        case ALERT:
+            name = "Alerts";
+            icon = FILE_TYPE_ICON;
+            break;
+        case VALUE:
+            name = "Values";
+            icon = FILE_TYPE_ICON;
+            break;
+        case MAX_TYPE:
+            name = "Shouldn't Appear";
+            icon = FILE_TYPE_ICON;
+            break;
+    }
+
+    QString path = addPrefix(TYPE_PREFIX,QString::number(type));
+    CatItem res(path, name);
+    res.setItemType(CatItem::ORGANIZING_TYPE);
+    res.setOrganizingType(type);
+    res.setLabel(TYPE_PARENT_KEY);
+    res.setSourceWeight(MEDIUM_EXTERNAL_WEIGHT);
+    res.setTagLevel(CatItem::INTERNAL_SOURCE);
+    res.setFilterRole(CatItem::CATEGORY_FILTER);
+    res.setCustomValue(CLOSABLE_ORGANIZING_SOURCE_KEY,0);
+    res.setStub(true);
+    return res;
+
+}
+
 
 
 
@@ -712,8 +918,6 @@ CatItem CatItem::getUpdateSourceParent(qint32 w){
 
 QList<CatItem> CatItem::getSearchSourceParents(){
     QList<CatItem> res;
-
-    //if(this->hasSourceWeight()){ return *this; }
 
     for(int i=0;i<d->children_detached_list.count();i++){
         if(d->children_detached_list[i].getChildPath() == getPath() ){
@@ -930,6 +1134,15 @@ void CatItem::clearRelations() {
     d->variantData.clear();
 }
 
+bool CatItem::matchOrganizingTypes( ItemType organizingType, ItemType itemType){
+    QList<ItemType> types = getOrganizingTypeList(organizingType);
+    for(int i=0; i<types.count();i++){
+        if(types[i]==itemType){
+            return true;
+        }
+    }
+    return false;
+}
 
 
 
