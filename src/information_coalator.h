@@ -85,12 +85,15 @@ class OHash {
                 m_hash[c.getId()] = c;
             } else {
                 ListItem li = m_hash[c.getId()];
-                if(li == c){
-                    li.merge(c);
-                    m_hash[c.getId()] = li;
-                } else {
-                    m_hash[c.getId()] = c;
-                }
+                Q_ASSERT(li == c);
+                li.merge(c);
+                m_hash[c.getId()] = li;
+//                if(li == c){
+//                    li.merge(c);
+//                    m_hash[c.getId()] = li;
+//                } else {
+//                    m_hash[c.getId()] = c;
+//                }
             }
         }
 

@@ -117,7 +117,7 @@ int Recoll_Interface::addPossiblyCompoundFile(CatItem& parentIt, QList<CatItem>*
         //fn = m_parent_udi;
         ipath = savedIpath;
     }
-    qDebug() << "addPossiblyCompoundFile at updatePath: " << fn.c_str();
+    //qDebug() << "addPossiblyCompoundFile at updatePath: " << fn.c_str();
     FileInterner interner(fn, &m_stp, m_rclconfig, m_tmpdir, FileInterner::FIF_none);
     // File name transcoded to utf8 for indexation.
     string charset = m_rclconfig->getDefCharset(true);
@@ -244,8 +244,8 @@ bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& pare
             qDebug() << "exception for error interning" << m_parent_udi.c_str();
         }
         if(fis == FileInterner::FIError){
-            qDebug() << "error interning" << m_parent_udi.c_str();
-            qDebug() << interner.getReason().c_str();
+            //qDebug() << "error interning" << m_parent_udi.c_str();
+            //qDebug() << interner.getReason().c_str();
             return false;
         }
     }
@@ -257,7 +257,7 @@ bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& pare
         if( (ipath.empty() )){
             m_continueOnIPath= false;
         }
-        qDebug() << "done interning " << m_parent_udi.c_str();
+        //qDebug() << "done interning " << m_parent_udi.c_str();
         qDebug() << interner.getReason().c_str();
         return false;
 

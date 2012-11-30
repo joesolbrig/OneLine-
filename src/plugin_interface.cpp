@@ -1182,6 +1182,7 @@ CatItem& CatItem::addParent(CatItem& parentItem, QString pluginName,
     return addParentInternal(parentItem, *this, pluginName,childRelType, isDefaultAppType);
 }
 
+
 CatItem& CatItem::addChildInternal(CatItem& parentItem, CatItem& childItem, QString pluginName,
                                BaseChildRelation::ChildRelType relType,
                                bool isDefaultAppType){
@@ -1260,6 +1261,44 @@ CatItem& CatItem::addParentInternal(CatItem& parentItem, CatItem& childItem,
     }
     return childItem.d->children_detached_list[insertIndex].getParentRef();
 }
+
+void CatItem::addChildren(QList<CatItem> children){
+
+    for(int i=0; i<children.count(); i++){
+        this->addChild(children[i]);
+    }
+}
+
+void CatItem::addChildrenBulk(QList<CatItem> children){
+
+    QHash<QString, DetachedChildRelation> relations;
+    for(int i=0;i < d->children_detached_list.count();i++){
+        DetachedChildRelation dcr = d->children_detached_list[i];
+        relations[dcr.toString()] = dcr;
+    }
+    for(int i=0; !(i==children.size());i++){
+        DetachedChildRelation dcr(*this, children[i],"");
+        relations[dcr.toString()] = dcr;
+    }
+}
+
+void CatItem::addParents(QList<CatItem> parents){
+    QHash<QString, DetachedChildRelation> relations;
+    for(int i=0;i < d->children_detached_list.count();i++){
+        DetachedChildRelation dcr = d->children_detached_list[i];
+        relations[dcr.toString()] = dcr;
+    }
+
+    for(int i=0; !(i==parents.size());i++){
+        DetachedChildRelation dcr(parents[i],*this, "");
+        relations[dcr.toString()] = dcr;
+    }
+
+    d->children_detached_list = relations.values();
+}
+
+
+
 
 void CatItem::adjustChildrensPath(QString newPath){
 

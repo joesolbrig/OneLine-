@@ -72,7 +72,7 @@ bool StreamPlugin::getFeedReaders(SearchInfo* info, QList<CatItem>* r){
     QList<AbstractReader*> iconDownloaders;
     for(int i=0;i < r->count();i++){
         CatItem it = r->at(i);
-        qDebug() << "scanning for icon: " << it.getPath();
+        //qDebug() << "scanning for icon: " << it.getPath();
         iconDownloaders.append(createIconReader(it));
     }
     r->append(launchFeedReaders(iconDownloaders));

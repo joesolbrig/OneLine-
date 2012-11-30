@@ -22,6 +22,7 @@ void CloseToolItem::mousePressEvent(QGraphicsSceneMouseEvent *){
 
 TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
         QObject(parent), m_item(it)  {
+    Q_ASSERT(it.getFilterRole() != CatItem::UNDEFINED_ELEMENT);
     setAcceptsHoverEvents(true);
     Q_ASSERT(parent);
     m_parent = parent;
@@ -81,9 +82,7 @@ TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
     //m_currentBackgroundColor = m_aC;
     setBigness(0);
     m_savedRectF = boundingRect();
-    if(m_item.hasLabel(CLOSABLE_ORGANIZING_SOURCE_KEY)
-        && (m_item.getCustomValue(CLOSABLE_ORGANIZING_SOURCE_KEY)!=0)
-        && m_item.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
+    if(!m_item.hasLabel(PERMANENT_ORGANIZING_SOURCE_KEY)){
         m_closerTool = new CloseToolItem(this);
         m_closerTool->hide();
     }
@@ -96,7 +95,8 @@ void TextBarItem::paint( QPainter * painter,
     painter->save();
     if(m_activated ){
         painter->fillRect(b, m_bC);
-    } else if((m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY)){
+    } else if((m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY
+               || m_item.hasLabel(ACTIVE_FILTER_ITEM_KEY))){
         painter->fillRect(b, m_bC);
     }
     painter->restore();
@@ -171,7 +171,7 @@ QRectF TextBarItem::baseBoundingRect() const{
     qreal w = fm.width(m_item.getName());
 
     qreal maxW = gMarginWidget->listWindowRect().width()/4-2;
-    qDebug() << "TextBarItem::baseBoundingRect() maxW" << maxW;
+    //qDebug() << "TextBarItem::baseBoundingRect() maxW" << maxW;
 //    qreal maxW = ((TextMessageBar*)parent())->geometry().width()/3;
     w = MIN(w, maxW);
     b.setWidth(w);

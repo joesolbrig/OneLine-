@@ -59,7 +59,7 @@ public:
 protected:
     void indexDirectory(QSet<QString> &extendedTypes, CatItem& parentItem,
         QList<CatItem>* output, UserEvent::LoadType lt=UserEvent::IGNORE,
-        bool addChild=false);
+        bool addChild=false, int overrideMaxPasses=-1);
     void alterItem(CatItem* item);
     CatItem createFileItem(QSet<QString> &extendedTypes, QFileInfo fileInfo, CatItem& parent, int depth, UserEvent::LoadType lt=UserEvent::IGNORE);
     CatItem parseOnelineFile(QFileInfo fileInfo);

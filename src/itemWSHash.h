@@ -29,11 +29,11 @@ public:
     friend class DetachedChildRelation;
     enum FilterRole{
         UNDEFINED_ELEMENT=0,
-        MESSAGE_ELEMENT,
-        CATEGORY_FILTER,
-        ACTIVE_CATEGORY,
-        SUBCATEGORY_FILTER,
-        ERROR_MESSAG
+        MESSAGE_ELEMENT=1,
+        CATEGORY_FILTER=2,
+        ACTIVE_CATEGORY=3,
+        SUBCATEGORY_FILTER=4,
+        ERROR_MESSAG=5
     };
 
     enum TagLevel{
@@ -941,21 +941,11 @@ public:
                    BaseChildRelation::ChildRelType defaultType=BaseChildRelation::UNDETERMINED_REL,
                    bool isDefaultAppType= false);
 
-
-
-    void addChildren(QList<CatItem> children){
-        for(int i=0; !(i==children.size());i++){
-            if(children[i].d->m_path!=d->m_path){
-                addChild(children[i]);
-            }
-        }
-    }
-
-    void addParents(QList<CatItem> parents){
-        for(int i=0; !(i==parents.size());i++){
-            addParent(parents[i]);
-        }
-    }
+    void addChildren(QList<CatItem> children);
+    void addChildrenBulk(QList<CatItem> children);
+    void addParents(QList<CatItem> parents);
+    static CatItem& addChildrenInternal(CatItem& parentItem, QList<CatItem>& children);
+    static CatItem& addParentsInternal(QList<CatItem>& parents, CatItem &childItem);
 
     void addCharacteristic(QString characteristicName,
             int value,
@@ -1238,9 +1228,12 @@ public:
     }
 
     time_t getModificationTime() const {
-        return (time_t)getCustomValue(MODIFICATION_TIME_KEY,(time_t)0);
+        time_t t = (time_t)getCustomValue(MODIFICATION_TIME_KEY,(time_t)0);
+        t = MAX(t,0);
+        return t;
     }
     void setModificationTime(time_t  v){
+        v = MAX(v,0);
         setCustomPluginValue(MODIFICATION_TIME_KEY,v);
     }
 

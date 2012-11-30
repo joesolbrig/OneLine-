@@ -189,7 +189,7 @@ QList<Directory> FilecatalogPlugin::getInitialDirs(){
 //One thing to explore is looking deeper into any directory with a higher rating...
 void FilecatalogPlugin::indexDirectory(QSet<QString> &extendedTypes,
     CatItem& parentItem, QList<CatItem>* output,UserEvent::LoadType lt,
-    bool addChild)
+    bool addChild, int overrideMaxPasses)
 {
     int depth=parentItem.getCustomValue(FILECAT_SEARCH_DEPTH);
     if(depth ==0){
@@ -209,12 +209,16 @@ void FilecatalogPlugin::indexDirectory(QSet<QString> &extendedTypes,
                                                   QDir::Time | QDir::Reversed);
     time_t scanTime = parentItem.getChildScanTime();
     int maxPasses = parentItem.getMaxUpdatePasses(DEFAULT_SUBDIR_SCAN_PASSES);
+    if(overrideMaxPasses>-1){
+        maxPasses = MIN(maxPasses, overrideMaxPasses);
+    }
     int passCount=0;
     QFileInfo fileInfo;
     QDateTime fileTime;
     fileTime.setTime_t(0);
     //For truly huge directories, this would suck but so would anything else...
     int i = 0;
+    QList<CatItem> children;
     for (; i < dirsInfo.count() && passCount <maxPasses; ++i) {
         fileInfo = dirsInfo[i];
         //Ordering by directory is not quite strict but we'll just live with skipped files given this error
@@ -234,9 +238,10 @@ void FilecatalogPlugin::indexDirectory(QSet<QString> &extendedTypes,
             { indexDirectory(extendedTypes, item, output,lt);}
         output->append(item);
         if(addChild){
-            parentItem.addChild(item);
+            children.append(item);
         }
     }
+    parentItem.addChildrenBulk(children);
     if(i < dirsInfo.count()){
         parentItem.setChildScanTime(fileTime.toTime_t());
         parentItem.setUpdatingSourceWeight(MAX_EXTERNAL_WEIGHT,getPluginRep());
@@ -368,7 +373,6 @@ CatItem FilecatalogPlugin::createFileItem(QSet<QString> &extendedTypes, QFileInf
             Q_ASSERT(it.hasParentType(FILE_CATALOG_PLUGIN_STR));
         } else {
             it.addParent(folderParentItem,FILE_CATALOG_PLUGIN_STR);
-
         }
     }
     return it;
@@ -397,14 +401,25 @@ bool FilecatalogPlugin::modifyItem(CatItem* it , UserEvent::LoadType lt) {
 
     if(it->hasLabel(FILE_CATALOG_PLUGIN_STR)){
         QFileInfo fileInfo(it->getPath());
+        time_t fileModTime = (time_t)fileInfo.lastModified().toTime_t();
+        fileModTime = MAX(fileModTime,0);
+        time_t itemModTime = (it->getModificationTime());
+
         if(!fileInfo.exists()){
             it->setForDelete();
             return true;
-        } else if(it->hasLabel(IS_STUB_KEY_STR) &&
+        } else  if(it->hasLabel(IS_STUB_KEY_STR) &&
                   !it->isStub()
-                && (time_t)fileInfo.lastModified().toTime_t() <= it->getModificationTime()){
+                && (fileModTime <= (itemModTime) )){
             return false;
         }
+        it->setLabel(IS_STUB_KEY_STR);
+        it->setStub(false);
+        it->setModificationTime(fileModTime);
+        itemModTime = (it->getModificationTime());
+        Q_ASSERT(it->hasLabel(IS_STUB_KEY_STR) &&
+                 !it->isStub()
+               && ( fileModTime == itemModTime));
 
         CatItem par = thePlatform->alterItem(it);
         if(!par.isEmpty()){ handled = true; }
@@ -424,12 +439,12 @@ bool FilecatalogPlugin::modifyItem(CatItem* it , UserEvent::LoadType lt) {
             it->setCustomPluginValue(FILECAT_SEARCH_DEPTH, 1);
             QList<CatItem> itemsAdded;
             indexDirectory(extendedTypes,*it,
-                &itemsAdded, lt, true);
+                &itemsAdded, lt, true, DEFAULT_SUBDIR_SCAN_LIMITED_PASSES);
             Q_ASSERT(!it->isStub());
             return true;
         }
     }
-    return handled;
+    return true;
 }
 
 

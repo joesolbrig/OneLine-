@@ -51,7 +51,7 @@ void CatBuilder::addItem(CatItem item){
     cat->addItem(item);
 }
 
-CatItem CatBuilder::updateItem(CatItem& it, int childDepth, UserEvent::LoadType lt, bool saveValues){
+CatItem CatBuilder::updateItem(CatItem& it, int childDepth, UserEvent::LoadType lt){
     if(!it.shouldUpdate(childDepth, lt)){ return it;}
 
 
@@ -68,7 +68,7 @@ CatItem CatBuilder::updateItem(CatItem& it, int childDepth, UserEvent::LoadType 
             //realItem.merge(it);
             it.merge(realItem);
         }
-        if(lt!=UserEvent::IGNORE && saveValues){
+        if(lt!=UserEvent::IGNORE){
             for(int i=0; i<childDepth;i++){
                 //avoiding address of reference of smart-pointer itme
                 CatItem holder = it;

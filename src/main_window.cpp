@@ -453,7 +453,7 @@ void MainUserWindow::catalogBuilt() {
         //Building the catalogue may add to current item
         CatItem& curItem = m_inputList.currentItemRef();
         if(!curItem.isEmpty()){
-            CatBuilder::updateItem(curItem,2,UserEvent::SELECTED, true);
+            CatBuilder::updateItem(curItem,2,UserEvent::SELECTED);
         }
 
         //Update files and list
@@ -584,7 +584,7 @@ bool MainUserWindow::tryShowPreview(){
             m_rightPreviewingItem = pItem;
             return false;
         }
-        CatBuilder::updateItem(pItem,2,UserEvent::SELECTED, true);
+        CatBuilder::updateItem(pItem,2,UserEvent::SELECTED);
     } else {
         pItem = m_centerPreviewingItem;
     }
@@ -772,6 +772,7 @@ void MainUserWindow::searchOnInput(int* beginPos) {
 
     m_inputList.filterItems();
     CatBuilder::getItemsFromQuery(m_inputList, outItems, MAX_ITEMS, beginPos);
+    qDebug() << "CatBuilder::getItemsFromQuery found: " << outItems.count() << " items:";
 
 
     st_SearchResultsChanged = true;
@@ -846,7 +847,7 @@ void MainUserWindow::setItem(){
     if( st_TakeItemFromList) {
         CatItem it = getSelectedItemFromList();
         if(!it.isEmpty()){
-            CatBuilder::updateItem(it, 2, UserEvent::SELECTED,false);
+            CatBuilder::updateItem(it, 2, UserEvent::SELECTED);
             m_inputList.setItem(it);
         }
     }
@@ -931,6 +932,7 @@ void MainUserWindow::fillList(){
     //charsAvail = m_itemChoiceList->getIconTextLength();
     QList<ListItem> il=
         m_inputList.getFormattedListItems(selectIndex,rowsAvail, charsAvail);
+    qDebug() << "MainUserWindow::fillList got" <<  il.count() << " items";
     addIconsToList(il);
 
     if(selectIndex<0){
@@ -1036,6 +1038,8 @@ void MainUserWindow::tryHideMenu(){
         Q_ASSERT(!m_contextMenu);
         t->close();
         t->deleteLater();
+        st_UserChoiceChanged = true;
+        st_TakeItemFromList = false;
     }
 }
 
@@ -1111,7 +1115,7 @@ void MainUserWindow::menuEvent(QContextMenuEvent* evt) {
 void MainUserWindow::listMenuEvent(QString itemPath, QPoint p) {
     CatItem item = m_inputList.getItemByPath(itemPath);
     if(!m_contextMenu && m_inputList.atFirstSlot() && !item.isEmpty()){
-        CatBuilder::updateItem(item,2,UserEvent::SELECTED, true);
+        CatBuilder::updateItem(item,2,UserEvent::SELECTED);
         InputList il;
         il.setItem(item);
         il.addSlot();
@@ -1499,7 +1503,7 @@ bool MainUserWindow::expandInto(CatItem& baseItem, bool expandOnSide){
     //Clear list
     m_itemChoiceList->addMiniIconList(QList<ListItem>());
     if(!baseItem.getIsTempItem())
-        { CatBuilder::updateItem(baseItem,2,UserEvent::SELECTED, true); }
+        { CatBuilder::updateItem(baseItem,2,UserEvent::SELECTED); }
 
     if(m_itemChoiceList->testIf_I_CanPreviewItem(baseItem) && !m_inputList.isExpanded()){
         hidePreview();
@@ -1534,16 +1538,16 @@ void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
     Q_ASSERT(it.getFilterRole() != CatItem::UNDEFINED_ELEMENT);
     qDebug() << "miniIcon: " << it.getPath() << " clicked";
     if(setTheItem){
-        if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
+        if(it.getItemType() == CatItem::LOCAL_DATA_FOLDER){
+            CatItem item = it;
+            expandInto(item);
+        } else if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
             m_inputList.setSubFilterItem(it);
         } else if(it.getFilterRole() == CatItem::CATEGORY_FILTER
                   || it.getFilterRole() == CatItem::ACTIVE_CATEGORY ){
             m_inputList.setFilterItem(it);
             Q_ASSERT(it == m_inputList.getFilterItem());
             CatBuilder::getMiniIcons(m_inputList);
-        } else if(it.getItemType() == CatItem::LOCAL_DATA_FOLDER){
-            CatItem item = it;
-            expandInto(item);
         }
     } else {
         if(it.getFilterRole() == CatItem::SUBCATEGORY_FILTER){
@@ -1567,6 +1571,8 @@ void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
         m_itemOrigin = FROM_SEARCH;
         st_SearchResultsChanged = true;
     }
+    m_inputList.clearItem();
+    m_inputDisplay->clearText();
     updateDisplay();
 }
 
@@ -1799,7 +1805,7 @@ void MainUserWindow::tabAction(int k, QKeyEvent* controlKey){
 
     CatItem& baseItem = m_inputList.currentItemRef();
     if(!baseItem.isEmpty())
-        {CatBuilder::updateItem(baseItem, 2, UserEvent::SELECTED,false);}
+        {CatBuilder::updateItem(baseItem, 2, UserEvent::SELECTED);}
 
     st_SearchResultsChanged = true;
     st_UserChoiceChanged = true;

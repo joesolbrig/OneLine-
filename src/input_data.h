@@ -131,6 +131,7 @@ public:
         } else {
             toReturn = CatItem();
         }
+        qDebug() << "addListItemList ending with: " << m_formattedItems.size() << " items";
         return toReturn;
     }
 
@@ -159,11 +160,13 @@ public:
             toReturn = CatItem();
 
         }
+        qDebug() << "intersperseListItemList ending with: " << m_formattedItems.size() << " items";
         return toReturn;
     }
 
     QList<ListItem> getFormattedListItems(VerbItem filterItem,int itemsHigh, int charsAvail, int treePos){
 
+        qDebug() << "getFormattedListItems starting with: " << m_formattedItems.size() << " items";
         QList<ListItem> res;
         if(this->getUserKeys().isEmpty()){
             if(treePos > 1){
@@ -176,6 +179,7 @@ public:
         m_formattedItems.distinguishItems(itemsHigh, !m_userKeys.isEmpty());
         m_formattedItems.setNextChoiceKeys(charsAvail);
 
+        qDebug() << "getFormattedListItems ending with: " << m_formattedItems.size() << " items";
         res = m_formattedItems.toList();
 
         return res;

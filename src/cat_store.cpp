@@ -223,99 +223,6 @@ QList<ListItem> Cat_Store::getFileSources(){
 
 }
 
-//QList<ListItem> Cat_Store::getBaseSources(){
-//    time_t now = ::appGlobalTime();
-//    QList<ListItem> results;
-//
-//    QList<ListItem> fileChars = getFileSources();
-//
-//    CatItem verbs_i(VERB_TYPE_PATH,VERB_NAME);
-//    ListItem verbs(verbs_i);
-//    verbs.setOrganizingType(CatItem::VERB);
-//    verbs.setItemType(CatItem::ORGANIZING_TYPE);
-//    verbs.setIcon(UI_NEXTACTION_PLACEHOLDER_ICON);
-//    results.append(verbs);
-//
-//    CatItem files_i(FILE_TYPE_PATH,FILES_NAME);
-//    ListItem files(files_i);
-//    files.setOrganizingType(CatItem::LOCAL_DATA_DOCUMENT);
-//    files.setItemType(CatItem::ORGANIZING_TYPE);
-//    files.setIcon(FILE_TYPE_ICON);
-//    for(int i=0; i< fileChars.count(); i++){
-//        files.addChild(fileChars[i]);
-//    }
-//    results.append(files);
-//
-//
-//    CatItem sites_i(WEBADDRESS_PATH, WEBPAGE_NAME);
-//    ListItem sites(sites_i);
-//    sites.setOrganizingType(CatItem::PUBLIC_DOCUMENT);
-//    sites.setItemType(CatItem::ORGANIZING_TYPE);
-//    sites.setIcon(TAG_TYPE_ICON);
-//    results.append(sites);
-//
-//    CatItem categories_i(CATEGORY_TYPE_PATH, CATEGORY_NAME);
-//    ListItem categories(categories_i);
-//    categories.setOrganizingType(CatItem::TAG);
-//    categories.setItemType(CatItem::ORGANIZING_TYPE);
-//    categories.setIcon(TAG_TYPE_ICON);
-//
-//    CatItem messages_i(UNSEEN_MSG_ITEMS_PATH, MESSAGES_NAME);
-//    ListItem messages(messages_i);
-//    messages.setOrganizingType(CatItem::MESSAGE);
-//    messages.setItemType(CatItem::ORGANIZING_TYPE);
-//    messages.setIcon(MESSAGE_TYPE_ICON);
-//    results.append(messages);
-//
-//    CatItem people_i(PEOPLE_PATH, PEOPLE_NAME);
-//    ListItem people(people_i);
-//    people.setOrganizingType(CatItem::PERSON);
-//    people.setItemType(CatItem::ORGANIZING_TYPE);
-//    people.setIcon(PERSON_TYPE_ICON);
-//
-//    CatItem newsItems_i(UNSEEN_ITEMS_PATH, NEW_POSTS_NAME);
-//    ListItem newsItems(newsItems_i);
-//    newsItems.setOrganizingType(CatItem::PUBLIC_POST);
-//    newsItems.setItemType(CatItem::ORGANIZING_TYPE);
-//    newsItems.setIcon(FEED_TYPE_ICON);
-//
-//    Tuple endMessageTuple((CatItem::MESSAGE),now);
-//    Tuple startMessageTuple((CatItem::MESSAGE),now-m_lastViewUpdate);
-//    int unseenMessages=item_index.get_range_count(
-//            startMessageTuple,endMessageTuple, I_BY_MESSAGETIME);
-//    Tuple endWebTuple((CatItem::PUBLIC_DOCUMENT),now);
-//    Tuple startWebTuple((CatItem::PUBLIC_DOCUMENT),now-m_lastViewUpdate);
-//    int unseenItems=item_index.get_range_count(
-//            startWebTuple,endWebTuple, I_BY_MESSAGETIME);;
-//
-////            vector<CatItem> scrs = item_index.get_range_by_pos(now-lastViewUpdate,now,I_BY_TIME);
-////            for(unsigned int i=0;i<scrs.size();i++) {
-////                if(scrs[i].getItemType()==CatItem::MESSAGE)
-////                    { unseenMessages++;}
-////                if(scrs[i].getItemType()==CatItem::PUBLIC_DOCUMENT)
-////                    { unseenItems++; }
-////            }
-//
-//    messages.setCustomPluginValue(NEW_ITEM_OF_TYPE_KEY,unseenMessages);
-//    newsItems.setCustomPluginValue(NEW_ITEM_OF_TYPE_KEY,unseenItems);
-//
-//    results.append(newsItems);
-//    results.append(people);
-//    results.append(categories);
-//
-////            CatItem typeParent(addPrefix(TYPE_PREFIX,QString::number(CatItem::ORGANIZING_TYPE)));
-////            QList<ListItem> otherTypes = getTypeChildItems(typeParent,100);
-////
-////            for(int i=0; i<otherTypes.count(); i++){
-////                if(otherTypes[i].hasLabel(TYPE_PREFIX)
-////                    && !otherTypes[i].getName().isEmpty()
-////                    && (otherTypes[i].hasLabel(ORGANIZING_CHARACTERISTIC_KEY))){
-////                    res.append(otherTypes[i]);
-////                }
-////            }
-//    return results;
-//}
-
 QList<ListItem> Cat_Store::getCondensedSources(){
     time_t now = ::appGlobalTime();
 
@@ -379,12 +286,21 @@ QList<ListItem> Cat_Store::getOrganizingSources(ItemFilter* inputList){
             res.push_front(lfi);
         } else {
             Q_ASSERT(inputList->getOrganizeingType()==CatItem::MIN_TYPE);
-            return ListItem::convertList(getHighestSourceParents());
+            res = ListItem::convertList(getHighestSourceParents());
         }
 
     } else if(parentItem.hasLabel(FILE_CATALOG_PLUGIN_STR)){
-        return getFileSources();
+        res = getFileSources();
     }
+
+#ifndef QT_NO_DEBUG
+    for(int i=0; i<res.count();i++){
+        CatItem testItem = res[i];
+        CatItem::FilterRole fRole = testItem.getFilterRole();
+        Q_ASSERT(fRole!=CatItem::UNDEFINED_ELEMENT);
+    }
+#endif
+
     return res;
     //Get a range of values...
 }
@@ -404,10 +320,10 @@ QList<ListItem> Cat_Store::getSubSourcesFromType(CatItem::ItemType type, int lim
         if(item.isEmpty()){ continue;}
         if(!item.isASource()){ continue;}
         ListItem li(item);
-        li.setLabel(CLOSABLE_ORGANIZING_SOURCE_KEY);
         res.append(li);
     }
     if(typeParent.isASource()){
+        typeParent.setFilterRole(CatItem::CATEGORY_FILTER);
         res.append(ListItem(typeParent));
     }
 
@@ -479,6 +395,7 @@ QList<CatItem> Cat_Store::getHighestSourceParents(ItemFilter* filter){
         QList<CatItem::ItemType> types = filter->getOrganizingTypeList();
         for(int i=0; i< types.count();i++){
             CatItem typeParent = createTypeParent(types[i]);
+            typeParent.setFilterRole(CatItem::CATEGORY_FILTER);
             resultTypes.append(typeParent);
         }
 
@@ -498,7 +415,6 @@ QList<CatItem> Cat_Store::getHighestSourceParents(ItemFilter* filter){
 
         for(int i=0;  i< highSourceItems.count(); i++){
             CatItem source = highSourceItems[i];
-            source.setLabel(CLOSABLE_ORGANIZING_SOURCE_KEY);
             if(!source.isCategorizingSource()){continue; }
             if(!source.isUserItem()){ continue; }
             if(!addedType && (source.getSourceWeightTics() < ITEM_TYPE_LEVEL
@@ -513,6 +429,7 @@ QList<CatItem> Cat_Store::getHighestSourceParents(ItemFilter* filter){
 
     time_t now = ::appGlobalTime();
     for(int i=0; i< resultTypes.count(); i++){
+        resultTypes[i].setFilterRole(CatItem::CATEGORY_FILTER);
         CatItem item = resultTypes[i];
         CatItem::ItemType organType = item.getOrganizeingType();
         Q_ASSERT(organType >= (int)CatItem::MIN_TYPE && organType <= CatItem::MAX_TYPE);
@@ -523,7 +440,6 @@ QList<CatItem> Cat_Store::getHighestSourceParents(ItemFilter* filter){
                     startWebTuple,endWebTuple, I_BY_MESSAGETIME);
             resultTypes[i].setCustomPluginValue(NEW_ITEM_OF_TYPE_KEY,unseenItems);
         }
-
     }
     return resultTypes;
 }
@@ -582,7 +498,9 @@ QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* 
             }
         }
     }
+
     QList<CatItem> res = itemSorter.values();
+    qDebug() << "Cat_Store::getInitialItems got: " <<  res.count() << " items";
     if(intialPos) { *intialPos += MAX(res.length(),limit); }
     return res;
 
@@ -1165,7 +1083,7 @@ CatItem Cat_Store::getItemByPathPrivate(QString path, int depth){
     item.clearRelations();
     if(depth>=0){
         restoreRelations(item, depth);
-        qDebug() << "getting item: " << item.getPath();
+        //qDebug() << "getting item: " << item.getPath();
         Q_ASSERT(depth==0 || !item.getSearchSourceParents().isEmpty());
     }
     
@@ -1555,10 +1473,10 @@ int Cat_Store::restoreRelationByIndex(CatItem& it, QString index, int depth){
 }
 
 CatItem Cat_Store::addItemProtected(CatItem itemToAdd, int recur){
-    if(itemToAdd.isASource()){
-        qDebug() << "got source: " << itemToAdd.getPath();
-
-    }
+//    if(itemToAdd.isASource()){
+//        //qDebug() << "got source: " << itemToAdd.getPath();
+//
+//    }
     if(m_insertedPaths.contains(itemToAdd.getPath())){
         CatItem re = item_index.getValue(itemToAdd.getPath());
         if(recur > 0 || itemToAdd.getName() ==re.getName()){
@@ -1572,6 +1490,7 @@ CatItem Cat_Store::addItemProtected(CatItem itemToAdd, int recur){
             itemToAdd.addParent(re, "", BaseChildRelation::SYNONYM);
         }
     }
+
     m_insertedPaths.insert(itemToAdd.getPath());
     if(recur >10){ return itemToAdd; }
     if(recur >1 && itemToAdd.isStub()) {return itemToAdd;}
@@ -1781,7 +1700,7 @@ void Cat_Store::addRelation(DetachedChildRelation cr, int recur){
     }
     if(child.isASource()){
         Tuple swTuple(parentId, child.getSourceWeight());
-        qDebug() << "added source parent: " << child.getPath();
+        //qDebug() << "added source parent: " << child.getPath();
         child_index.addEntry( swTuple, dbR, C_SOURCE_BY_PARENT_TYPE);
     }
 //    if(cr.getChildType() == BaseChildRelation::WEIGHT_SOURCE
@@ -2207,10 +2126,12 @@ QList<CatItem> Cat_Store::getPinnedItems(QString keystrokes, ItemFilter* filter,
 
 CatItem Cat_Store::createTypeParent(CatItem::ItemType type){
     CatItem typeParent = CatItem::createTypeParent(type);
-    CatItem savedItem = getItemByPathPrivate(typeParent.getPath());
+    CatItem savedItem = item_index.getValue(typeParent.getPath());
     if(!savedItem.isEmpty()){
         typeParent = savedItem;
     }
+    typeParent.setFilterRole(CatItem::CATEGORY_FILTER);
+    typeParent.setLabel(PERMANENT_ORGANIZING_SOURCE_KEY);
     return typeParent;
 
 }

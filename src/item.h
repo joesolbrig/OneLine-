@@ -495,7 +495,7 @@ class BaseChildRelation {
             return matches(r);
         }
 
-        bool isEmpty(){
+        bool isEmpty() const {
             return getChildPath().isEmpty();
         }
 
@@ -556,6 +556,10 @@ class BaseChildRelation {
                 }
             }
             childRelType = (BaseChildRelation::ChildRelType)MAX((int)newRelType,(int)childRelType);
+        }
+
+        QString toString(){
+            return (getParentPath()+ TYPE_LIST_SEP + this->getChildPath());
         }
 
 };
@@ -654,7 +658,7 @@ class DetachedChildRelation : public BaseChildRelation {
         DetachedChildRelation(const DetachedChildRelation& dcr){
             child.assign_from(dcr.child);
             parent.assign_from(dcr.parent);
-            Q_ASSERT(child.getPath() !=parent.getPath());
+            //Q_ASSERT((child.getPath() !=parent.getPath()) || dcr.isEmpty());
             m_usage=dcr.getUsage();
             m_relevanceWeight=dcr.getRelevanceWeight();
             m_externalWeight=dcr.getExternalWeight();

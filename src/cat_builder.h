@@ -72,8 +72,7 @@ public:
     static void addSynonymChildren(CatItem& toUpdate) {
         cat->addSynonymChildren(toUpdate);
     }
-    static CatItem updateItem(CatItem& it, int childDepth=1, UserEvent::LoadType lt= UserEvent::IGNORE
-                              , bool saveValues=true);
+    static CatItem updateItem(CatItem& it, int childDepth=1, UserEvent::LoadType lt= UserEvent::IGNORE);
     static long totalItems();
     //We need the new framework for this...
     static void setShown(CatItem it, UserEvent etv=UserEvent::SHOWN_LIST);

@@ -202,7 +202,7 @@ QList<CatItem> Catalog::parseRequest(InputList & inputData, int itemsDesired, in
             return cat_store.getAssociatedDocuments(&inputData, inputData.getParentItem(), itemsDesired);
         } else {
             CatItem par = cat_store.getItemByPath(inputData.getParentItem().getPath(),1);
-            CatBuilder::updateItem(par,2,UserEvent::SELECTED, true);
+            CatBuilder::updateItem(par,2,UserEvent::SELECTED);
             return par.getChildren();
         }
     }
@@ -267,7 +267,7 @@ QList<CatItem> Catalog::parseRequest(InputList & inputData, int itemsDesired, in
 QList<CatItem> Catalog::getOperations(InputList & inputData){
     QList<CatItem> res;
     CatItem target = inputData.getStatementObject();
-    CatBuilder::updateItem(target,2,UserEvent::SELECTED, true);
+    CatBuilder::updateItem(target,2,UserEvent::SELECTED);
     QList<CatItem> tags = (target.getTypeParents(BaseChildRelation::TAG_PARENT));
     if(tags.count()>0){
         CatItem removeTagItem(OP_REMOVE_PATH,REMOVE_TAG_NAME);
@@ -287,7 +287,7 @@ QList<CatItem> Catalog::getOperations(InputList & inputData){
 
 QList<CatItem> Catalog::getOperationChildren(InputList & inputData){
     CatItem target = inputData.getStatementObject();
-    CatBuilder::updateItem(target,2,UserEvent::SELECTED, true);
+    CatBuilder::updateItem(target,2,UserEvent::SELECTED);
     CatItem tag =inputData.getOperationTarget();
     if(tag.getchildTypeToTake()!=(BaseChildRelation::ChildRelType)0){
         return target.getTypeParents(tag.getchildTypeToTake());
