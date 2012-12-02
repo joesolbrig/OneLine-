@@ -266,14 +266,14 @@ void ExpressionIconWindow::formatIcons(){
 
 
 void ExpressionIconWindow::stretchRectToRight(int pos, float amount) {
-    qDebug() << "stretch right" << amount;
+    //qDebug() << "stretch right" << amount;
     QRect r;
     r.setWidth(amount);
     r.setHeight(amount);
     r.moveBottomLeft(QPoint(m_smallIconSize*(pos),
                             geometry().height()));
     IconWidget* l = m_expressionIcons[pos];
-    qDebug() << "stretchRectToRigh setGeomtry r" << r;
+    //qDebug() << "stretchRectToRigh setGeomtry r" << r;
     l->setGeometry(r);
     l->updateGeometry();
 }

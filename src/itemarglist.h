@@ -168,7 +168,7 @@ public:
 
     bool isOrganizingItem(CatItem item);
 
-    QList<ListItem> getOrganizingFilterItems(int itemsAllowed, int charsAvail, int minWeight = 0);
+    QList<ListItem> getOrganizingFilterItems(int itemsAllowed=4, int charsAvail=100, int minWeight = 0);
     QList<ListItem> getOrganizingSubFilterItems(int itemsAllowed, int charsAvail, int minWeight = 0);
     void setOrganzingItems(QList<ListItem> items);
 

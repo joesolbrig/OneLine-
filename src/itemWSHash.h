@@ -448,7 +448,7 @@ public:
                           BaseChildRelation::ChildRelType isDefault=BaseChildRelation::NORMAL,
                           bool isDefaultAppType=false);
 
-    static CatItem& addParentInternal(CatItem& parentItem, CatItem &childItem, QString pluginName,
+    static CatItem& addParentInternal(CatItem& parentItem, CatItem &childItem, QString pluginName="",
                           BaseChildRelation::ChildRelType isDefault=BaseChildRelation::NORMAL,
                           bool isDefaultAppType=false);
     static CatItem createTypeParent(CatItem::ItemType type);
@@ -2027,7 +2027,7 @@ public:
         return ITEM_TYPE_DEFAULT;
     }
 
-    FilterRole getFilterRole(){
+    FilterRole getFilterRole() const {
         return( (FilterRole)getCustomValue(FILTER_ROLE_KEY,CatItem::UNDEFINED_ELEMENT));
     }
 

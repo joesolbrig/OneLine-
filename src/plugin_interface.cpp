@@ -760,18 +760,18 @@ CatItem CatItem::createFileItem(QSet<QString> &extendedTypes, QFileInfo initialI
         it.setChildStubbed(false);
         folderParentItem.setChildStubbed(false);
 
-        if((int)lt < (int)UserEvent::SEEN){
-            CatItem parentCopy = folderParentItem;
-            parentCopy.setStub();
-            parentCopy.clearRelations();
-            Q_ASSERT(parentCopy.getChildren().count()==0);
-            //parentCopy.addChild(item);
-            it.addParent(parentCopy,FILE_CATALOG_PLUGIN_STR);
-            Q_ASSERT(it.hasParentType(FILE_CATALOG_PLUGIN_STR));
-        } else {
-            it.addParent(folderParentItem,FILE_CATALOG_PLUGIN_STR);
-
-        }
+        CatItem parentCopy = folderParentItem;
+        parentCopy.setStub();
+        parentCopy.clearRelations();
+        Q_ASSERT(parentCopy.getChildren().count()==0);
+        //parentCopy.addChild(item);
+        it.addParent(parentCopy,FILE_CATALOG_PLUGIN_STR);
+        Q_ASSERT(it.hasParentType(FILE_CATALOG_PLUGIN_STR));
+        //parent added "in bulk", elsewhere
+//        if((int)lt < (int)UserEvent::SEEN){
+//        } else {
+//            it.addParent(folderParentItem,FILE_CATALOG_PLUGIN_STR);
+//        }
     }
     return it;
 }
@@ -1135,6 +1135,7 @@ void CatItem::clearRelations() {
 }
 
 bool CatItem::matchOrganizingTypes( ItemType organizingType, ItemType itemType){
+    if(organizingType==CatItem::MIN_TYPE){ return true;}
     QList<ItemType> types = getOrganizingTypeList(organizingType);
     for(int i=0; i<types.count();i++){
         if(types[i]==itemType){
@@ -1265,10 +1266,13 @@ CatItem& CatItem::addParentInternal(CatItem& parentItem, CatItem& childItem,
 void CatItem::addChildren(QList<CatItem> children){
 
     for(int i=0; i<children.count(); i++){
-        this->addChild(children[i]);
+        if(children[i].getPath() !=this->getPath()){
+            addChild(children[i]);
+        }
     }
 }
 
+//We happen to know the child
 void CatItem::addChildrenBulk(QList<CatItem> children){
 
     QHash<QString, DetachedChildRelation> relations;
@@ -1277,24 +1281,33 @@ void CatItem::addChildrenBulk(QList<CatItem> children){
         relations[dcr.toString()] = dcr;
     }
     for(int i=0; !(i==children.size());i++){
-        DetachedChildRelation dcr(*this, children[i],"");
+        CatItem& child = children[i];
+        //We're assume child has no parent copies...
+        DetachedChildRelation dcr(*this, child,"");
+        child.d->children_detached_list.append(dcr);
         relations[dcr.toString()] = dcr;
     }
+    d->children_detached_list = relations.values();
 }
 
 void CatItem::addParents(QList<CatItem> parents){
-    QHash<QString, DetachedChildRelation> relations;
-    for(int i=0;i < d->children_detached_list.count();i++){
-        DetachedChildRelation dcr = d->children_detached_list[i];
-        relations[dcr.toString()] = dcr;
+    for(int i=0; i<parents.count(); i++){
+        if(parents[i].getPath() !=this->getPath()){
+            addParent(parents[i]);
+        }
     }
-
-    for(int i=0; !(i==parents.size());i++){
-        DetachedChildRelation dcr(parents[i],*this, "");
-        relations[dcr.toString()] = dcr;
-    }
-
-    d->children_detached_list = relations.values();
+//    QHash<QString, DetachedChildRelation> relations;
+//    for(int i=0;i < d->children_detached_list.count();i++){
+//        DetachedChildRelation dcr = d->children_detached_list[i];
+//        relations[dcr.toString()] = dcr;
+//    }
+//
+//    for(int i=0; !(i==parents.size());i++){
+//        DetachedChildRelation dcr(parents[i],*this, "");
+//        relations[dcr.toString()] = dcr;
+//    }
+//
+//    d->children_detached_list = relations.values();
 }
 
 

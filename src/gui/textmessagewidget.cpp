@@ -40,7 +40,6 @@ TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
 
     m_textItem = new QGraphicsTextItem(this);
 
-
     m_font = m_item.getDisplayFont();
     m_font.setBold(true);
     if(m_item.getFilterRole() == CatItem::ACTIVE_CATEGORY){
@@ -59,7 +58,7 @@ TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
         m_font.setPointSize(m_font.pointSize()-2);
         m_textItem->setDefaultTextColor(UI_ICONBAR_ITEM_COLOR);
     } else {
-        m_font.setPointSize(m_font.pointSize());
+        m_font.setPointSize(m_font.pointSize()-2);
         m_textItem->setDefaultTextColor(UI_ICONBAR_MESSAGE_COLOR);
     }
     m_textItem->setFont(m_font);
@@ -82,6 +81,14 @@ TextBarItem::TextBarItem(TextMessageBar *parent, ListItem it) :
     //m_currentBackgroundColor = m_aC;
     setBigness(0);
     m_savedRectF = boundingRect();
+    if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){
+        QRectF textRect = m_textItem->boundingRect();
+        if(textRect.width()> m_savedRectF.width()){
+            QPointF txt_pnt((m_savedRectF.width() - (textRect.width()))/2,0);
+            m_textItem->setPos(txt_pnt);
+        }
+    }
+
     if(!m_item.hasLabel(PERMANENT_ORGANIZING_SOURCE_KEY)){
         m_closerTool = new CloseToolItem(this);
         m_closerTool->hide();
@@ -123,14 +130,15 @@ void TextBarItem::updateText(){
 
     QFontMetrics fm(m_font);
     qreal w = baseBoundingRect().width();
-    qDebug() << "w: " << w;
     qreal acw = fm.averageCharWidth();
-    qDebug() << "acw: " << acw;
     int charsAllowed = (w/acw);
-    qDebug() << "charsAllowed: " << charsAllowed;
     bool altDn = gMainWidget->st_altKeyDown;
     QString text;
-    if(altDn ){
+    if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){
+        text = m_item.getName();
+        if(text.length()> charsAllowed-5)
+        text = QString("...") + text.right(charsAllowed-8);
+    } else  if(altDn ){
         text = m_item.formattedName(false,charsAllowed);
     } else {
         text = m_item.getName();
@@ -170,7 +178,12 @@ QRectF TextBarItem::baseBoundingRect() const{
     QFontMetrics fm(this->m_textItem->font());
     qreal w = fm.width(m_item.getName());
 
-    qreal maxW = gMarginWidget->listWindowRect().width()/4-2;
+    qreal maxW=0;
+    if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){
+        maxW = gMarginWidget->listWindowRect().width()/(1.2)-4;
+    } else {
+        maxW = gMarginWidget->listWindowRect().width()/4-2;
+    }
     //qDebug() << "TextBarItem::baseBoundingRect() maxW" << maxW;
 //    qreal maxW = ((TextMessageBar*)parent())->geometry().width()/3;
     w = MIN(w, maxW);
@@ -346,7 +359,7 @@ int TextMessageBar::getMessageSpaceAvailable(){
     int length = m_view->geometry().width();
     int buttonWidth=0;
     for(int i=0; i < m_textButtons.length(); i++){
-        buttonWidth += m_textButtons[i]->fixedRect().width() + (m_vertPadding/4);
+        buttonWidth += m_textButtons[i]->fixedRect().width(); //+ (m_vertPadding/4)
     }
     length -=buttonWidth;
     QFont fnt;

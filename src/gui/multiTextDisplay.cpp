@@ -330,16 +330,15 @@ void MultiTextDisplay::setActiveIconPos(int pos){
 
 
 void MultiTextDisplay::placeIconWidget(){
-    qDebug() << "setIconPos()" ;
-    qDebug() << "totalDesiredHeight()" << totalDesiredHeight();
-    qDebug() << "invisibleAreaHeight()" << invisibleAreaHeight();
-    qDebug() << "visibleDesiredHeight" << visibleDesiredHeight();
-    qDebug() << "geometry: " << geometry();
+//    qDebug() << "setIconPos()" ;
+//    qDebug() << "totalDesiredHeight()" << totalDesiredHeight();
+//    qDebug() << "invisibleAreaHeight()" << invisibleAreaHeight();
+//    qDebug() << "visibleDesiredHeight" << visibleDesiredHeight();
+//    qDebug() << "geometry: " << geometry();
     QRect r(UI_MAINBOX_LEFT_MARGIN,0, 0,0); //zero h&w 'cause it should set it own size...
-    //QRect textR = m_mainEdit.geometry();
     r.setBottom(invisibleAreaHeight() + visibleDesiredHeight()) ;//- getBottomMargin())
 
-    qDebug() << "icon rect:" << r;
+    //qDebug() << "icon rect:" << r;
     raise();
     m_meaningIconWidget.raise();
     m_meaningIconWidget.show();

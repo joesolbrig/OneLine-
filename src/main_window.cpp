@@ -264,7 +264,7 @@ void MainUserWindow::choiceUnderstoodTimeout(){
         }}
 
         { static int lastupdate =0;
-            if(abs(now - lastupdate) >= 1 && !st_ShowingSidePreview){
+            if(abs(now - lastupdate) >= 3 && !st_ShowingSidePreview){
                 tryShowPreview();
                 lastupdate=now;
             } else {
@@ -584,7 +584,7 @@ bool MainUserWindow::tryShowPreview(){
             m_rightPreviewingItem = pItem;
             return false;
         }
-        CatBuilder::updateItem(pItem,2,UserEvent::SELECTED);
+        CatBuilder::updateItem(pItem,2,UserEvent::SEEN);
     } else {
         pItem = m_centerPreviewingItem;
     }
@@ -741,7 +741,6 @@ void MainUserWindow::backgroundSearchDone(QString searchString)
     m_searcher = 0;
 }
 
-
 //Getting and displaying items....
 void MainUserWindow::searchOnInput(int* beginPos) {
     if(st_TakeItemFromList){return;}
@@ -766,7 +765,7 @@ void MainUserWindow::searchOnInput(int* beginPos) {
 
     QList<CatItem> outItems;
     //int visibleItems = this->m_itemChoiceList->getCurrentRow();
-    if(m_itemChoiceList->getMessageItemCount()==0){
+    if(m_inputList.getOrganizingFilterItems().count()==0){
         CatBuilder::getMiniIcons(m_inputList);
     }
 
@@ -932,7 +931,6 @@ void MainUserWindow::fillList(){
     //charsAvail = m_itemChoiceList->getIconTextLength();
     QList<ListItem> il=
         m_inputList.getFormattedListItems(selectIndex,rowsAvail, charsAvail);
-    qDebug() << "MainUserWindow::fillList got" <<  il.count() << " items";
     addIconsToList(il);
 
     if(selectIndex<0){
@@ -941,6 +939,7 @@ void MainUserWindow::fillList(){
         m_savedPosition = selectIndex;
     }
 
+    qDebug() << "MainUserWindow::fillList got" <<  il.count() << " items";
     CatItem contextItem = m_inputList.getParentContextItem();
     if(m_itemOrigin == FROM_SEARCH){
         m_itemChoiceList->addSearchList(il);
@@ -982,6 +981,7 @@ void MainUserWindow::fillList(){
 
     addMiniIcons();
     st_SearchResultsChanged  = false;
+    qDebug() << "fillList end";
 }
 
 
@@ -1502,8 +1502,11 @@ bool MainUserWindow::expandInto(CatItem& baseItem, bool expandOnSide){
     }
     //Clear list
     m_itemChoiceList->addMiniIconList(QList<ListItem>());
-    if(!baseItem.getIsTempItem())
-        { CatBuilder::updateItem(baseItem,2,UserEvent::SELECTED); }
+    if(!baseItem.getIsTempItem()) {
+        qDebug() << "MainUserWindow::expandInto" << baseItem.getPath() <<
+                " main event value: " << UserEvent::SELECTED;
+        CatBuilder::updateItem(baseItem,2,UserEvent::SELECTED);
+    }
 
     if(m_itemChoiceList->testIf_I_CanPreviewItem(baseItem) && !m_inputList.isExpanded()){
         hidePreview();
@@ -1523,6 +1526,8 @@ bool MainUserWindow::expandInto(CatItem& baseItem, bool expandOnSide){
             if(m_inputList.slotCount()>1){return false;}
             st_TakeItemFromList = false;
             searchOnInput();
+        } else {
+            CatBuilder::getMiniIcons(m_inputList);
         }
 
         if(expandOnSide){
@@ -1571,7 +1576,7 @@ void MainUserWindow::miniIconClicked(ListItem it, bool setTheItem){
         m_itemOrigin = FROM_SEARCH;
         st_SearchResultsChanged = true;
     }
-    m_inputList.clearItem();
+    m_inputList.clearSlotEntry();
     m_inputDisplay->clearText();
     updateDisplay();
 }
@@ -2031,7 +2036,7 @@ bool MainUserWindow::processControlKey(QKeyEvent* controlKey){
 
                 CatItem& actionItem = m_inputList.currentItemRef();
                 if(!actionItem.isEmpty()){
-                    CatBuilder::updateItem(actionItem,2);
+                    CatBuilder::updateItem(actionItem,2, UserEvent::SELECTED);
                 }
                 if(controlKey->modifiers() == Qt::ControlModifier){
                     if(m_itemChoiceList->testIf_I_CanPreviewItem(actionItem)

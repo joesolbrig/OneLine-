@@ -268,13 +268,13 @@ class UserEvent {
         } event_type;
 
         enum LoadType{
-            IGNORE,
-            JUST_FOUND,
-            STANDARD_UPDATE,
-            BECOMING_VISIBLE,
-            SEEN,
-            SELECTED,
-            CHOSEN
+            IGNORE=0,
+            JUST_FOUND=1,
+            STANDARD_UPDATE=2,
+            BECOMING_VISIBLE=3,
+            SEEN=4,
+            SELECTED=5,
+            CHOSEN=5
         };
 
         UserEvent(EventType evt=CHOICE){

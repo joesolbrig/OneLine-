@@ -54,7 +54,6 @@ void CatBuilder::addItem(CatItem item){
 CatItem CatBuilder::updateItem(CatItem& it, int childDepth, UserEvent::LoadType lt){
     if(!it.shouldUpdate(childDepth, lt)){ return it;}
 
-
     CatItem realItem;
     QList<int> matches = it.getMatchIndex();
 

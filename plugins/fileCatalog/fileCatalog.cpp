@@ -239,6 +239,7 @@ void FilecatalogPlugin::indexDirectory(QSet<QString> &extendedTypes,
         output->append(item);
         if(addChild){
             children.append(item);
+            qDebug() << "trying to add: " << item.getPath();
         }
     }
     parentItem.addChildrenBulk(children);
@@ -387,8 +388,13 @@ CatItem FilecatalogPlugin::parseOnelineFile(QFileInfo fileInfo){
 }
 
 bool FilecatalogPlugin::modifyItem(CatItem* it , UserEvent::LoadType lt) {
+    qDebug() << "FilecatalogPlugin::modifyItem" << it->getPath() << " : " << lt;
     Q_ASSERT(it);
-    if(lt ==UserEvent::JUST_FOUND){ return false; }
+    time_t itemModTime = (it->getModificationTime());
+
+    if(lt == UserEvent::JUST_FOUND){
+        return false;
+    }
 
     bool handled = false;
     QSet<QString> extendedTypes;
@@ -403,14 +409,17 @@ bool FilecatalogPlugin::modifyItem(CatItem* it , UserEvent::LoadType lt) {
         QFileInfo fileInfo(it->getPath());
         time_t fileModTime = (time_t)fileInfo.lastModified().toTime_t();
         fileModTime = MAX(fileModTime,0);
-        time_t itemModTime = (it->getModificationTime());
 
         if(!fileInfo.exists()){
             it->setForDelete();
+            qDebug() << "FilecatalogPlugin::modifyItem exiting 'cause file doesn't exist";
             return true;
-        } else  if(it->hasLabel(IS_STUB_KEY_STR) &&
-                  !it->isStub()
+        } else  if(it->hasLabel(IS_STUB_KEY_STR)
+                && !it->isStub()
                 && (fileModTime <= (itemModTime) )){
+            //if((int)lt< (int)UserEvent::SELECTED ){ }
+            qDebug() << "FilecatalogPlugin::modifyItem exit 'cause item should be up-to-date" << " : " << lt;
+            qDebug() << "test: " << UserEvent::SELECTED;
             return false;
         }
         it->setLabel(IS_STUB_KEY_STR);
@@ -419,13 +428,13 @@ bool FilecatalogPlugin::modifyItem(CatItem* it , UserEvent::LoadType lt) {
         itemModTime = (it->getModificationTime());
         Q_ASSERT(it->hasLabel(IS_STUB_KEY_STR) &&
                  !it->isStub()
-               && ( fileModTime == itemModTime));
+               && ( fileModTime <= (itemModTime)));
 
         CatItem par = thePlatform->alterItem(it);
         if(!par.isEmpty()){ handled = true; }
 
 
-        if((fileInfo.isDir() && lt==UserEvent::SELECTED)){
+        if(fileInfo.isDir()){ //&& lt==UserEvent::SELECTED)
             QString pn = fileInfo.dir().absolutePath();
             if(!pn.isEmpty()){
                 QFileInfo parInfo(pn);
@@ -441,6 +450,7 @@ bool FilecatalogPlugin::modifyItem(CatItem* it , UserEvent::LoadType lt) {
             indexDirectory(extendedTypes,*it,
                 &itemsAdded, lt, true, DEFAULT_SUBDIR_SCAN_LIMITED_PASSES);
             Q_ASSERT(!it->isStub());
+            qDebug() << "FilecatalogPlugin::modifyItem got: " << it->getChildCount() << "children";
             return true;
         }
     }

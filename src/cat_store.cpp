@@ -1341,7 +1341,7 @@ void Cat_Store::addItemEntryProtected(CatItem itemToAdd){
         item_index.removeEntry(itemToAdd, I_PINNED_BY_FINALWEIGHT);
     }
 
-    //Q_ASSERT(items_by_keys.find(toAdd.shortName,3,0).contains(it));
+    //Q_ASSERT(items_by_keys.find(itemToAdd.getName(),3,0).contains(it));
     if(itemToAdd.isUpdatableSource()){
         int totalSourceUpdateWeight(0);
         if(itemToAdd.isASource()){

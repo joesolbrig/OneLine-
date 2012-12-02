@@ -251,13 +251,9 @@ QListWidgetItem* ListInnerLayout::hoverItem() const{
 int ListInnerLayout::charsWidth(){
     QFontMetrics fm =  m_realItemList->fontMetrics();
     float avDirCharWidth = fm.width("/mmmm/")/8;
-    qDebug() <<  "avDirCharWidth: " << avDirCharWidth;
-    qDebug() << "list width" << m_realItemList->geometry().width();
-    qDebug() << "parent width" << this->m_parentWidget->geometry().width();
     int w = m_realItemList->geometry().width() -  (UI_STANDARD_ICON_WIDTH +UI_STANDARD_ICON_BORDER);
 
     int charsAvail = w/ avDirCharWidth;
-    qDebug() << "got chars width: " << charsAvail;
     return charsAvail;
 }
 

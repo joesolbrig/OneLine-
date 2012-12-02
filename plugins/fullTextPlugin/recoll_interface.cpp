@@ -156,7 +156,6 @@ int Recoll_Interface::addPossiblyCompoundFile(CatItem& parentIt, QList<CatItem>*
 }
 
 bool Recoll_Interface::getDocForPreview(CatItem& it){
-    qDebug() << "getDocForPreview: " << it.getPath();
     string basePath;
     string ipath;
     if(it.getPath().contains(ARG_SEPERATOR)){
@@ -197,17 +196,16 @@ bool Recoll_Interface::getDocForPreview(CatItem& it){
             if (!interner.get_html().empty()) {
                 QString preview = interner.get_html().c_str();
                 preview.detach();
-                qDebug() << "getDocForPreview - got preview: " << it.getPath();
                 it.setPreviewHtml(preview);
             } else {
-                qDebug() << "getDocForPreview - don't have preview str for: " << it.getPath();
+                //qDebug() << "getDocForPreview - don't have preview str for: " << it.getPath();
 
             }
         } else {
             string missing;
             interner.getMissingExternal(missing);
-            qDebug() << "getDocForPreview - can't get preview. Err: "
-                    << missing.c_str() << "ret:" << ret << " path: " << it.getPath();
+//            qDebug() << "getDocForPreview - can't get preview. Err: "
+//                    << missing.c_str() << "ret:" << ret << " path: " << it.getPath();
         }
     } catch (...) {
         qDebug() << "getDocForPreview - some processing err: ";
@@ -258,7 +256,7 @@ bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& pare
             m_continueOnIPath= false;
         }
         //qDebug() << "done interning " << m_parent_udi.c_str();
-        qDebug() << interner.getReason().c_str();
+        //qDebug() << interner.getReason().c_str();
         return false;
 
     }

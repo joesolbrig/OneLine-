@@ -605,7 +605,6 @@ void ListWithDisplay::showAnimated(){
 }
 
 void ListWithDisplay::animateToLocation(QRect r){
-    qDebug() << "animateToLocation begin" << r;
     m_upDownAnimation->setDuration(UI_LIST_RESIZE_TIME);
     int startHeight = geometry().height();
     if(r.height() == startHeight && r.width() == m_width){
