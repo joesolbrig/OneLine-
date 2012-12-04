@@ -23,8 +23,8 @@ PKGCONFIG += gtk+-2.0 \
     libnotify
 
 # Uncomment/comment to enable/disable profiling
-# QMAKE_CXXFLAGS_DEBUG += -pg
-# QMAKE_LFLAGS_DEBUG += -pg
+#QMAKE_CXXFLAGS_DEBUG += -pg
+#QMAKE_LFLAGS_DEBUG += -pg
 VPATH += src/ \
     src/util/ \
     src/util/mmap_file/ \

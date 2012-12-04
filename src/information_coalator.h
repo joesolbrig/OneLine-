@@ -274,6 +274,7 @@ protected:
     int m_charsAvail;
     QString m_fontStr;
     QList<QChar> m_hotKeys;
+    QSet<QChar> m_hotKeyTracker;
     QList<QString> m_itemsByUserDescription;
     QList<QString> m_organizingItems;
     QList<QString> m_organizingSubItems;
@@ -429,7 +430,7 @@ public:
         for(;j< li.getName().length();j++){
             k = li.getName()[j];
             k = k.toLower();
-            if(k.isLetter() && !m_hotKeys.contains(k)){
+            if(k.isLetter() && !m_hotKeyTracker.contains(k)){
                 li.setNextKeyIndex(j);
                 li.setUseDisplayPathForNextKey( false);
                 break;
@@ -442,7 +443,7 @@ public:
             for(j=0;j< rawDisplay.length() ;j++){
                 k = rawDisplay[j];
                 k = k.toLower();
-                if(!m_hotKeys.contains(k)){
+                if(!m_hotKeyTracker.contains(k)){
                     li.setNextKeyIndex(li.getName().length() + j);
                     li.setUseDisplayPathForNextKey(true);
                     break;
@@ -460,7 +461,7 @@ public:
         for(;j< li.getName().length();j++){
             k = li.getName()[j];
             k = k.toLower();
-            if(k.isLetter() && !m_hotKeys.contains(k)){
+            if(k.isLetter() && !m_hotKeyTracker.contains(k)){
                 li.setNextKeyIndex(j);
                 li.setUseDisplayPathForNextKey( false);
                 break;
@@ -471,7 +472,7 @@ public:
             for(j=0;j< rawDisplay.length() ;j++){
                 k = rawDisplay[j];
                 k = k.toLower();
-                if(!m_hotKeys.contains(k)){
+                if(!m_hotKeyTracker.contains(k)){
                     li.setNextKeyIndex(li.getName().length() + j);
                     li.setUseDisplayPathForNextKey(true);
                     break;
@@ -483,17 +484,20 @@ public:
 
     void setNextChoiceKeys(int charsAvail){
         m_hotKeys.clear();
+        m_hotKeyTracker.clear();
         int miniIconCount = m_organizingItems.count();
         for(int i=0;i< miniIconCount;i++){
             ListItem& li = atStringRef(m_organizingItems[i]);
             QChar k = setSingleItemHotKey(li, charsAvail);
             m_hotKeys.append(k);
+            m_hotKeyTracker.insert(k);
         }
         for(int i=0;i< this->count();i++){
             ListItem& li = at(i);
             QChar k = setSingleItemHotKey(li, charsAvail);
             //m_hotKeys.insert(i,k);
             m_hotKeys.append(k);
+            m_hotKeyTracker.insert(k);
         }
     }
 
@@ -533,6 +537,7 @@ public:
         m_charsAvail = t.m_charsAvail;
         m_fontStr = t.m_fontStr;
         m_hotKeys = t.m_hotKeys;
+        m_hotKeyTracker = t.m_hotKeyTracker;
 
         //Info coalator
         m_filterItem = t.m_filterItem;
@@ -550,6 +555,7 @@ public:
         m_charsAvail = t.m_charsAvail;
         m_fontStr = t.m_fontStr;
         m_hotKeys = t.m_hotKeys;
+        m_hotKeyTracker = t.m_hotKeyTracker;
 
         //Info coalator
         m_filterItem = t.m_filterItem;
@@ -682,6 +688,7 @@ public:
             append(filterItems[i]);
         }
         m_hotKeys.clear();
+        m_hotKeyTracker.clear();
         m_itemsByUserDescription.clear();
     }
 
@@ -696,6 +703,7 @@ public:
             if(li.isEmpty()){ continue;}
             QChar k = setExtraItemKey(li, charsAvail);
             m_hotKeys.insert(OHash::count() +i,k);
+            m_hotKeyTracker.insert(k);
         }
         for(int i=0; i< m_organizingItems.count() && res.count() <limit; i++){
             ListItem li = atString(m_organizingItems[i]);
@@ -710,6 +718,7 @@ public:
             ListItem li = atStringRef(m_organizingSubItems[i]);
             QChar k = setExtraItemKey(li, charsAvail);
             m_hotKeys.insert(OHash::count() +i,k);
+            m_hotKeyTracker.insert(k);
         }
         QList<ListItem> res;
         for(int i=0; i< m_organizingSubItems.count(); i++){

@@ -312,15 +312,16 @@ QByteArray XSLTFeedReader::processRawStream(QByteArray response){
     } else if (m_filt.hasLabel(STREAM_FILTER_FILESOURCE)){
         //This is kludge 'cause I can't find
         //a nice way to tell the file where the home directory is
-        QString pathFile = (*ggSettings)->fileName();
-        int lastSlash = pathFile.lastIndexOf(QLatin1Char('/'));
-        if (lastSlash == -1){
-                qWarning() <<  "Empty home file";
-                quit();
-                return "";
-        }
-        pathFile = pathFile.mid(0, lastSlash);
-        pathFile = pathFile + "/" + m_filt.getFilterFilePath();
+//        QString pathFile = (*ggSettings)->fileName();
+//        int lastSlash = pathFile.lastIndexOf(QLatin1Char('/'));
+//        if (lastSlash == -1){
+//                qWarning() <<  "Empty home file";
+//                quit();
+//                return "";
+//        }
+//        pathFile = pathFile.mid(0, lastSlash);
+//        pathFile = pathFile + "/" + m_filt.getFilterFilePath();
+        QString pathFile = m_filt.getFilterFilePath();
         QFile codeFile(pathFile);
         if(!codeFile.exists()){
             qWarning() <<  "Empty Filter file: " << pathFile << '\n';

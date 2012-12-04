@@ -175,17 +175,17 @@
   <valuemap type="QVariantMap">
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Release</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList">
-    <value type="QString">DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-eEVcqEVPas,guid=cb7d956a8605da71834eae3450b8f882</value>
-    <value type="QString">DESKTOP_AUTOSTART_ID=10cc32dfd4c7273dd0135429952493352200000059080006</value>
+    <value type="QString">DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-KSCuRbRvIT,guid=6ecda7fa7ea3761152dd79c850bd06f1</value>
+    <value type="QString">DESKTOP_AUTOSTART_ID=10d642bf894e31e46b135456536445593300000059070006</value>
     <value type="QString">DESKTOP_SESSION=gnome</value>
     <value type="QString">DISPLAY=:0.0</value>
     <value type="QString">GDMSESSION=gnome</value>
     <value type="QString">GDM_LANG=en_US.UTF-8</value>
     <value type="QString">GDM_XSERVER_LOCATION=local</value>
     <value type="QString">GNOME_DESKTOP_SESSION_ID=this-is-deprecated</value>
-    <value type="QString">GNOME_KEYRING_PID=5897</value>
-    <value type="QString">GNOME_KEYRING_SOCKET=/tmp/keyring-uiMzDP/socket</value>
-    <value type="QString">GPG_AGENT_INFO=/tmp/seahorse-QB2FqD/S.gpg-agent:6008:1</value>
+    <value type="QString">GNOME_KEYRING_PID=5896</value>
+    <value type="QString">GNOME_KEYRING_SOCKET=/tmp/keyring-C0sUy5/socket</value>
+    <value type="QString">GPG_AGENT_INFO=/tmp/seahorse-Chp9fo/S.gpg-agent:6031:1</value>
     <value type="QString">GTK_RC_FILES=/etc/gtk/gtkrc:/home/hansj/.gtkrc-1.2-gnome2</value>
     <value type="QString">HOME=/home/hansj</value>
     <value type="QString">LANG=en_US.UTF-8</value>
@@ -195,15 +195,15 @@
     <value type="QString">PATH=/home/hansj/qtsdk-2010.02/qt/bin:/home/hansj/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games</value>
     <value type="QString">PWD=/home/hansj</value>
     <value type="QString">QTDIR=/home/hansj/qtsdk-2010.02/qt</value>
-    <value type="QString">SESSION_MANAGER=local/hansj-laptop:/tmp/.ICE-unix/5908</value>
+    <value type="QString">SESSION_MANAGER=local/hansj-laptop:/tmp/.ICE-unix/5907</value>
     <value type="QString">SHELL=/bin/bash</value>
-    <value type="QString">SSH_AUTH_SOCK=/tmp/keyring-uiMzDP/ssh</value>
+    <value type="QString">SSH_AUTH_SOCK=/tmp/keyring-C0sUy5/ssh</value>
     <value type="QString">USER=hansj</value>
     <value type="QString">USERNAME=hansj</value>
     <value type="QString">WINDOWPATH=7</value>
     <value type="QString">XAUTHORITY=/home/hansj/.Xauthority</value>
     <value type="QString">XDG_DATA_DIRS=/usr/local/share/:/usr/share/:/usr/share/gdm/</value>
-    <value type="QString">XDG_SESSION_COOKIE=25e538e46aea4e4938a2eefc4a2aae31-1354299520.660832-1455322968</value>
+    <value type="QString">XDG_SESSION_COOKIE=25e538e46aea4e4938a2eefc4a2aae31-1354565359.950756-259444219</value>
    </valuelist>
    <valuelist key="abstractProcess.arguments" type="QVariantList">
     <value type="QString">/home/hansj/Documents/Programming/oneline/oneline0.01/oneline.pro</value>
@@ -223,17 +223,17 @@
   <valuemap type="QVariantMap">
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Release</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList">
-    <value type="QString">DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-eEVcqEVPas,guid=cb7d956a8605da71834eae3450b8f882</value>
-    <value type="QString">DESKTOP_AUTOSTART_ID=10cc32dfd4c7273dd0135429952493352200000059080006</value>
+    <value type="QString">DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-KSCuRbRvIT,guid=6ecda7fa7ea3761152dd79c850bd06f1</value>
+    <value type="QString">DESKTOP_AUTOSTART_ID=10d642bf894e31e46b135456536445593300000059070006</value>
     <value type="QString">DESKTOP_SESSION=gnome</value>
     <value type="QString">DISPLAY=:0.0</value>
     <value type="QString">GDMSESSION=gnome</value>
     <value type="QString">GDM_LANG=en_US.UTF-8</value>
     <value type="QString">GDM_XSERVER_LOCATION=local</value>
     <value type="QString">GNOME_DESKTOP_SESSION_ID=this-is-deprecated</value>
-    <value type="QString">GNOME_KEYRING_PID=5897</value>
-    <value type="QString">GNOME_KEYRING_SOCKET=/tmp/keyring-uiMzDP/socket</value>
-    <value type="QString">GPG_AGENT_INFO=/tmp/seahorse-QB2FqD/S.gpg-agent:6008:1</value>
+    <value type="QString">GNOME_KEYRING_PID=5896</value>
+    <value type="QString">GNOME_KEYRING_SOCKET=/tmp/keyring-C0sUy5/socket</value>
+    <value type="QString">GPG_AGENT_INFO=/tmp/seahorse-Chp9fo/S.gpg-agent:6031:1</value>
     <value type="QString">GTK_RC_FILES=/etc/gtk/gtkrc:/home/hansj/.gtkrc-1.2-gnome2</value>
     <value type="QString">HOME=/home/hansj</value>
     <value type="QString">LANG=en_US.UTF-8</value>
@@ -243,15 +243,15 @@
     <value type="QString">PATH=/home/hansj/qtsdk-2010.02/qt/bin:/home/hansj/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games</value>
     <value type="QString">PWD=/home/hansj</value>
     <value type="QString">QTDIR=/home/hansj/qtsdk-2010.02/qt</value>
-    <value type="QString">SESSION_MANAGER=local/hansj-laptop:/tmp/.ICE-unix/5908</value>
+    <value type="QString">SESSION_MANAGER=local/hansj-laptop:/tmp/.ICE-unix/5907</value>
     <value type="QString">SHELL=/bin/bash</value>
-    <value type="QString">SSH_AUTH_SOCK=/tmp/keyring-uiMzDP/ssh</value>
+    <value type="QString">SSH_AUTH_SOCK=/tmp/keyring-C0sUy5/ssh</value>
     <value type="QString">USER=hansj</value>
     <value type="QString">USERNAME=hansj</value>
     <value type="QString">WINDOWPATH=7</value>
     <value type="QString">XAUTHORITY=/home/hansj/.Xauthority</value>
     <value type="QString">XDG_DATA_DIRS=/usr/local/share/:/usr/share/:/usr/share/gdm/</value>
-    <value type="QString">XDG_SESSION_COOKIE=25e538e46aea4e4938a2eefc4a2aae31-1354299520.660832-1455322968</value>
+    <value type="QString">XDG_SESSION_COOKIE=25e538e46aea4e4938a2eefc4a2aae31-1354565359.950756-259444219</value>
    </valuelist>
    <value key="abstractProcess.IgnoreReturnValue" type="bool">false</value>
    <valuelist key="abstractProcess.arguments" type="QVariantList">

@@ -106,6 +106,7 @@ QList<CatItem> Catalog::expandStubs(QString userKeys, QList<CatItem>* inList){
 
     QSet<QString> updated;
     while((workingList->length()>0)) {
+        cat_store.beginAddGroup();
         for(int i=0; i<workingList->count();i++){
             CatItem toAdd = workingList->at(i);
             bool atStub = toAdd.isStub();
@@ -117,7 +118,7 @@ QList<CatItem> Catalog::expandStubs(QString userKeys, QList<CatItem>* inList){
                 if(atStub) {
                     refreshNeeded = true;
                     //toAdd.setStub(false);
-                    cat_store.addItem(toAdd);
+                    cat_store.addItemInGroup(toAdd);
                 }
             }
             QList<CatItem> newStubs = extractStubs(toAdd);
@@ -130,16 +131,18 @@ QList<CatItem> Catalog::expandStubs(QString userKeys, QList<CatItem>* inList){
         }
         oldStubs = stubs;
         workingList = &oldStubs;
+        cat_store.endAddGroup();
         stubs.clear();
         Q_ASSERT(workingList->count() <1000);
         rep++;
         Q_ASSERT(rep<10);
     }
 
+    cat_store.beginAddGroup();
     for(int i=0; i<inList->count();i++){
         CatItem toAdd = inList->at(i);
         if(toAdd.isForDBInsertOnly()){
-            cat_store.addItem(toAdd);
+            cat_store.addItemInGroup(toAdd);
             continue;
         }
         if(userKeys.isEmpty() || matches(&toAdd, userKeys) || toAdd.getTakesAnykeys()) {
@@ -153,6 +156,7 @@ QList<CatItem> Catalog::expandStubs(QString userKeys, QList<CatItem>* inList){
             if(!toAdd.hasLabel(BUILTIN))
                 { res.append(toAdd);}
         }}
+    cat_store.endAddGroup();
     return res;
 }
 

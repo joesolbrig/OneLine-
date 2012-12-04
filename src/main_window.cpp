@@ -225,7 +225,6 @@ void MainUserWindow::choiceUnderstoodTimeout(){
         //explicit searching - this is the fastest thing
         { static int lastupdate=0;
         if(abs(now - lastupdate) > (FORGROUND_SEARCH_DELAY )){
-
             if(foregroundSearch()) {
                 lastupdate = now;
                 return;
@@ -235,15 +234,14 @@ void MainUserWindow::choiceUnderstoodTimeout(){
     if(m_contextMenu){ return;}
 
         { static int lastupdate=0;
-            if(abs(now - lastupdate) > (FORGROUND_SEARCH_DELAY*5)){
-
+            if(abs(now - lastupdate) > ((FORGROUND_SEARCH_DELAY+2)*5)){
                 if(searchFurtherItems()) {
                     lastupdate = now;
                 }
             }}
 
         { static int lastupdate=0;
-        if(abs(now - lastupdate) > (SHOW_PREVIEW_DELAY)){
+        if(abs(now - lastupdate) > (SHOW_PREVIEW_DELAY*3)){
             setItemsSeen();
         }}
 

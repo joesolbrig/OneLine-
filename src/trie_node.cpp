@@ -133,7 +133,8 @@ bool TrieNode::addItem(ItemRep ir, QList<ItemRep>* expelledList, bool* used){
     }
 
     i = m_bestItems.begin();
-    for(int cnt=0; i!=m_bestItems.end();cnt++, i++){
+    const QLinkedList<ItemRep>::const_iterator theEnd = m_bestItems.end();
+    for(int cnt=0; i!=theEnd;cnt++, i++){
         if(ir.get_weight() < (*i).get_weight() &&
            (cnt < (n_to_keep) || (ir.getItemType() == (*i).getItemType()))){
             i = m_bestItems.insert(i,ir);

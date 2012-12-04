@@ -1267,7 +1267,7 @@ QList<CatItem> Cat_Store::getHighestTypeProtected(ItemFilter* filter, long limit
         if(m_returnedPaths.contains(it.getPath())){continue;}
         m_returnedPaths.insert(it.getPath());
         if(filterBySeen && filter && !filter->acceptItem(&it)){continue;}
-        restoreRelations(it);
+        //restoreRelations(it);
         res.append(it);
 
     }
@@ -1490,8 +1490,8 @@ CatItem Cat_Store::addItemProtected(CatItem itemToAdd, int recur){
             itemToAdd.addParent(re, "", BaseChildRelation::SYNONYM);
         }
     }
-
     m_insertedPaths.insert(itemToAdd.getPath());
+
     if(recur >10){ return itemToAdd; }
     if(recur >1 && itemToAdd.isStub()) {return itemToAdd;}
     //qDebug() << QString(recur, ' ') << "CAT add Item:" << it.getPath();
@@ -1511,12 +1511,9 @@ CatItem Cat_Store::addItemProtected(CatItem itemToAdd, int recur){
     }
 
     bool sameWeight = false;
-    CatItem oldItem;
-    if(!item_index.getValue(itemToAdd.getPath()).isEmpty()){
-        oldItem = item_index.getValue(itemToAdd.getPath());
-        if(itemToAdd.getIsTempItem()){ //isStub()
-            return oldItem;
-        }
+    CatItem oldItem = item_index.getValue(itemToAdd.getPath());
+    if(!oldItem.isEmpty()){
+        if(itemToAdd.getIsTempItem()){ return oldItem;}
         if(oldItem.getWeightSection() == itemToAdd.getWeightSection())
             { sameWeight = true; }
         if(!itemToAdd.hasWeightInfo())
@@ -1531,14 +1528,13 @@ CatItem Cat_Store::addItemProtected(CatItem itemToAdd, int recur){
         if(!oldItem.isEmpty()){
             oldItem.mergeItem(itemToAdd);
         }
-        //it = oldItem;
     } else if(itemToAdd.getIsTempItem()){
         return itemToAdd;
     }
 
     addRelationsToDBProtected(itemToAdd, recur);//must be before reweigh to give access to external weight
     if(!oldItem.isEmpty()){ itemToAdd = oldItem; }
-    reweightItemProtected(itemToAdd);
+    if(!sameWeight){ reweightItemProtected(itemToAdd); }
     addItemEntryProtected(itemToAdd);
     //Todo much could change to do below...
 
@@ -1824,7 +1820,7 @@ long Cat_Store::calcFullWeight(CatItem it){
         Tuple t(parentId, externalWeight);
         Tuple lowBound(parentId,0);
         Tuple highBound(parentId+1,0);
-        child_index.removeEntry(rel, C_BY_PARENTID_CHILDAW);
+        //child_index.removeEntry(rel, C_BY_PARENTID_CHILDAW);
         child_index.addEntry( t, rel, C_BY_PARENTID_CHILDAW);
 
         //OK, ordinal index of item relative to a given source, scaled

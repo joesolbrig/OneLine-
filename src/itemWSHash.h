@@ -652,7 +652,7 @@ public:
         }
 
         QStringList sl = d->m_path.split("://");
-        QString name = sl[0] ;
+        QString& name = sl[0] ;
         if(name == maybeLabel)
             {return true;}
 //        if((sl.length() == 1 || (d->m_path[0]==QChar('/'))) && s == FILE_CATALOG_PLUGIN_STR)
@@ -673,10 +673,12 @@ public:
             { return true; }
         if(name == TAGITEM_NAME && maybeLabel == TAG_LABEL)
             { return true; }
-        if(name + "://"== maybeLabel)
+        //optimize = quick checks to weed out most results first
+        if(maybeLabel.length()+3 == name.length() &&
+           maybeLabel.endsWith("://") &&
+            name + "://"== maybeLabel)
             {return true;}
         return false;
-        //return d->m_data.contains((s));
     }
 
     QSet<QString> getLabels() const{
