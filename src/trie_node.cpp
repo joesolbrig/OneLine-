@@ -117,7 +117,6 @@ bool TrieNode::addItem(ItemRep ir, QList<ItemRep>* expelledList, bool* used){
     QLinkedList<ItemRep>::iterator i = m_bestItems.begin();
     for(; i!=m_bestItems.end();i++){
         if(itemId == (*i).getInternalId()){
-
             if((*i).getNthPiece() == ir.getNthPiece() ){
                 (*i) = ir;
                 return true;

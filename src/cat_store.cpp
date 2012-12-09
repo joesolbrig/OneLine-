@@ -211,7 +211,7 @@ QList<ListItem> Cat_Store::getFileSources(){
 
     CatItem time(TIME_SORT_CATEGORY_ITEM_PATH, TIME_NAME);
     time.setItemType(CatItem::ORGANIZING_TYPE);
-    time.setOrganizingCharacteristic(LAST_UPDATETIME_KEY);
+    time.setOrganizingCharacteristic(MODIFICATION_TIME_KEY);
     res.append(ListItem(name));
     res.append(ListItem(size));
     res.append(ListItem(mimeType));

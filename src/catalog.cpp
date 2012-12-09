@@ -169,7 +169,8 @@ bool Catalog::getItemsFromQuery(InputList &inputData, QList<CatItem>& outResults
     plugins.getLabels(&inputData);
     plugins.getResults(&inputData, &partialList);
 
-    outResults = expandStubs(inputData.getUserKeys(), &partialList);
+    //outResults = expandStubs(inputData.getUserKeys(), &partialList);
+    outResults = partialList;
 
     //Skipping because it should happen in more detail later...
     //...

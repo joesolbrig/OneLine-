@@ -94,6 +94,9 @@ public:
         return b;
 
     }
+    QRectF minimumRect() {
+        return m_savedRectF;
+    }
 
     void setActiveFilterIcon(bool s){m_activated = s;}
     void setText(QString text);

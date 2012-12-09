@@ -59,10 +59,11 @@ int PluginInterface::ms_homeDirLen;
 
 QString contextualTimeString(QDateTime d){
     QDateTime now = QDateTime::currentDateTime();
-    if(d.secsTo(now) > (7*24*60*1000)){
-        return d.toString(Qt::TextDate);
+    if(d.secsTo(now) > (7*24*60*60*365)){
+        //return d.toString(Qt::TextDate);
+        return d.toString("dddd h:ap yy");
     } else if(d.secsTo(now) > (2*24*60*60*1000)){
-        return d.toString("dddd' 'h':'ap");
+        return d.toString("dddd h:ap");
     } else if(d.secsTo(now) > (24*60*60*1000)){
         return d.toString("'yesterday:'h':'ap");
     } else if(d.secsTo(now) > (60*60*1000)){
@@ -431,8 +432,9 @@ struct OrderedItem  {
                 if(s1 < s2) return true;
             }
 
-            if(v1  < v2) return true;
-            if(v1  > v2) return false;
+            //REVERSE ORDER
+            if(v1  > v2) return true;
+            if(v1  < v2) return false;
         }
         return m_oldOrder < oi.m_oldOrder;
     }

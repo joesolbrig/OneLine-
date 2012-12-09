@@ -114,9 +114,8 @@ void FilecatalogPlugin::getCatalog(QList<CatItem>* items){
         CatItem dirParent(fileInfo.absoluteFilePath());
         int depth = MIN(memDirs[i].depth, MAX_DIR_SEARCH_DEPTH);
         dirParent = CatItem::createFileItem(extendedTypes, fileInfo, dummy, depth,UserEvent::IGNORE,thePlatform,getPluginRep());
-        dirParent.setCustomPluginValue(FILECAT_SEARCH_DEPTH, depth);
         dirParent.setCustomPluginInfo(FILE_DIRECTORY_PLUGIN_STR,memDirs[i].toString());
-        indexDirectory(extendedTypes, dirParent, items);
+        indexDirectory(depth, extendedTypes, dirParent, items);
         if(memDirs[i].baseWeight>0){
             dirParent.setUpdatingSourceWeight(memDirs[i].baseWeight,getPluginRep());
         }
@@ -157,8 +156,7 @@ void FilecatalogPlugin::extendCatalog(SearchInfo* existingItems, QList<CatItem>*
             qDebug() << "file: " << fileInfo.path() << " it not a dir but marked as one!";
             it.setTagLevel(CatItem::ATOMIC_ELEMENT);
         } else {
-            it.setCustomPluginValue(FILECAT_SEARCH_DEPTH,1);
-            indexDirectory(extendedTypes, it, outItems);
+            indexDirectory(1, extendedTypes, it, outItems);
         }
         outItems->append(it);
     }
@@ -187,11 +185,11 @@ QList<Directory> FilecatalogPlugin::getInitialDirs(){
 
 
 //One thing to explore is looking deeper into any directory with a higher rating...
-void FilecatalogPlugin::indexDirectory(QSet<QString> &extendedTypes,
+void FilecatalogPlugin::indexDirectory(int depth, QSet<QString> &extendedTypes,
     CatItem& parentItem, QList<CatItem>* output,UserEvent::LoadType lt,
     bool addChild, int overrideMaxPasses)
 {
-    int depth=parentItem.getCustomValue(FILECAT_SEARCH_DEPTH);
+    //int depth=parentItem.getCustomValue(FILECAT_SEARCH_DEPTH);
     if(depth ==0){
         parentItem.setStub(true);
         return;
@@ -233,9 +231,8 @@ void FilecatalogPlugin::indexDirectory(QSet<QString> &extendedTypes,
         CatItem item = CatItem::createFileItem(extendedTypes, fileInfo, parentItem,depth,UserEvent::IGNORE,thePlatform,getPluginRep());
         Q_ASSERT(parentItem.getPath() != item.getPath());
         item.setCustomPluginInfo(FILE_DIRECTORY_PLUGIN_STR,parentItem.getName());
-        item.setCustomValue(FILECAT_SEARCH_DEPTH,depth-1);
         if(fileInfo.isDir())
-            { indexDirectory(extendedTypes, item, output,lt);}
+            { indexDirectory(depth-1, extendedTypes, item, output,lt);}
         output->append(item);
         if(addChild){
             children.append(item);
@@ -445,9 +442,8 @@ bool FilecatalogPlugin::modifyItem(CatItem* it , UserEvent::LoadType lt) {
                     it->addParent(pItem);
                 }
             }
-            it->setCustomPluginValue(FILECAT_SEARCH_DEPTH, 1);
             QList<CatItem> itemsAdded;
-            indexDirectory(extendedTypes,*it,
+            indexDirectory(1, extendedTypes,*it,
                 &itemsAdded, lt, true, DEFAULT_SUBDIR_SCAN_LIMITED_PASSES);
             Q_ASSERT(!it->isStub());
             qDebug() << "FilecatalogPlugin::modifyItem got: " << it->getChildCount() << "children";

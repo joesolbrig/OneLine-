@@ -359,7 +359,7 @@ int TextMessageBar::getMessageSpaceAvailable(){
     int length = m_view->geometry().width();
     int buttonWidth=0;
     for(int i=0; i < m_textButtons.length(); i++){
-        buttonWidth += m_textButtons[i]->fixedRect().width(); //+ (m_vertPadding/4)
+        buttonWidth += m_textButtons[i]->minimumRect().width(); //+ (m_vertPadding/4)
     }
     length -=buttonWidth;
     QFont fnt;

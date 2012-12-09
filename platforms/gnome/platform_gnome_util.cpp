@@ -114,6 +114,8 @@ QIcon GnomeIconProvider::getGnomeicon(const QFileInfo& info) const
     //Call the function that accesses files, we do
     //our own caching so don't bother w/ cached version
     GError* err_ptr = NULL;
+
+    //needs to be re-worked as something like http://svn.gna.org/svn/graveman/trunk/src/thumbnails.c
     gchar* fileType = gnome_icon_lookup_sync(curIconTheme,
                                         NULL,
                                         fileName,

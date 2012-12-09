@@ -97,7 +97,7 @@ class OHash {
             }
         }
 
-        void addList(QList<CatItem> c){
+        virtual void addList(QList<CatItem> c){
             for(int i=0;i<c.count();i++){
                 ListItem li(c[i]);
                 append(li);
@@ -111,7 +111,7 @@ class OHash {
 
         }
 
-        void addList(QList<ListItem> c){
+        virtual void addList(QList<ListItem> c){
             for(int i=0;i<c.count();i++){
                 append(c[i]);
             }
@@ -278,7 +278,7 @@ protected:
     QList<QString> m_itemsByUserDescription;
     QList<QString> m_organizingItems;
     QList<QString> m_organizingSubItems;
-    QList<QString> m_sortedItems;
+    QList<ListItem> m_sortedItems;
     QString m_organizingItemPath;
     QString m_organizingSubItemPath;
 
@@ -573,6 +573,37 @@ public:
         this->addList(ii);
     }
 
+    void addList(QList<CatItem> c){
+        for(int i=0;i<c.count();i++){
+            ListItem li(c[i]);
+            append(li);
+       }
+        if(!m_organizingSubItemPath.isEmpty()){
+            CatItem filter = this->atPath(m_organizingSubItemPath);
+            if(!filter.getOrganizingCharacteristic().isEmpty()){
+                QList<ListItem> oldList = this->toList();
+                QList<ListItem> li = sortListItems(oldList, filter.getOrganizingCharacteristic(), false);
+                reorderToList(li);
+            }
+        }
+        m_formatted=false;
+    }
+
+    void addList(QList<ListItem> c){
+        for(int i=0;i<c.count();i++){
+            append(c[i]);
+            if(!m_organizingSubItemPath.isEmpty()){
+                CatItem filter = this->atPath(m_organizingSubItemPath);
+                if(!filter.getOrganizingCharacteristic().isEmpty()){
+                    QList<ListItem> oldList = this->toList();
+                    QList<ListItem> li = sortListItems(oldList, filter.getOrganizingCharacteristic(), false);
+                    reorderToList(li);
+                }
+            }
+        }
+        m_formatted=false;
+    }
+
     ListItem atPath(QString itemPath){
         if(m_hash.contains(itemPath)){
             return m_hash[itemPath];
@@ -616,15 +647,20 @@ public:
 
     void sortFilterBySubItem(ListItem cItm){
         if(!cItm.isEmpty()){
-            if(!cItm.getOrganizingCharacteristic().isEmpty()){
+            QString organizingChar = cItm.getOrganizingCharacteristic();
+            if(!organizingChar.isEmpty()){
                 QList<ListItem> oldList = this->toList();
-                QList<ListItem> li = sortListItems(oldList, cItm.getOrganizingCharacteristic(), false);
+                if(m_organizingSubItemPath.isEmpty()){
+                    m_sortedItems = oldList;
+                }
+                QList<ListItem> li = sortListItems(oldList, organizingChar, false);
                 reorderToList(li);
             }
             m_organizingItems.append(cItm.getPath());
             addToStore(cItm);
             m_organizingSubItemPath = cItm.getId();
         } else {
+            reorderToList(m_sortedItems);
             m_organizingSubItemPath.clear();
         }
 

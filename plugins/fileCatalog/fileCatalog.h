@@ -57,7 +57,7 @@ public:
     QString getIcon();
 
 protected:
-    void indexDirectory(QSet<QString> &extendedTypes, CatItem& parentItem,
+    void indexDirectory(int depth, QSet<QString> &extendedTypes, CatItem& parentItem,
         QList<CatItem>* output, UserEvent::LoadType lt=UserEvent::IGNORE,
         bool addChild=false, int overrideMaxPasses=-1);
     void alterItem(CatItem* item);

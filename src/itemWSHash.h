@@ -719,7 +719,6 @@ public:
         return d->children_detached_list.count();
     }
 
-
     void clearTempInformation() {
         d->m_data.remove(TEMPORARY_DESCRIPTION_KEY_STR);
         d->m_data.remove(TEMPORARY_NAME_KEY_STR);
@@ -727,6 +726,9 @@ public:
         d->m_data.remove(TEMPORARY_LONG_HTML_KEY_STR);
         d->m_data.remove(ORDER_BY_SIBLING_KEY);
         d->m_data.remove(SIBLING_ORDER_KEY);
+
+        d->m_data.remove(LONG_TEXT_KEY_STR);
+        d->m_data.remove(LONG_TEXT_NAME);
 
         if(d->m_data.contains(NAME_KEY_STR)){
             d->m_name = d->m_data[NAME_KEY_STR];
@@ -880,6 +882,12 @@ public:
             return getPositiveTotalWeight();
         } else if(key == ITEM_CREATION_TIME_KEY_STR){
             return getCreationTime();
+        } else if(key == MODIFICATION_TIME_KEY){
+            if(d->m_data.contains(key)){
+                return (time_t)d->m_data[(MODIFICATION_TIME_KEY)].toInt();
+            } else {
+                return getCreationTime();
+            }
         }  else if(key == WEIGHT_SECTION_KEY_STR){
             return getWeightSection();
         }
@@ -1689,22 +1697,23 @@ public:
         if(this->hasLabel(DESCRIPTION_KEY_STR))
             return getCustomString(ALT_DESCRIPTION_KEY_STR);
 
-        QString res = getActionParentType() + " ";
+        QString res = getActionParentType();
 
         if(this->hasLabel(FILE_CATALOG_PLUGIN_STR)){
+            res += QString(" ");
             long size = getCharacteristicValue(FILE_SIZE_CHARACTERISTIC_KEY);
             if(size < 1000){
-                res += QString::number(size) + " bits";
+                res += QString::number(size) + " bits ";
             } else  if(size < 1000*1000){
-                res += QString::number(size/1000) + " k";
+                res += QString::number(size/1000) + " k ";
             } else{
-                res += QString::number(size/(1000*1000)) + " mb";
+                res += QString::number(size/(1000*1000)) + " mb ";
             }
 
             QString mimeType = getMimeDescription();
             mimeType.truncate(20);
             if(!mimeType.isEmpty()){
-                res += mimeType + " ";
+                res += QString(" ") + mimeType ;
             }
 
             time_t t;
@@ -1715,6 +1724,7 @@ public:
                 t = getCreationTime();
             }
             d.fromTime_t(t);
+            Q_ASSERT(d.isValid());
             res += (QString(" ") + contextualTimeString(d));
             return res;
         }

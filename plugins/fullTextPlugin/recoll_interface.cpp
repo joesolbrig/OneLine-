@@ -352,14 +352,14 @@ bool Recoll_Interface::addRecolMetadata(Rcl::Doc doc,CatItem &it){
         changed=true;
     }
 
-    QString body;
-    if(!doc.text.empty()){
-        body = doc.text.c_str();
-        if(!body.isEmpty()) {
-            it.setLongText(body);
-            changed=true;
-        }
-    }
+//    QString body;
+//    if(!doc.text.empty()){
+//        body = doc.text.c_str();
+//        if(!body.isEmpty()) {
+//            it.setLongText(body);
+//            changed=true;
+//        }
+//    }
     return changed;
 
 }
