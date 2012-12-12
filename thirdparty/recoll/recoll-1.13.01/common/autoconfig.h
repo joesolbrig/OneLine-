@@ -49,4 +49,4 @@
 /* #undef RCL_SPLIT_CAMELCASE */
 
 /* No X11 */
-/* #undef WITHOUT_X11 */
+#define WITHOUT_X11 1

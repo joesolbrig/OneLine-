@@ -23,14 +23,15 @@ HEADERS = fullTextPlugin.h \
     ../../src/item.h \
     ../../src/itemWSHash.h \
     ../../src/itemarglist.h \
-    ../../src/inputLanguage.h
+    ../../src/inputLanguage.h \
+    address.h
 SOURCES = fullTextPlugin.cpp \
     recoll_interface.cpp \
     ../../src/platform_util.cpp \
     ../../src/plugin_interface.cpp \
     ../../src/itemarglist.cpp \
     ../../src/inputLanguage.cpp \
-    ../../thirdparty/recoll/recoll-1.13.01/bincimapmime/address.cc
+    address.cc
 TARGET = fullTextPlugin
 CONFIG += link_pkgconfig
 unix { 
