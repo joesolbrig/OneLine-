@@ -31,6 +31,111 @@ using namespace std;
 using namespace Binc;
 
 
+QString Recoll_Interface::bumpIPath(QString iPath){
+    QString res = iPath;
+    do {
+        if(!res.contains(":")){
+            int i = res.toInt();
+            if(i<=0){ return "";}
+            res = QString::number(i+1);
+            continue;
+        }
+        QStringList paths = res.split(":");
+        int i = paths[paths.length()-1].toInt();
+        QString newEnd = QString::number(i+1);
+        paths[paths.length()-1] = newEnd;
+        res = paths.join(":");
+        continue;
+    } while(m_usedSubpath.contains(res));
+    return res;
+}
+
+int Recoll_Interface::getItemFromQuerries(Rcl::SearchData * sdata,
+                     Rcl::Query *query, QList<RecollQueryItem>& results){
+
+    RefCntr<Rcl::SearchData> rsData(sdata);
+    string qr("Query results");
+
+    DocSequenceDb *src = new DocSequenceDb(
+            RefCntr<Rcl::Query>(query), qr, rsData);
+
+    int i=0;
+    for (; i < result_limit; i++){
+        Rcl::Doc doc;
+        if (!query->getDoc(i, doc)) {break;}
+
+        RecollQueryItem recollItem;
+        recollItem.abstractText = src->getAbstract(doc).c_str();
+        recollItem.mimeStr = doc.mimetype.c_str();
+        recollItem.filePath = QString(doc.url.c_str()) + ARG_SEPERATOR + doc.ipath.c_str();
+        if(recollItem.filePath.contains(FILE_PREFIX)){
+            recollItem.filePath.remove(0,FILE_PREFIX.length());
+        }
+        if(!doc.text.empty()){
+            qDebug() << "doc getItemFromQuerries has text: ";
+            recollItem.longText = doc.text.c_str();
+            recollItem.longText.detach();
+        }
+
+        list<string> terms;
+//                vector<vector<string> > dummyGroups;
+//                vector<int> dummyGslks;
+        query->getMatchTerms(doc, terms);
+        //src->getTerms(terms, dummyGroups, dummyGslks);
+        for(list<string>::iterator i=terms.begin(); i!=terms.end(); i++){
+            recollItem.resultTerms.append((*i).c_str());
+        }
+        recollItem.matchDescription = src->getDescription().c_str();
+        results.push_back(recollItem);
+    }
+    return i;
+}
+
+
+int Recoll_Interface::getMatches(QString queryStr,  QString searchDir, QList<RecollQueryItem>& results, int l,
+               QString& error,
+               bool exclusive){
+    result_limit = l;
+    string u8 = (const char* )queryStr.toUtf8();
+    trimstring(u8);
+
+    //openDB(false);
+
+    Rcl::SClType qt;
+    if(exclusive){
+        qt = SCLT_OR;
+    } else {
+        qt = SCLT_OR;
+    }
+
+    Rcl::SearchData * sdata = new Rcl::SearchData(Rcl::SCLT_OR);
+    Rcl::SearchDataClause* clp = new Rcl::SearchDataClauseSimple(Rcl::SCLT_OR,u8);
+    sdata->addClause(clp);
+    string stemlang("english");
+    sdata->setStemlang(stemlang);
+    if(!searchDir.isEmpty())
+        { sdata->setTopdir(searchDir.toStdString()); }
+    Rcl::Query *query = new Rcl::Query(m_rcldb);
+    RefCntr<Rcl::SearchData> rsData(sdata);
+    if (!query ) {
+        error = "Query Empty Somehow";
+        qDebug() << "Recoll error:" << error;
+        return 0;
+    }
+
+    //This index is querried here
+    if ( !query->setQuery(rsData)) {
+        error = rsData->getReason().c_str();
+        qDebug() << "Recoll error:" << error;
+        return 0;
+    }
+    query->setCollapseDuplicates(true);
+    bool success = getItemFromQuerries(sdata, query, results);
+
+    closeDB();
+    return success;
+}
+
 
 
 bool Recoll_Interface::addAPossiblyCompoundFile(CatItem& parent, QList<CatItem>* res, int maxPasses){
@@ -171,7 +276,10 @@ bool Recoll_Interface::getDocForPreview(CatItem& it){
         qDebug() << "skipping zip";
         return false; 
     }
-    if(!f.exists()){ return false; }
+    if(!f.exists()){
+        qDebug() << "base path file doesn't exist: " << it.getPath();
+        return false;
+    }
 
     Rcl::Doc outDoc;
 
@@ -197,15 +305,16 @@ bool Recoll_Interface::getDocForPreview(CatItem& it){
                 QString preview = interner.get_html().c_str();
                 preview.detach();
                 it.setPreviewHtml(preview);
-            } else {
-                //qDebug() << "getDocForPreview - don't have preview str for: " << it.getPath();
-
+            } else if(it.getLongText().isEmpty()){
+                qDebug() << "getDocForPreview - don't have preview str for: " << it.getPath();
+                return false;
             }
         } else {
             string missing;
             interner.getMissingExternal(missing);
-//            qDebug() << "getDocForPreview - can't get preview. Err: "
-//                    << missing.c_str() << "ret:" << ret << " path: " << it.getPath();
+            qDebug() << "getDocForPreview - can't get preview. Err: "
+                    << missing.c_str() << "ret:" << ret << " path: " << it.getPath();
+            return false;
         }
     } catch (...) {
         qDebug() << "getDocForPreview - some processing err: ";
@@ -242,14 +351,13 @@ bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& pare
             qDebug() << "exception for error interning" << m_parent_udi.c_str();
         }
         if(fis == FileInterner::FIError){
-            //qDebug() << "error interning" << m_parent_udi.c_str();
-            //qDebug() << interner.getReason().c_str();
+            qDebug() << "error interning" << m_parent_udi.c_str();
+            qDebug() << interner.getReason().c_str();
             return false;
         }
     }
 
     //Add bookmark for our item
-    //Does storing and restoring a UTF8 inside a QString corrupt data?? We'll see...
     QString newInternalPath(ipath.c_str());
     if(m_indexingJustParent || fis == FileInterner::FIDone ){
         if( (ipath.empty() )){
@@ -258,7 +366,6 @@ bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& pare
         //qDebug() << "done interning " << m_parent_udi.c_str();
         //qDebug() << interner.getReason().c_str();
         return false;
-
     }
 
     qDebug() << "newInternalPath: " << ipath.c_str();
@@ -301,7 +408,7 @@ bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& pare
     // Add document to database. If there is an ipath, add it as a children
     // of the file document.
     if (ipath.empty()) {
-        if(addRecolMetadata(doc, parentIt)){
+        if(addRecolMetadataToParent(doc, parentIt)){
             returnedItemIt = parentIt;
         }
         m_base_indexed = true;
@@ -340,9 +447,7 @@ bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& pare
     }
 }
 
-
-
-bool Recoll_Interface::addRecolMetadata(Rcl::Doc doc,CatItem &it){
+bool Recoll_Interface::addRecolMetadataToParent(Rcl::Doc doc,CatItem &it){
 
     bool changed=false;
     if(!doc.mimetype.empty() ){
@@ -352,16 +457,15 @@ bool Recoll_Interface::addRecolMetadata(Rcl::Doc doc,CatItem &it){
         changed=true;
     }
 
-//    QString body;
-//    if(!doc.text.empty()){
-//        body = doc.text.c_str();
-//        if(!body.isEmpty()) {
-//            it.setLongText(body);
-//            changed=true;
-//        }
-//    }
+    QString body;
+    if(!doc.text.empty()){
+        body = doc.text.c_str();
+        if(!body.isEmpty()) {
+            it.setTemporaryLongText(body);
+            changed=true;
+        }
+    }
     return changed;
-
 }
 
 
@@ -476,7 +580,7 @@ CatItem Recoll_Interface::makeCatItem(Rcl::Doc doc, CatItem& parentIt){
                 CatItem contactP(PERSON_PREFIX + namePath, senderName);
                 contactP.setItemType(CatItem::PERSON);
 
-                CatItem emailP(SYNONYM_PREFIX + namePath+ "/" + fullEmailAddress,fullEmailAddress);
+                CatItem emailP(SYNONYM_PREFIX + namePath+ "/" + fullEmailAddress,senderName);
                 emailP.setItemType(CatItem::PERSON);
                 emailP.setIsIntermediateSource();
                 emailP.addParent(contactP,FULL_TEXT_PLUGIN_NAME,BaseChildRelation::SYNONYM);
@@ -496,14 +600,16 @@ CatItem Recoll_Interface::makeCatItem(Rcl::Doc doc, CatItem& parentIt){
         Binc::splitAddr(Binc::unfold(line),d);
         for (vector<string>::const_iterator i = d.begin(); i != d.end(); ++i){
             Address addr(*i);
-            CatItem emailAccount(EMAIL_ACCOUNT_PREFIX
-                           + QString(addr.local.c_str())
-                           + QString("@")
-                           + QString(addr.host.c_str()));
+            QString fullEmailAddress = QString(addr.local.c_str())
+                              + QString("@")
+                              + QString(addr.host.c_str());
+            CatItem emailAccount(fullEmailAddress);
             emailAccount.setItemType(CatItem::ORGANIZING_TYPE);
             emailAccount.setTagLevel(CatItem::EXTERNAL_SOURCE);
             if(!addr.name.empty()){
                 emailAccount.setName(EMAIL_ACCOUNT_NAME_DESCRIPTION + QString(addr.name.c_str()));
+            } else {
+                emailAccount.setName(fullEmailAddress);
             }
             emailAccount.setSourceWeight(MAX_EXTERNAL_WEIGHT, CatItem::createTypeParent(CatItem::MESSAGE));
             res.addParent(emailAccount,FILE_CATALOG_PLUGIN_STR,BaseChildRelation::MESSAGE_SOURCE_PARENT);

@@ -582,7 +582,7 @@ bool MainUserWindow::tryShowPreview(){
             m_rightPreviewingItem = pItem;
             return false;
         }
-        CatBuilder::updateItem(pItem,2,UserEvent::SEEN);
+        CatBuilder::updateItem(pItem,2,UserEvent::PREVIEW);
     } else {
         pItem = m_centerPreviewingItem;
     }

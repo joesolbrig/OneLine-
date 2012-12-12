@@ -167,6 +167,7 @@ const QString MATCHINDEX_KEY_STR("MATCHINDEX_KEY_STR");
 const QString IS_FOR_LATER_KEY_STR("IS_FOR_LATER_KEY_STR");
 const QString TEMPORARY_DESCRIPTION_KEY_STR("TEMPORARY_DESCRIPTION_KEY_STR");
 const QString TEMPORARY_LONG_HTML_KEY_STR("TEMPORARY_LONG_HTML_KEY_STR");
+const QString TEMPORARY_LONG_TEXT_KEY_STR("TEMPORARY_LONG_TEXT_KEY_STR");
 const QString TEMPORARY_NAME_KEY_STR("TEMPORARY_NAME_KEY_STR");
 const QString PREFIX_NAME_KEY_STR("PREFIX_NAME_KEY_STR");
 const QString TEMP_LOW_PATH_KEY_STR("TEMP_LOW_NAME_KEY_STR");
@@ -1025,7 +1026,8 @@ const QString URL_REDIRECT_MSG = "Redirected...";
 const QString MINUTES_AGO_PHRASE = "minutes ago";
 const QString FROM_PERSON__PHRASE= " from ";
 
-const QString EMAIL_ACCOUNT_NAME_DESCRIPTION = "Email Account Of ";
+//const QString EMAIL_ACCOUNT_NAME_DESCRIPTION = "Email Account Of ";
+const QString EMAIL_ACCOUNT_NAME_DESCRIPTION = "account: ";
 
 const QString USE_CTRL_RETURN_MSG = "Press ctrl-return to finish ";
 const QString USE_CTRL_TAB_MSG = "Press ctrl-tab to continue ";

@@ -274,7 +274,8 @@ class UserEvent {
             BECOMING_VISIBLE=3,
             SEEN=4,
             SELECTED=5,
-            CHOSEN=5
+            PREVIEW=6,
+            CHOSEN=7
         };
 
         UserEvent(EventType evt=CHOICE){

@@ -83,6 +83,7 @@ public:
     void getCatalog(QList<CatItem>* items);
     //bool modifyItem(CatItem* id);
     void itemsLoaded(SearchInfo* inf, QList<CatItem>* res);
+    bool itemLoaded(CatItem* itemPtr, UserEvent::LoadType lt);
     void indexAFileItem(CatItem& id, QFileInfo fi, QList<CatItem>* r, bool compound=true);
     QString cachePath();
     void launchItem(InputList*, QList<CatItem>* output);

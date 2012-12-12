@@ -239,6 +239,27 @@ void FullTextPlugin::itemsLoaded(SearchInfo* inf, QList<CatItem>* res){
     m_recoll_interface->closeDB();
 }
 
+//Less efficient 'cause
+bool FullTextPlugin::itemLoaded(CatItem* itemPtr, UserEvent::LoadType lt){
+    //QList<CatItem>* items = inf->itemListPtr;
+    if((int)lt < (int)UserEvent::PREVIEW){
+        return false;
+    }
+
+    QMutexLocker locker(&m_fullTextMutex);
+    recoll_threadinit();
+    if(!m_recoll_interface->openDB(true)){ return false; }
+    CatItem item = *itemPtr;
+    bool handled = true;
+
+    if(m_recoll_interface->getDocForPreview(item)){
+        (*itemPtr) = item;
+    }
+
+    m_recoll_interface->closeDB();
+    return handled ;
+}
+
 
 //The only extras we might add on files on the "edge" of our index
 QString FullTextPlugin::cachePath(){
@@ -508,6 +529,11 @@ int FullTextPlugin::msg(int msgId, void* wParam, void* lParam)
             case MSG_ITEMS_LOADING:
                 itemsLoaded((SearchInfo*) wParam, (QList<CatItem>*)lParam);
                 handled = true;
+                break;
+            case MSG_ITEM_LOADING:
+                //CatItem* item = (CatItem*) wParam;
+                //UserEvent::LoadType lt = (UserEvent::LoadType)lParam;
+                handled = itemLoaded((CatItem*) wParam, (UserEvent::LoadType)(int)lParam);
                 break;
             case MSG_LAUNCH_ITEM:
                 launchItem((InputList*) wParam, (QList<CatItem>*) lParam);

@@ -59,21 +59,29 @@ int PluginInterface::ms_homeDirLen;
 
 QString contextualTimeString(QDateTime d){
     QDateTime now = QDateTime::currentDateTime();
+    QString res = "now";
+    QDate date = d.date();
+    QTime time = d.time();
+    qDebug() << "date part" << date;
+    qDebug() << "time part" << time;
     if(d.secsTo(now) > (7*24*60*60*365)){
         //return d.toString(Qt::TextDate);
-        return d.toString("dddd h:ap yy");
-    } else if(d.secsTo(now) > (2*24*60*60*1000)){
-        return d.toString("dddd h:ap");
-    } else if(d.secsTo(now) > (24*60*60*1000)){
-        return d.toString("'yesterday:'h':'ap");
+        res = d.toString("d-m h:ap yyyy");
+    } else if(d.secsTo(now) > (7*24*60*60)){
+        //return d.toString(Qt::TextDate);
+        res = d.toString("d-m h:ap");
+    } else if(d.secsTo(now) > (2*24*60*60)){
+        res =d.toString("dddd h:ap");
+    } else if(d.secsTo(now) > (24*60*60)){
+        res =d.toString("'yesterday:'h':'ap");
     } else if(d.secsTo(now) > (60*60*1000)){
-        return d.toString("h':'ap");
+        res =d.toString("h':'ap");
     } else if(d.secsTo(now) > (60*1000)){
         int minutes = d.secsTo(now)/60;
         QString phrs = QString("$1 ").arg(minutes);
-        return phrs + MINUTES_AGO_PHRASE;
+        res = phrs + MINUTES_AGO_PHRASE;
     }
-    return "now";
+    return res;
 }
 
 
@@ -472,6 +480,49 @@ QList<CatItem> sortCatItems(QList<CatItem> il, QString label, bool asKey){
         res2.append(res[i]);
     }
     return res2;
+}
+
+QString CatItem::getAltDescription() {
+    if(this->hasLabel(TEMPORARY_DESCRIPTION_KEY_STR))
+        return getCustomString(TEMPORARY_DESCRIPTION_KEY_STR);
+    if(this->hasLabel(ALT_DESCRIPTION_KEY_STR))
+        return getCustomString(ALT_DESCRIPTION_KEY_STR);
+    if(this->hasLabel(DESCRIPTION_KEY_STR))
+        return getCustomString(ALT_DESCRIPTION_KEY_STR);
+
+    QString res = getActionParentType();
+
+    if(this->hasLabel(FILE_CATALOG_PLUGIN_STR)){
+        res += QString(" ");
+        long size = getCharacteristicValue(FILE_SIZE_CHARACTERISTIC_KEY);
+        if(size < 1000){
+            res += QString::number(size) + " bits ";
+        } else  if(size < 1000*1000){
+            res += QString::number(size/1000) + " k ";
+        } else{
+            res += QString::number(size/(1000*1000)) + " mb ";
+        }
+
+        QString mimeType = getMimeDescription();
+        mimeType.truncate(20);
+        if(!mimeType.isEmpty()){
+            res += QString(" ") + mimeType ;
+        }
+
+        time_t t;
+        QDateTime d;
+        if(hasLabel(MODIFICATION_TIME_KEY)){
+            t = getModificationTime();
+        } else {
+            t = getCreationTime();
+        }
+        d = QDateTime::fromTime_t(t);
+        Q_ASSERT(d.isValid());
+        qDebug() << "datetime: " << d;
+        res += (QString(" ") + contextualTimeString(d));
+        return res;
+    }
+    return "";
 }
 
 

@@ -724,11 +724,14 @@ public:
         d->m_data.remove(TEMPORARY_NAME_KEY_STR);
         d->m_data.remove(TEMPORARY_PRIORITY_KEY_STR);
         d->m_data.remove(TEMPORARY_LONG_HTML_KEY_STR);
+        d->m_data.remove(TEMPORARY_LONG_TEXT_KEY_STR);
         d->m_data.remove(ORDER_BY_SIBLING_KEY);
         d->m_data.remove(SIBLING_ORDER_KEY);
 
-        d->m_data.remove(LONG_TEXT_KEY_STR);
+        //d->m_data.remove(LONG_TEXT_KEY_STR);
         d->m_data.remove(LONG_TEXT_NAME);
+
+        d->m_data.remove(HTML_PREVIEW_KEY);
 
         if(d->m_data.contains(NAME_KEY_STR)){
             d->m_name = d->m_data[NAME_KEY_STR];
@@ -1689,48 +1692,7 @@ public:
         setCustomPluginInfo(ALT_DESCRIPTION_KEY_STR,v);
     }
 
-    QString getAltDescription() {
-        if(this->hasLabel(TEMPORARY_DESCRIPTION_KEY_STR))
-            return getCustomString(TEMPORARY_DESCRIPTION_KEY_STR);
-        if(this->hasLabel(ALT_DESCRIPTION_KEY_STR))
-            return getCustomString(ALT_DESCRIPTION_KEY_STR);
-        if(this->hasLabel(DESCRIPTION_KEY_STR))
-            return getCustomString(ALT_DESCRIPTION_KEY_STR);
-
-        QString res = getActionParentType();
-
-        if(this->hasLabel(FILE_CATALOG_PLUGIN_STR)){
-            res += QString(" ");
-            long size = getCharacteristicValue(FILE_SIZE_CHARACTERISTIC_KEY);
-            if(size < 1000){
-                res += QString::number(size) + " bits ";
-            } else  if(size < 1000*1000){
-                res += QString::number(size/1000) + " k ";
-            } else{
-                res += QString::number(size/(1000*1000)) + " mb ";
-            }
-
-            QString mimeType = getMimeDescription();
-            mimeType.truncate(20);
-            if(!mimeType.isEmpty()){
-                res += QString(" ") + mimeType ;
-            }
-
-            time_t t;
-            QDateTime d;
-            if(hasLabel(MODIFICATION_TIME_KEY)){
-                t = getModificationTime();
-            } else {
-                t = getCreationTime();
-            }
-            d.fromTime_t(t);
-            Q_ASSERT(d.isValid());
-            res += (QString(" ") + contextualTimeString(d));
-            return res;
-        }
-        return "";
-    }
-
+    QString getAltDescription();
     QString getName() const{
         if(d->m_data.contains(TEMPORARY_NAME_KEY_STR) && (!d->m_data[TEMPORARY_NAME_KEY_STR].isEmpty())){
             return d->m_data[TEMPORARY_NAME_KEY_STR];
@@ -1879,6 +1841,14 @@ public:
     }
     void setTemporaryLongHtml(QString v){
         d->m_data[TEMPORARY_LONG_HTML_KEY_STR] = v;
+    }
+
+    QString getTemporaryLongText(){
+        if(!d->m_data.contains(TEMPORARY_LONG_TEXT_KEY_STR)){return "";}
+        return d->m_data[TEMPORARY_LONG_TEXT_KEY_STR];
+    }
+    void setTemporaryLongText(QString v){
+        d->m_data[TEMPORARY_LONG_TEXT_KEY_STR] = v;
     }
 
     bool getUseDescription() const {

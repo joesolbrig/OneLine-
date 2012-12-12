@@ -204,138 +204,20 @@ class Recoll_Interface{
         bool addNonCompoundFile(CatItem& parent, QFileInfo fi, QList<CatItem>* res);
         int addPossiblyCompoundFile(CatItem& parent, QList<CatItem>* res,
             std::string& ipath, QFileInfo fi=QFileInfo());
-        QString bumpIPath(QString iPath){
-            QString res = iPath;
-            do {
-                if(!res.contains(":")){
-                    int i = res.toInt();
-                    if(i<=0){ return "";}
-                    res = QString::number(i+1);
-                    continue;
-                }
-                QStringList paths = res.split(":");
-                int i = paths[paths.length()-1].toInt();
-                QString newEnd = QString::number(i+1);
-                paths[paths.length()-1] = newEnd;
-                res = paths.join(":");
-                continue;
-            } while(m_usedSubpath.contains(res));
-            return res;
-        }
+        QString bumpIPath(QString iPath);
 
-//        std::string bumpIPath(std::string ip){
-//            QString iPath(ip.c_str());
-//            if(m_visitedPath.contains(iPath)){
-//                if(!iPath.contains(":")){
-//                    int i = iPath.toInt();
-//                    Q_ASSERT(i>0);
-//                    return QString::number(i+1);
-//                }
-//                QStringList paths = iPath.split(":");
-//                int i = paths[paths.length()-1].toInt();
-//                QString newEnd = QString::number(i+1);
-//                paths[paths.length()-1] = newEnd;
-//                QString res = paths.join(":");
-//                return res.toStdString();
-//            }
-//            m_visitedPath.insert(iPath);
-//            return "";
-//        }
         int getMatches(QString queryStr,  QString searchDir, QList<RecollQueryItem>& results, int l,
                        QString& error,
-                       bool exclusive=false){
-            result_limit = l;
-            string u8 = (const char* )queryStr.toUtf8();
-            trimstring(u8);
-
-            //openDB(false);
-
-            Rcl::SClType qt;
-            if(exclusive){
-                qt = SCLT_OR;
-            } else {
-                qt = SCLT_OR;
-            }
-
-            Rcl::SearchData * sdata = new Rcl::SearchData(Rcl::SCLT_OR);
-            Rcl::SearchDataClause* clp = new Rcl::SearchDataClauseSimple(Rcl::SCLT_OR,u8);
-            sdata->addClause(clp);
-            string stemlang("english");
-            sdata->setStemlang(stemlang);
-            if(!searchDir.isEmpty())
-                { sdata->setTopdir(searchDir.toStdString()); }
-            Rcl::Query *query = new Rcl::Query(m_rcldb);
-            RefCntr<Rcl::SearchData> rsData(sdata);
-            if (!query ) {
-                error = "Query Empty Somehow";
-                qDebug() << "Recoll error:" << error;
-                return 0;
-            }
-
-            //This index is querried here
-            if ( !query->setQuery(rsData)) {
-                error = rsData->getReason().c_str();
-                qDebug() << "Recoll error:" << error;
-                return 0;
-            }
-            query->setCollapseDuplicates(true);
-            bool success = getItemFromQuerries(sdata, query, results);
-
-
-
-            closeDB();
-            return success;
-        }
-
+                       bool exclusive=false);
         bool getDocForPreview(CatItem& it);
     protected:
 
         int getItemFromQuerries(Rcl::SearchData * sdata,
-                             Rcl::Query *query, QList<RecollQueryItem>& results){
-
-            RefCntr<Rcl::SearchData> rsData(sdata);
-            string qr("Query results");
-
-            DocSequenceDb *src = new DocSequenceDb(
-                    RefCntr<Rcl::Query>(query), qr, rsData);
-
-            int i=0;
-            for (; i < result_limit; i++){
-                Rcl::Doc doc;
-                if (!query->getDoc(i, doc)) {break;}
-
-                RecollQueryItem recollItem;
-                recollItem.abstractText = src->getAbstract(doc).c_str();
-                recollItem.mimeStr = doc.mimetype.c_str();
-                recollItem.filePath = QString(doc.url.c_str()) + ARG_SEPERATOR + doc.ipath.c_str();
-                if(recollItem.filePath.contains(FILE_PREFIX)){
-                    recollItem.filePath.remove(0,FILE_PREFIX.length());
-                }
-                if(!doc.text.empty()){
-                    qDebug() << "doc getItemFromQuerries has text: ";
-                    recollItem.longText = doc.text.c_str();
-                    recollItem.longText.detach();
-                }
-
-                list<string> terms;
-//                vector<vector<string> > dummyGroups;
-//                vector<int> dummyGslks;
-                query->getMatchTerms(doc, terms);
-                //src->getTerms(terms, dummyGroups, dummyGslks);
-                for(list<string>::iterator i=terms.begin(); i!=terms.end(); i++){
-                    recollItem.resultTerms.append((*i).c_str());
-                }
-                recollItem.matchDescription = src->getDescription().c_str();
-                results.push_back(recollItem);
-            }
-            return i;
-        }
-
-
+                             Rcl::Query *query, QList<RecollQueryItem>& results);
         bool processInternalFile(FileInterner& interner, CatItem& parentIt, CatItem& childIt, string utf8fn, string& beginIPath);
         //void finishParent(FileInterner& interner,CatItem& parent);
         static CatItem makeCatItem(Rcl::Doc doc, CatItem& parentIt);
-        bool addRecolMetadata(Rcl::Doc doc, CatItem& item);
+        bool addRecolMetadataToParent(Rcl::Doc doc, CatItem& item);
         bool checkFileInDatabase(const std::string &fn);
     private:
         RclConfig* m_rclconfig;
