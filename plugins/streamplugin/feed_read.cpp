@@ -27,6 +27,11 @@ void XmlFileReader::run(){
             parseTransformedStream(transformedXML);
         }
     }
+    if(!m_filt.isEmpty()){
+        for(int i=0; i < m_results.count(); i++){
+            m_results[i].addParent(m_filt,STREAM_SOURCE_PATH,BaseChildRelation::MESSAGE_SOURCE_PARENT);
+        }
+    }
     f.close();
     m_finished = true;
 
@@ -47,6 +52,11 @@ void AbstractFeedReader::run(){
         loop.exec();
         processRequestResult();
         m_finished = true;
+        if(!m_filt.isEmpty()){
+            for(int i=0; i < m_results.count(); i++){
+                m_results[i].addParent(m_filt,STREAM_SOURCE_PATH,BaseChildRelation::MESSAGE_SOURCE_PARENT);
+            }
+        }
         quit();
     }
 }

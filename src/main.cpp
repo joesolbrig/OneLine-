@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
     app->closeAllWindows();
     qDebug() << "windows close";
     app->quit();
-    qDebug() << "quit, now to delete app";
+    qDebug() << "quiting";
 #else
     //Don't do times threads and timers unless not testing...
     gMainWidget->startTasks();

@@ -1,10 +1,9 @@
 Item_Name=Recent Files
 Item_Descript=Gnome Recent Files
 EXTERNAL_WEIGHT_KEY_STR=5120
-SOURCE_WEIGHT_KEY_STR="1000000"
 Item_Child_Section1=xbel_recent
 Item_Child_Section2=xbel_recent_old
-is_categorizing_source=1
+is_categorizing_source=0
 
 [xbel_recent]
 Item_Name=Gnome Recent Files

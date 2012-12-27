@@ -43,10 +43,10 @@ int stopindexing=0;
 
 Recoll_Interface ri;
 
-RclConfig* RclConfig::getMainConfig()
-{
-    return rclconfig;
-}
+//RclConfig* RclConfig::getMainConfig()
+//{
+//    return rclconfig;
+//}
 
 void FullTextPlugin::init()
 {
@@ -375,7 +375,7 @@ CatItem FullTextPlugin::CreateFullTextItem(RecollQueryItem recolItem, QList<CatI
 
     QString path = recolItem.filePath;
     if(path.simplified().endsWith(ARG_SEPERATOR)){
-        path = path.simplified().left(path.length()-2);
+        path = path.simplified().left(path.length()-1);
     }
 
 

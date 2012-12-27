@@ -2047,10 +2047,10 @@ QList<CatItem> TheApplicationTester::backgroundFind(QString userKeys, QStringLis
 
 void TheApplicationTester::testFileFind(){
 
-    QString filePath1 = "./test1.txt";
-    QString filePath2 = "./test2.txt";
-    QString filePath3 = "./test3.txt";
-    QString filePath4 = "./test4.txt";
+    QString filePath1 = "./temp_test/test1.txt";
+    QString filePath2 = "./temp_test/test2.txt";
+    QString filePath3 = "./temp_test/test3.txt";
+    QString filePath4 = "./temp_test/test4.txt";
 
     QDir baseDir(QDir::current() );
     filePath1 = baseDir.cleanPath(baseDir.absoluteFilePath(filePath1));

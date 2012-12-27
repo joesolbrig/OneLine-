@@ -167,6 +167,7 @@ class Recoll_Interface{
             Rcl::Db::OpenMode mode;
             if (write){
                 mode = Rcl::Db::DbUpd;
+                m_rcldb->close();
 //                if(trunc){
 //                    mode = Rcl::Db::DbTrunc;
 //                } else {
@@ -191,9 +192,9 @@ class Recoll_Interface{
                 return;
             }
             m_db_is_open = false;
-            //It *seems* that close kills the whole thing and shoudl
-
-            //m_rcldb->close();
+            if(m_rcldb->isopen()){
+                m_rcldb->close();
+            }
         }
 
         void purgeDB(){
@@ -214,7 +215,9 @@ class Recoll_Interface{
 
         int getItemFromQuerries(Rcl::SearchData * sdata,
                              Rcl::Query *query, QList<RecollQueryItem>& results);
-        bool processInternalFile(FileInterner& interner, CatItem& parentIt, CatItem& childIt, string utf8fn, string& beginIPath);
+        bool processInternalFile(FileInterner& interner, CatItem& parentIt, CatItem& childIt,
+                                 string charset,
+                                 string& beginIPath);
         //void finishParent(FileInterner& interner,CatItem& parent);
         static CatItem makeCatItem(Rcl::Doc doc, CatItem& parentIt);
         bool addRecolMetadataToParent(Rcl::Doc doc, CatItem& item);

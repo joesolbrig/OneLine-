@@ -73,7 +73,6 @@ class TheApplicationTester : public QObject {
 
         void testInformationFormat1();
 
-        void testFileFind();
         void testFilePlugin();
         void testSortRoutines();
         void testComparisonRoutines();
@@ -94,17 +93,21 @@ class TheApplicationTester : public QObject {
 
         void test_MultiTree2();
         void test_MultiTree1();
-        void test_cat_store();    //Support functions, tests are private slots
+        void test_cat_store();
+
+        void testUpdateUsage2();
+        void testUpdateUsage();
+
+
     public slots:
+        //Support functions, tests are private slots
         void extensionCycler(QList<CatItem> inList, QList<CatItem>* outList);
 
     //We swap functions in and out of below for custom tests...
     private slots:
         //working tests
         //not-used functions go above "'slots:" when we want to hide them...
-
-        void testUpdateUsage2();
-        void testUpdateUsage();
+        void testFileFind();
 
 
     };

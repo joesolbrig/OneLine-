@@ -1586,6 +1586,9 @@ bool CatItem::mergeItem(CatItem s, bool allowDiff, bool thisIsOriginal, QSet<QSt
     {QHash<QString, QString>::iterator i;
     bool soureStub = s.isStub();
     for(i=s.d->m_data.begin();i!=s.d->m_data.end();++i){
+        if(i.key()==CHILD_COUNT_STUBBED_KEY){
+            if(i.value()=="-1"){ continue;}
+        }
 
         if(i.key().endsWith(ATTRIB_PRIORITY_POSTFIX))
             { continue; }

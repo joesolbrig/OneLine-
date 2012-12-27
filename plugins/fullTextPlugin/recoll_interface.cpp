@@ -65,7 +65,13 @@ int Recoll_Interface::getItemFromQuerries(Rcl::SearchData * sdata,
         if (!query->getDoc(i, doc)) {break;}
 
         RecollQueryItem recollItem;
-        recollItem.abstractText = src->getAbstract(doc).c_str();
+        vector<string> abstractList;
+        if(src->getAbstract(doc, abstractList) && abstractList.size()>0){
+            for(unsigned int i=0;i<abstractList.size(); i++){
+                recollItem.abstractText += abstractList.at(i).c_str();
+                recollItem.abstractText += " ";
+            }
+        }
         recollItem.mimeStr = doc.mimetype.c_str();
         recollItem.filePath = QString(doc.url.c_str()) + ARG_SEPERATOR + doc.ipath.c_str();
         if(recollItem.filePath.contains(FILE_PREFIX)){
@@ -77,12 +83,13 @@ int Recoll_Interface::getItemFromQuerries(Rcl::SearchData * sdata,
             recollItem.longText.detach();
         }
 
-        list<string> terms;
+        //list<string> terms;
+        vector<string> terms;
 //                vector<vector<string> > dummyGroups;
 //                vector<int> dummyGslks;
         query->getMatchTerms(doc, terms);
         //src->getTerms(terms, dummyGroups, dummyGslks);
-        for(list<string>::iterator i=terms.begin(); i!=terms.end(); i++){
+        for(vector<string>::iterator i=terms.begin(); i!=terms.end(); i++){
             recollItem.resultTerms.append((*i).c_str());
         }
         recollItem.matchDescription = src->getDescription().c_str();
@@ -108,13 +115,13 @@ int Recoll_Interface::getMatches(QString queryStr,  QString searchDir, QList<Rec
         qt = SCLT_OR;
     }
 
-    Rcl::SearchData * sdata = new Rcl::SearchData(Rcl::SCLT_OR);
+    string stemlang("english");
+    //sdata->setStemlang(stemlang);
+    Rcl::SearchData * sdata = new Rcl::SearchData(Rcl::SCLT_OR, stemlang);
     Rcl::SearchDataClause* clp = new Rcl::SearchDataClauseSimple(Rcl::SCLT_OR,u8);
     sdata->addClause(clp);
-    string stemlang("english");
-    sdata->setStemlang(stemlang);
     if(!searchDir.isEmpty())
-        { sdata->setTopdir(searchDir.toStdString()); }
+        { sdata->addDirSpec(searchDir.toStdString()); }
     Rcl::Query *query = new Rcl::Query(m_rcldb);
     RefCntr<Rcl::SearchData> rsData(sdata);
     if (!query ) {
@@ -210,8 +217,8 @@ int Recoll_Interface::addPossiblyCompoundFile(CatItem& parentIt, QList<CatItem>*
         return 1;
     }
 
-    LOGDEB0(("addPossiblyCompoundFile: processing: [%s] %s\n",
-             displayableBytes(m_stp.st_size).c_str(), fn.c_str()));
+//    LOGDEB0(("addPossiblyCompoundFile: processing: [%s] %s\n",
+//             displayableBytes(m_stp.st_size).c_str(), fn.c_str()));
 
     m_parent_udi.clear();
     make_udi(fn, savedIpath, m_parent_udi);
@@ -223,32 +230,36 @@ int Recoll_Interface::addPossiblyCompoundFile(CatItem& parentIt, QList<CatItem>*
         ipath = savedIpath;
     }
     //qDebug() << "addPossiblyCompoundFile at updatePath: " << fn.c_str();
-    FileInterner interner(fn, &m_stp, m_rclconfig, m_tmpdir, FileInterner::FIF_none);
+    const struct stat st(m_stp);
+    TempDir td;
+    FileInterner interner(fn, &st, m_rclconfig, td, FileInterner::FIF_none);
     // File name transcoded to utf8 for indexation.
     string charset = m_rclconfig->getDefCharset(true);
     // If this fails, the file name won't be indexed, no big deal
     // Note that we used to do the full path here, but I ended up believing
     // that it made more sense to use only the file name
 
-    string utf8fn;
-    int ercnt;
-    if (!transcode(path_getsimple(fn), utf8fn, charset, "UTF-8", &ercnt)) {
-        LOGERR(("addPossiblyCompoundFile: fn transcode failure from [%s] to UTF-8: %s\n",
-                charset.c_str(), path_getsimple(fn).c_str()));
-    } else if (ercnt) {
-        LOGDEB(("addPossiblyCompoundFile: fn transcode %d errors from [%s] to UTF-8: %s\n",
-                ercnt, charset.c_str(), path_getsimple(fn).c_str()));
-    }
-    LOGDEB2(("addPossiblyCompoundFile: fn transcoded from [%s] to [%s] (%s->%s)\n",
-             path_getsimple(fn).c_str(), utf8fn.c_str(), charset.c_str(),
-             "UTF-8"));
+//    string utf8fn;
+//    int ercnt;
+//    if (!transcode(path_getsimple(fn), utf8fn, charset, "UTF-8", &ercnt)) {
+//        LOGERR(("addPossiblyCompoundFile: fn transcode failure from [%s] to UTF-8: %s\n",
+//                charset.c_str(), path_getsimple(fn).c_str()));
+//    } else if (ercnt) {
+//        LOGDEB(("addPossiblyCompoundFile: fn transcode %d errors from [%s] to UTF-8: %s\n",
+//                ercnt, charset.c_str(), path_getsimple(fn).c_str()));
+//    }
+//    LOGDEB2(("addPossiblyCompoundFile: fn transcoded from [%s] to [%s] (%s->%s)\n",
+//             path_getsimple(fn).c_str(), utf8fn.c_str(), charset.c_str(),
+//             "UTF-8"));
 
     int maxPasses = parentIt.getMaxUpdatePasses();
     bool cont = true;
     int cycles=0;
     while((cycles < maxPasses) && cont && (allowCompound || cycles==0)) {
         CatItem addedItem;
-        cont = processInternalFile(interner,parentIt, addedItem, utf8fn, ipath);
+        cont = processInternalFile(interner,parentIt, addedItem,
+                                   charset,
+                                   ipath);
         if(!addedItem.isEmpty()){ res->append(addedItem); }
         cycles++;
         if(!cont){break;}
@@ -292,7 +303,10 @@ bool Recoll_Interface::getDocForPreview(CatItem& it){
     m_parent_udi.clear();
     Q_ASSERT(m_tmpdir.length()>0);
     
-    FileInterner interner(basePath, &m_stp, m_rclconfig, m_tmpdir, FileInterner::FIF_forPreview);
+    const struct stat st(m_stp);
+    TempDir td;
+    const string path(basePath);
+    FileInterner interner(path, &st, m_rclconfig, td, FileInterner::FIF_forPreview);
 
     try {
         FileInterner::Status ret = interner.internfile(outDoc, ipath);
@@ -311,7 +325,8 @@ bool Recoll_Interface::getDocForPreview(CatItem& it){
             }
         } else {
             string missing;
-            interner.getMissingExternal(missing);
+            FIMissingStore fim;
+            interner.getMissingExternal(&fim, missing);
             qDebug() << "getDocForPreview - can't get preview. Err: "
                     << missing.c_str() << "ret:" << ret << " path: " << it.getPath();
             return false;
@@ -324,7 +339,10 @@ bool Recoll_Interface::getDocForPreview(CatItem& it){
 }
 
 bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& parentIt, CatItem& returnedItemIt,
-        string utf8fn, string& ipath){
+        string charset,
+        string& ipath){
+    qDebug() << "interning" << parentIt.getPath()  << " : " << returnedItemIt.getPath();
+    
 
     //receiver objects!
     Rcl::Doc doc;
@@ -338,7 +356,7 @@ bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& pare
                 fis = interner.internfile(doc, ipath);
                 ipath.clear();
             } catch(...){
-                qDebug() << "exception for error externing interning" << m_parent_udi.c_str();
+                qDebug() << "exception for error interning" << m_parent_udi.c_str();
             }
         }
 
@@ -359,14 +377,14 @@ bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& pare
 
     //Add bookmark for our item
     QString newInternalPath(ipath.c_str());
-    if(m_indexingJustParent || fis == FileInterner::FIDone ){
-        if( (ipath.empty() )){
-            m_continueOnIPath= false;
-        }
-        //qDebug() << "done interning " << m_parent_udi.c_str();
-        //qDebug() << interner.getReason().c_str();
-        return false;
-    }
+//    if(m_indexingJustParent || fis == FileInterner::FIDone ){
+//        if( (ipath.empty() )){
+//            m_continueOnIPath= false;
+//        }
+//        qDebug() << "done interning " << m_parent_udi.c_str();
+//        qDebug() << "error: " << interner.getReason().c_str();
+//        return false;
+//    }
 
     qDebug() << "newInternalPath: " << ipath.c_str();
     parentIt.setLastUpdatePath(newInternalPath);
@@ -402,8 +420,11 @@ bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& pare
     }
     if (doc.url.empty())
         {doc.url = FILE_PREFIX.toStdString() + parentIt.getPath().toStdString();}
-    if (doc.utf8fn.empty()){
-        doc.utf8fn = utf8fn;
+//    if (doc.utf8fn.empty()){
+//        doc.utf8fn = utf8fn;
+//    }
+    if (doc.origcharset.empty()){
+        doc.origcharset = charset;
     }
     // Add document to database. If there is an ipath, add it as a children
     // of the file document.
@@ -424,7 +445,7 @@ bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& pare
         CatItem parentSubstitute = parentIt;
         childIt.addParent(parentSubstitute);
         m_rcldb->addOrUpdate(udi, m_parent_udi, doc);
-        //qDebug() << "adding internal child: " << childIt.getPath();
+        qDebug() << "adding internal child: " << childIt.getPath();
         returnedItemIt = childIt;
     }
 

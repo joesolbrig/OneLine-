@@ -319,6 +319,13 @@ QList<ListItem> Cat_Store::getSubSourcesFromType(CatItem::ItemType type, int lim
         if(item.getSourceWeightTics() <= STANDARD_TICS){ continue;}
         if(item.isEmpty()){ continue;}
         if(!item.isASource()){ continue;}
+
+
+        //if(item.getChildCount()==0){ continue;}
+
+        int childs = child_index.get_range_count(
+                Tuple(item.getItemId()), Tuple(item.getItemId()+1), C_BY_PARENDID);
+        if(childs<3){ continue;}
         ListItem li(item);
         res.append(li);
     }
