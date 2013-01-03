@@ -10,6 +10,7 @@ INCLUDEPATH += ../../src/ \
     /usr/include/QtOAuth \
     /usr/include/QtOAuth/include \
     /usr/local/lib/include/qjson \
+    /usr/include/qjson/ \
     /usr/local/include/QtCrypto
 
 # qoauth requires the appropriate qca plugin TOO but loads this **at runtime**
@@ -53,7 +54,7 @@ SOURCES = ../../src/plugin_interface.cpp \
 unix:LIBS += /usr/local/lib/libqca.so
 unix:LIBS += /usr/lib/qt4/plugins/crypto/libqca-ossl.so
 unix:LIBS += /usr/lib/libqoauth.so
-unix:LIBS += /usr/local/lib/lib/libqjson.so.0
+#unix:LIBS += /usr/local/lib/lib/libqjson.so.0
 TARGET = streamplugin
 if(!debug_and_release|build_pass):CONFIG(debug, debug|release):DESTDIR = ../../debug/plugins
 if(!debug_and_release|build_pass):CONFIG(release, debug|release):DESTDIR = ../../release/plugins

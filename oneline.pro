@@ -15,17 +15,20 @@ INCLUDEPATH += /usr/include/glib-2.2/
 INCLUDEPATH += /usr/include/glib-2.0/
 INCLUDEPATH += /usr/include/libwnck-1.0/
 INCLUDEPATH += /usr/include/gnome-vfs-2.0/
+INCLUDEPATH += /usr/include/qjson/
 INCLUDEPATH += /usr/local/lib/include/qjson/
 CONFIG += link_pkgconfig
 PKGCONFIG += gtk+-2.0 \
     libgnomeui-2.0 \
     libwnck-1.0 \
-    libnotify
+    libnotify \
+    QJson
 
 # Uncomment/comment to enable/disable profiling
 #QMAKE_CXXFLAGS_DEBUG += -pg
 #QMAKE_LFLAGS_DEBUG += -pg
 VPATH += src/ \
+    /usr/local/lib/include/ \
     src/util/ \
     src/util/mmap_file/ \
     src/gui/ \
@@ -140,9 +143,10 @@ unix {
     if(!debug_and_release|build_pass):CONFIG(debug, debug|release):DESTDIR = debug/
     if(!debug_and_release|build_pass):CONFIG(release, debug|release):DESTDIR = release/
     LIBS += -lkyotocabinet \
-        /usr/local/lib/lib/libqjson.so \
         -lstdc++ \
-        -lpthread
+        -lpthread \
+#        /usr/local/lib/lib/libqjson.so \
+
     LIBS += -lX11 \
         -lXext \
         -lXrender
