@@ -11,6 +11,7 @@ INCLUDEPATH += /usr/include/gtk-2.2
 INCLUDEPATH += /usr/include/gtk-2.0
 INCLUDEPATH += /usr/include/gnome-desktop-2.0/
 INCLUDEPATH += /usr/include/glib-2.2/
+INCLUDEPATH += /usr/lib/i386-linux-gnu/glib-2.0/include/
 INCLUDEPATH += /usr/include/glib-2.0/
 INCLUDEPATH += /usr/include/libwnck-1.0/
 INCLUDEPATH += /usr/include/gio-unix-2.0/
