@@ -8,7 +8,10 @@ VPATH += ../../src/ \
 INCLUDEPATH += ../../src/ \
     ../unix
 INCLUDEPATH += /usr/include/gtk-2.2
+INCLUDEPATH += /usr/lib/i386-linux-gnu/gtk-2.0/
 INCLUDEPATH += /usr/include/gtk-2.0
+INCLUDEPATH += /usr/include/cairo
+INCLUDEPATH += /usr/include/pango-1.0/
 INCLUDEPATH += /usr/include/gnome-desktop-2.0/
 INCLUDEPATH += /usr/include/glib-2.2/
 INCLUDEPATH += /usr/lib/i386-linux-gnu/glib-2.0/include/

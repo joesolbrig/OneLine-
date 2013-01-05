@@ -24,8 +24,8 @@ PKGCONFIG += gtk+-2.0 \
     gnome-desktop-2.0
 LIBS += -lX11 \
     -lXext \
-    -lXrender \
-    /usr/lib/libmagic.so
+    -lXrender
+
 unix:DEFINES += SKINS_PATH=$(SKINS_PATH) \
     PLUGINS_PATH=/usr/lib/oneline/ \
     PLATFORMS_PATH=$(PLATFORMS_PATH)

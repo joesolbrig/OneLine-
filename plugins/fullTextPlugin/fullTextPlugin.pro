@@ -48,7 +48,7 @@ unix {
         -lz \
         $(BDYNAMIC) \
         -lz
-    POST_TARGETDEPS = ../../thirdparty/recoll/librcl.a
+    POST_TARGETDEPS = $${RECOL_DIR}/lib/librcl.a
 }
 win32 { 
     CONFIG -= embed_manifest_dll

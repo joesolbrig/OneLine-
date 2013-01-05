@@ -3,7 +3,10 @@ CONFIG += plugin \
     debug_and_release
 CONFIG += oauth
 CONFIG += link_pkgconfig
-PKGCONFIG += QJson
+PKGCONFIG += QJson \
+    libcrypto \
+    qca2
+
 VPATH += /usr/local/lib/
 INCLUDEPATH += ../../src/ \
     QtXmlPatterns \
@@ -11,7 +14,9 @@ INCLUDEPATH += ../../src/ \
     /usr/include/QtOAuth/include \
     /usr/local/lib/include/qjson \
     /usr/include/qjson/ \
-    /usr/local/include/QtCrypto
+    /usr/local/include/QtCrypto \
+    /usr/include/QtCrypto \
+    /usr/include/qt4/QtXmlPatterns/
 
 # qoauth requires the appropriate qca plugin TOO but loads this **at runtime**
 # from the qt directory
@@ -20,7 +25,7 @@ LIBS += -L/usr/lib \
     -L/usr/local/lib/lib \
     -lqca \
     -lqjson
-QT += xmlpatterns
+QT += xmlpatternslibcrypto
 QT += webkit
 QT += network
 QT += xml
@@ -51,7 +56,7 @@ SOURCES = ../../src/plugin_interface.cpp \
     iconfromurl_reader.cpp
 
 # win32:LIBS += /usr/local/lib/libqca.so
-unix:LIBS += /usr/local/lib/libqca.so
+#unix:LIBS += /usr/local/lib/libqca.so
 unix:LIBS += /usr/lib/qt4/plugins/crypto/libqca-ossl.so
 unix:LIBS += /usr/lib/libqoauth.so
 #unix:LIBS += /usr/local/lib/lib/libqjson.so.0
