@@ -1,0 +1,35 @@
+[global]
+x_rect_radius=3
+y_rect_radius=3
+
+[rect_border_window]
+1\inner_width=6;
+1\outter_width=2;
+1\radius=4;
+1\color="bitmap:DarkTexture.png"
+1\rect_roundness="2,2"
+size=1
+
+[gradiant_main]
+1\color="47, 79, 79,200"
+1\stop=0.2
+1\angle=30
+2\color="0, 206, 209,100"
+2\stop=0.3
+3\color="255, 215, 0,150"
+3\stop=1
+size=3
+
+[rect_main_edit]
+1\inner_width=6;
+1\outter_width=1;
+1\radius=4;
+1\color="gradiant_main"
+2\rect_roundness="2,2"
+2\inner_width=-1;
+2\outter_width=1;
+2\radius=4;
+2\color="bitmap:gray_clouds.png"
+2\rect_roundness="2,2"
+size=2
+
