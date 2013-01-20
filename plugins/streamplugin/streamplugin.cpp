@@ -152,7 +152,9 @@ QList<CatItem> StreamPlugin::launchFeedReaders(QList<AbstractReader*>& feedDownl
     QList<CatItem> res;
     for(int i=0;i < feedDownloaders.count();i++){
         if(feedDownloaders[i]){
-            res.append(feedDownloaders[i]->getResults());
+            QList<CatItem> partialResult = feedDownloaders[i]->getResults();
+            partialResult.detach();
+            res.append(partialResult);
             delete feedDownloaders[i];
             feedDownloaders[i] = 0;
         }

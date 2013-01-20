@@ -222,9 +222,9 @@ void TheApplicationTester::testMultiPartJson(){
     //Refresh since you'll edit the download file
     if(the_test_builder==0){
         CatBuilder::destroyCatalog();
-        the_test_builder = new CatBuilder(CatBuilder::REFRESH, *gDirs, true);
+        the_test_builder = new CatBuilder(UserEvent::CATALOGUE_LOAD, *gDirs);
     }
-    the_test_builder->catalogTask(CatBuilder::REFRESH);
+    the_test_builder->catalogTask();
 
     // http://www.rawstory.com/rs/2012/01/02/cantor-refuses-to-admit-reagan-raised-taxes/
     CatItem it("http://www.popsci.com/science/article/2012-01/new-material-can-pull-carbon-dioxide-right-out-air-unprecedented-rates");
@@ -277,16 +277,16 @@ void TheApplicationTester::testMultiPartJson(){
     QList<CatItem> toUpdate;
     toUpdate.append(it);
 
-    CatBuilder* builder = new CatBuilder(CatBuilder::EXTEND, *gDirs);
-    builder->m_userItems = toUpdate;
+    CatBuilder* builder = new CatBuilder(UserEvent::CATALOGUE_EXTEND, *gDirs);
+    *(builder->mp_userItems) = toUpdate;
     builder->m_userKeys = "";
     builder->m_keywords = QStringList();
     builder->m_extensionType = UserEvent::SELECTED;
     builder->m_extendDefaultSources = false;
 
-    builder->catalogTask(CatBuilder::EXTEND);
+    builder->catalogTask();
 
-    QList<CatItem> resL = builder->m_extension_results;
+    QList<CatItem> resL = *builder->mp_extension_results;
     Q_ASSERT(resL.count()>1);
 }
 
@@ -370,15 +370,16 @@ void TheApplicationTester::testInputListAsHash(){
 
 void TheApplicationTester::extensionCycler(QList<CatItem> inList, QList<CatItem>* outList){
     if(!the_test_builder)
-        { the_test_builder = new CatBuilder(CatBuilder::EXTEND, *gDirs); }
+        { the_test_builder = new CatBuilder(UserEvent::CATALOGUE_EXTEND, *gDirs); }
 
     int pluginCount = CatBuilder::getPluginHandle()->getPlugins().count();
     for(int i=0; i< pluginCount; i++){
         gTime_offset_for_testing += 1000*1000;
-        the_test_builder->m_userItems = inList;
+        *(the_test_builder->mp_userItems) = inList;
         the_test_builder->start(QThread::NormalPriority);
         the_test_builder->wait(100000000);
-        outList->append(the_test_builder->m_extension_results);
+        QList<CatItem> list = *(the_test_builder->mp_extension_results);
+        outList->append(list);
     }
 
 }
@@ -733,9 +734,9 @@ void TheApplicationTester::testXslPlugin2(){
 
     if(!the_test_builder){
         CatBuilder::destroyCatalog();
-        the_test_builder = new CatBuilder(CatBuilder::LOAD, *gDirs);
+        the_test_builder = new CatBuilder(UserEvent::CATALOGUE_LOAD, *gDirs);
     }
-    the_test_builder->catalogTask(CatBuilder::LOAD);
+    the_test_builder->catalogTask();
 
 
     CatItem extendIt1 = the_test_builder->getItem(XMEL_BOOKMARKS_PATH1);
@@ -2093,8 +2094,8 @@ void TheApplicationTester::testFileFind(){
     li.append(i3);
     li.append(i4);
     if(!the_test_builder)
-        { the_test_builder = new CatBuilder(CatBuilder::REFRESH, *gDirs); }
-    the_test_builder->m_userItems = li;
+        { the_test_builder = new CatBuilder(UserEvent::CATALOGUE_LOAD, *gDirs); }
+    *(the_test_builder->mp_userItems) = li;
     QList<CatItem> ol;
     the_test_builder->doExtension(&ol);
 
@@ -2394,9 +2395,9 @@ void TheApplicationTester::verifyChildItem(QString keys, QString result){
 void TheApplicationTester::testFilePlugin(){
     if(the_test_builder==0){
         CatBuilder::destroyCatalog();
-        the_test_builder = new CatBuilder(CatBuilder::REFRESH, *gDirs, true);
+        the_test_builder = new CatBuilder(UserEvent::CATALOGUE_LOAD, *gDirs);
     }
-    the_test_builder->catalogTask(CatBuilder::REFRESH);
+    the_test_builder->catalogTask();
     // Duplicates the mode argument above 'cause we're calling a otherwise-private function
     // to avoid starting a new thread
     bool s = verifyCatHasItemName(QString("testFilePluginFile.txt"));
@@ -2847,9 +2848,9 @@ void TheApplicationTester::testGui(){
 
     if(!the_test_builder){
         CatBuilder::destroyCatalog();
-        the_test_builder = new CatBuilder(CatBuilder::REFRESH, *gDirs);
+        the_test_builder = new CatBuilder(UserEvent::CATALOGUE_LOAD, *gDirs);
     }
-    the_test_builder->catalogTask(CatBuilder::REFRESH);
+    the_test_builder->catalogTask();
     Q_ASSERT(CatBuilder::getCatalog());
     //Mostly so as to profile without loading test plugin
     loopForProfiling();

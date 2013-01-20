@@ -187,7 +187,6 @@ void MainUserWindow::startTasks(){
     InputList il;
     CatBuilder::getItemsFromQuery(il, outItems, MAX_ITEMS);
     gMarginWidget->gSetAppPos();
-
     activateWindow();
     ::gMarginWidget->raise();
 
@@ -316,17 +315,17 @@ void MainUserWindow::loadCatalog(bool refreshCatalog){
 
     if(refreshCatalog){
         refreshExtendCatalog(true);
-        if(m_builder){
-            m_builder->wait();
-            delete m_builder;
-        }
-        m_builder = 0;
-        refreshExtendCatalog(true, true);
-        if(m_builder){
-            m_builder->wait();
-            delete m_builder;
-        }
-        m_builder = 0;
+//        if(m_builder){
+//            m_builder->wait();
+//            //delete m_builder;
+//        }
+//        m_builder = 0;
+//        refreshExtendCatalog(true, true);
+//        if(m_builder){
+//            m_builder->wait();
+//            //delete m_builder;
+//        }
+//        m_builder = 0;
     } else {
         CatBuilder::getOrCreateCatalog(*gDirs);
     }
@@ -352,21 +351,21 @@ bool MainUserWindow::refreshExtendCatalog(bool forceLoad, bool forceExtend){
     time_t now = appGlobalTime();
     if(m_inputList.slotCount()>1){ return false;}
     time_t last_update = gSettings->value(LAST_REFRESH_KEY, 0).toInt();
-    CatBuilder::CatalogRefreshMode m;
+    UserEvent::LoadType m;
     if(forceExtend){
-        m = CatBuilder::EXTEND;
+        m = UserEvent::CATALOGUE_EXTEND;
     } else if(forceLoad){
-        m = CatBuilder::LOAD;
+        m = UserEvent::CATALOGUE_LOAD;
 //    } else  if(last_update ==0 || (now - last_update > 60*60*24)){
 //        m = CatBuilder::REFRESH;
     } else  if((now - last_update > 15*60)){
-        m = CatBuilder::SAVE;
+        m = UserEvent::CATALOGUE_SAVE;
     } else {
         if(m_lastExtendText.length()>0 && m_lastExtendText != m_inputList.getUserKeys()){
             m_lastExtendText = m_inputList.getUserKeys();
             return false;
         }
-        m = CatBuilder::EXTEND;
+        m = UserEvent::CATALOGUE_EXTEND;
     }
 
     //CatalogRefreshMode m = (CatalogRefreshMode)gSettings->value(IS_SAVED_KEY, (int)CatalogRefreshMode::REFRESH);
@@ -374,14 +373,37 @@ bool MainUserWindow::refreshExtendCatalog(bool forceLoad, bool forceExtend){
     if(m_searcher) { return false;}
     m_builder = new CatBuilder(m, *gDirs);
     qDebug() << "Begin refreshExtend " << (int)m;
-    connect(m_builder, SIGNAL(catalogFinished()), this, SLOT(catalogBuilt()));
-    m_builder->m_userItems = m_inputList.getListItems();
-    m_builder->m_userKeys = m_inputList.getUserKeys();
-    m_builder->m_keywords = m_inputList.getKeyWords();
-    m_builder->m_extensionType = UserEvent::STANDARD_UPDATE;
+    connect(m_builder, SIGNAL(catalogFinished(CatBuilder*)), this, SLOT(catalogBuilt(CatBuilder*)));
+    connect(m_builder, SIGNAL(finished()),
+            this, SLOT(deleteAndZeroCatBuilder()));
+//    m_builder->m_userItems = m_inputList.getListItems();
+//    m_builder->m_userKeys = m_inputList.getUserKeys();
+//    m_builder->m_keywords = m_inputList.getKeyWords();
 
     m_builder->start(QThread::IdlePriority);
     return true;
+
+}
+
+void MainUserWindow::fillBuilderInfo(CatBuilder* builder){
+    QString userKeys = m_inputList.getUserKeys();
+    userKeys.detach();
+    QStringList keywords = m_inputList.getKeyWords();
+    keywords.detach();
+
+    QList<CatItem> userItems;
+    if(builder->m_extensionType==UserEvent::STANDARD_UPDATE){
+        userItems = m_inputList.getListItems();
+    } else if(builder->m_extensionType==UserEvent::BACKGROUND_SEARCH){
+        userItems.append(m_inputList.getContextType(FILE_DIRECTORY_PLUGIN_STR));
+    } //else nothing
+    userItems.detach();
+    for(int i=0; i<userItems.count();i++){
+        builder->mp_userItems->append(userItems[i]);
+    }
+    builder->m_userKeys = userKeys;
+    builder->m_keywords = keywords;
+    //BACKGROUND_SEARCH
 
 }
 
@@ -408,27 +430,59 @@ void MainUserWindow::extendSelectedItem(){
 
     //if(toUpdate.isEmpty()){return;}
 
-    m_builder = new CatBuilder(CatBuilder::EXTEND, *gDirs);
+    Q_ASSERT(m_builder==0);
+    m_builder = new CatBuilder(UserEvent::CATALOGUE_EXTEND, *gDirs);
     connect(m_builder, SIGNAL(catalogFinished()), this, SLOT(catalogBuilt()));
-    m_builder->m_userItems = toUpdate;
-    m_builder->m_userKeys = m_inputList.getUserKeys();
-    m_builder->m_keywords = m_inputList.getKeyWords();
+    connect(m_builder, SIGNAL(finished()),
+            this, SLOT(deleteAndZeroCatBuilder()));
+//    m_builder->m_userItems = toUpdate;
+//    m_builder->m_userKeys = m_inputList.getUserKeys();
+//    m_builder->m_keywords = m_inputList.getKeyWords();
     m_builder->m_extensionType = UserEvent::SELECTED;
     m_builder->m_extendDefaultSources = false;
     m_builder->start(QThread::IdlePriority);
 
 }
 
-void MainUserWindow::catalogBuilt() {
+bool MainUserWindow::backgroundSearch(){
+
+    QStringList keyWords = m_inputList.getKeyWords();
+    if(m_builder) { return false;}
+    if(m_searcher) { return false;}
+    if(m_inputList.fieldInputType()==InputList::USER_TEXT){ return true;}
+
+    if(keyWords.count() > MAX_WORDS_FOR_SEARCH ){ return false;}
+    if(keyWords.count() == m_backgroundSearchKeywordCount){ return false;}
+    m_backgroundSearchKeywordCount = keyWords.count();
+
+    if(keyWords.count() >0 && (m_backgroundSearchKeys!=m_inputList.getUserKeys())
+            && m_inputList.slotCount()==1){
+        m_backgroundSearchKeys = m_inputList.getUserKeys();
+        Q_ASSERT(!m_searcher);
+        m_searcher = new CatBuilder(UserEvent::BACKGROUND_SEARCH, *gDirs);
+//        m_searcher->m_userKeys = m_inputList.getUserKeys();
+//        m_searcher->m_keywords = keyWords;
+//        m_searcher->m_userItems.append(m_inputList.getContextType(FILE_DIRECTORY_PLUGIN_STR));
+        m_searcher->start(QThread::IdlePriority);
+        connect(m_searcher, SIGNAL(backgroundSearchDone(CatBuilder*,QString )),
+                this, SLOT(backgroundSearchDone(CatBuilder*, QString )));
+        connect(m_searcher, SIGNAL(finished()),
+                this, SLOT(deleteAndZeroCatSearch()));
+    }
+    return true;
+
+}
+
+void MainUserWindow::catalogBuilt(CatBuilder* builder) {
 
     time_t now = QDateTime::currentDateTime().toTime_t();
     gSettings->setValue(LAST_REFRESH_KEY, (int)now);
-    if(!m_builder) { return;}
+    if(builder==0) { return;}
 
-    if(m_builder->m_extensionType == UserEvent::SELECTED){
+    if(builder->m_extensionType == UserEvent::SELECTED){
         CatItem& currentRef = m_inputList.currentItemRef();
-        for(int i=0; i< m_builder->m_extension_results.count() && !currentRef.isEmpty(); i++){
-            CatItem it = m_builder->m_extension_results[i];
+        for(int i=0; i< builder->mp_extension_results->count() && !currentRef.isEmpty(); i++){
+            CatItem it = builder->mp_extension_results->value(i);
             if(currentRef ==it){
                 if(st_ShowingSidePreview and !(m_itemChoiceList->showingSidePreview())){
                     st_ShowingSidePreview = false;
@@ -438,33 +492,80 @@ void MainUserWindow::catalogBuilt() {
             }
         }
     }
-
-    m_builder->wait();
-
     if(m_inputList.slotCount()==1){
         if(m_itemChoiceList->getItemCount()==0){
             st_TakeItemFromList=false;
             searchOnInput();
         }
-        appendListItems(m_builder->m_timelyItems);
-
+        if(builder->mp_timelyItems && builder->mp_timelyItems->count()>0){
+            QList<CatItem> list = *(builder->mp_timelyItems);
+            appendListItems(list);
+        }
         //Building the catalogue may add to current item
         CatItem& curItem = m_inputList.currentItemRef();
         if(!curItem.isEmpty()){
             CatBuilder::updateItem(curItem,2,UserEvent::SELECTED);
         }
-
-        //Update files and list
-        //fillList();
         showitemList();
         m_itemChoiceList->update();
     }
+    //m_builder->clearLists();
+    //m_builder->deleteLater();
 
-    delete m_builder;
-    m_builder = 0;
-
+//    if(m_builder->wait(20*MILLISECS_IN_SECOND)){
+ //    } else {
+//        Q_ASSERT(false);
+//        m_builder->terminate();
+//        qDebug() << "terminating thread - desperation time";
+//    }
+    builder->wait();
+    builder->deleteLater();
+    m_builder=0;
 }
 
+
+void MainUserWindow::backgroundSearchDone(CatBuilder* searcher, QString searchString)
+{
+    //skip if this is coming after keys have changed..
+    qDebug() << "backgroundSearchDone called with:" << searchString;
+    if((searchString ==m_inputList.getUserKeys()
+        || m_inputList.getListItems().count()==0)&&
+            (m_inputList.fieldInputType()!=InputList::USER_TEXT) && m_inputList.slotCount()==1){
+        Q_ASSERT(m_searcher);
+        m_searcher->wait();
+        //m_inputList.filterItems();
+        QList<CatItem> list = *(m_searcher->mp_extension_results);
+        appendListItems(list);
+
+        st_SearchResultsChanged = true;
+        st_ListFilled = false;
+        m_itemOrigin = FROM_SEARCH;
+        updateDisplay();
+        m_backgroundSearchKeys = searchString;
+    }
+     searcher->clearLists();
+//    m_searcher->wait();
+     searcher->deleteLater();
+     m_searcher = 0;
+}
+
+void MainUserWindow::deleteAndZeroCatBuilder(){
+    qDebug() << "deleteAndZeroCatBuilder";
+//    if(m_builder){
+//        qDebug() << "deleting";
+//        delete m_builder;
+//        m_builder = 0;
+//    }
+}
+
+void MainUserWindow::deleteAndZeroCatSearch(){
+    qDebug() << "deleteAndZeroCatSearch";
+//    if(m_searcher){
+//        qDebug() << "deleting";
+//        m_searcher->deleteLater();;
+//        m_searcher = 0;
+//    }
+}
 void MainUserWindow::setItemsSeen(){
     time_t now = appGlobalTime() ;
     time_t timeSinceLastChange = now - m_lastTimeItemsSeen;
@@ -486,30 +587,6 @@ void MainUserWindow::setItemsSeen(){
     m_lastTimeItemsSeen = now;
 }
 
-bool MainUserWindow::backgroundSearch(){
-    QStringList keyWords = m_inputList.getKeyWords();
-    if(m_builder) { return false;}
-    if(m_searcher) { return false;}
-    if(m_inputList.fieldInputType()==InputList::USER_TEXT){ return true;}
-
-    if(keyWords.count() > MAX_WORDS_FOR_SEARCH ){ return false;}
-    if(keyWords.count() == m_backgroundSearchKeywordCount){ return false;}
-    m_backgroundSearchKeywordCount = keyWords.count();
-
-    if(keyWords.count() >0 && (m_backgroundSearchKeys!=m_inputList.getUserKeys())
-            && m_inputList.slotCount()==1){
-        m_backgroundSearchKeys = m_inputList.getUserKeys();
-        if(m_searcher){ delete m_searcher; m_searcher=0;}
-        m_searcher = new CatBuilder(CatBuilder::SEARCH, *gDirs);
-        m_searcher->m_userKeys = m_inputList.getUserKeys();
-        m_searcher->m_keywords = keyWords;
-        m_searcher->m_userItems.append(m_inputList.getContextType(FILE_DIRECTORY_PLUGIN_STR));
-        m_searcher->start(QThread::IdlePriority);
-        connect(m_searcher, SIGNAL(backgroundSearchDone(QString )),
-                this, SLOT(backgroundSearchDone(QString )));
-    }
-    return true;
-}
 
 bool MainUserWindow::foregroundSearch(){
 
@@ -716,28 +793,7 @@ void MainUserWindow::itemsUpdatedFromBackground(QList<CatItem> its){
     }
 }
 
-void MainUserWindow::backgroundSearchDone(QString searchString)
-{
-    //skip if this is coming after keys have changed..
-    qDebug() << "backgroundSearchDone called with:" << searchString;
-    if((searchString ==m_inputList.getUserKeys()
-        || m_inputList.getListItems().count()==0)&&
-            (m_inputList.fieldInputType()!=InputList::USER_TEXT) && m_inputList.slotCount()==1){
-        Q_ASSERT(m_searcher);
-        m_searcher->wait();
-        //m_inputList.filterItems();
-        appendListItems(m_searcher->m_extension_results);
 
-        st_SearchResultsChanged = true;
-        st_ListFilled = false;
-        m_itemOrigin = FROM_SEARCH;
-        updateDisplay();
-        m_backgroundSearchKeys = searchString;
-    }
-    m_searcher->wait();
-    delete m_searcher;
-    m_searcher = 0;
-}
 
 //Getting and displaying items....
 void MainUserWindow::searchOnInput(int* beginPos) {

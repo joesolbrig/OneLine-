@@ -80,6 +80,7 @@ public:
     void getID(uint*);
     void getName(QString*);
     void search(SearchInfo* searchInfo, QList<CatItem>* results);
+    void processSearch();
     void getCatalog(QList<CatItem>* items);
     //bool modifyItem(CatItem* id);
     void itemsLoaded(SearchInfo* inf, QList<CatItem>* res);

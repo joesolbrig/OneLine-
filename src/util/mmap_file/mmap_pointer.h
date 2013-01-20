@@ -214,7 +214,12 @@ public:
 
         QFile file(fileName());
         bool reset;
-        file.open(QIODevice::ReadWrite);
+        bool openRes=true;
+        openRes = file.open(QIODevice::ReadWrite);
+        if(!openRes){
+            qDebug() << file.errorString();
+            Q_ASSERT(false);
+        }
         qint64 readSize = readFileSize(&file);
         m_memLength = m_pageCount*pageSize;
         if(override || readSize < m_pageCount){
@@ -302,16 +307,19 @@ public:
             Q_ASSERT(false);
         }
         char data[sizeof(qint64)+4];
-        if(!file->read(data, sizeof(qint64))){
+        int readRes=-1;
+        readRes = file->read(data, sizeof(qint64));
+        if(readRes <=0){
             return 0;
         }
-        long long res;
+        long long res=0;
         sscanf(data,"%lld", &res);
 //        bool ok=false;
 //        data[sizeof(qint64)]=0;
 //        qint64 requestedSize = QString(data).toLongLong(&ok);
 //        if(!ok){ return 0;}
 //        return requestedSize;
+        if(res<=0){ return 0;}
         return res;
 
     }

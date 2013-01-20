@@ -48,8 +48,8 @@ Recoll_Interface ri;
 //    return rclconfig;
 //}
 
-void FullTextPlugin::init()
-{
+void FullTextPlugin::init() {
+
     m_recoll_interface = &ri;
     QString path = (*settings)->value("FullTextPlugin/recol_db_dir", QDir::homePath() + "/.recoll").toString();
     QString error;
@@ -87,9 +87,7 @@ void FullTextPlugin::getName(QString* str)
 void FullTextPlugin::getLabels(InputList*  ) { }
 
 void FullTextPlugin::extendCatalog(SearchInfo* info, QList<CatItem>* r){
-    //QMutexLocker locker(&m_fullTextMutex);
-    Q_ASSERT(gMutexPtr);
-    QMutexLocker locker(&m_fullTextMutex); //this->gMutexPtr
+    QMutexLocker locker(&m_fullTextMutex);
     if(info->m_subthread){
         recoll_threadinit();
     }
@@ -173,10 +171,37 @@ void FullTextPlugin::indexAFileItem(CatItem& id, QFileInfo fi, QList<CatItem>* r
 
 void FullTextPlugin::itemsLoaded(SearchInfo* inf, QList<CatItem>* res){
     QList<CatItem>* items = inf->itemListPtr;
-    Q_ASSERT(gMutexPtr);
-    QMutexLocker locker(&m_fullTextMutex);
+    if(!m_fullTextMutex.tryLock()){
+        return;
+    }
+    //The following woulod allow a small chance we're blocking
+    //QMutexLocker locker(&m_fullTextMutex);
     recoll_threadinit();
+
+    sigset_t sset;
+    sigset_t old_sset;
+    sigemptyset(&sset);
+    sigemptyset(&old_sset);
+    sigaddset(&sset, SIGPIPE);
+    pthread_sigmask(SIG_BLOCK, &sset, &old_sset);
+
+    //DIAGNOSTICS
+    qDebug() << "SIGPIPE #:" << (int)SIGPIPE;
+    /* Get the modified signal of the thread */
+    pthread_sigmask( SIG_BLOCK, NULL, &sset);
+    int sig_num;
+    for ( sig_num = 0; sig_num < SIGPROF; ++ sig_num ){
+        if ( 0 != sigismember( & old_sset, sig_num ) ) {
+            qDebug() << "Old set blocking signal:" << sig_num;
+        }  else { qDebug() << "Old set not blocking signal:" << sig_num; }
+
+        if ( 0 != sigismember( & sset, sig_num ) ){
+            qDebug() << "NEW set blocking signal:" << sig_num;
+        }  else { qDebug() << "NEW set not blocking signal:" << sig_num; }
+    }
+
     if(!m_recoll_interface->openDB(true)){
+        m_fullTextMutex.unlock();
         return;
     }
     CatItem me = getPluginRep();
@@ -236,7 +261,20 @@ void FullTextPlugin::itemsLoaded(SearchInfo* inf, QList<CatItem>* res){
         }
         //(*items)[i] = it;
     }
+
+    /* Get post-run of the thread */
+    pthread_sigmask( SIG_BLOCK, NULL, &sset);
+    for ( sig_num = 0; sig_num < SIGUSR2; ++ sig_num ){
+      if ( 0 != sigismember( & old_sset, sig_num ) ) {
+         qDebug() << "Old set blocking signal:" << sig_num;
+      }  else { qDebug() << "Old set not blocking signal:" << sig_num; }
+
+      if ( 0 != sigismember( & sset, sig_num ) ){
+          qDebug() << "Old set blocking signal:" << sig_num;
+       }  else { qDebug() << "Old set not blocking signal:" << sig_num; }
+    }
     m_recoll_interface->closeDB();
+    m_fullTextMutex.unlock();
 }
 
 //Less efficient 'cause
@@ -271,9 +309,18 @@ QString FullTextPlugin::cachePath(){
 
 
 }
-void FullTextPlugin::search(SearchInfo* search_info, QList<CatItem>* results)
-{
-    Q_ASSERT(gMutexPtr);
+
+//Call in mainThread to just start a process.
+void FullTextPlugin::processSearch(){
+//    vector<string> args;
+//    args.push_back("-c");
+//    args.push_back(theconfig->getConfDir());
+//    m_idxproc = new ExecCmd;
+//    m_idxproc->startExec("recollindex", args, false, false);
+}
+
+void FullTextPlugin::search(SearchInfo* search_info, QList<CatItem>* results) {
+
     QMutexLocker locker(&m_fullTextMutex);
     qDebug() << "FullTextPlugin::search: " ;
     if(search_info->m_subthread){

@@ -70,32 +70,6 @@ void FilecatalogPlugin::getCatalog(QList<CatItem>* items){
         items->append(menuItems);
     }
     bool addRecentItem = set->value(ADD_RECENT_ITEMS_SOURCE_KEY, true).toBool();
-//    if(addRecentItem){
-//        CatItem recentItemSource1(XMEL_BOOKMARKS_PATH1);
-//        QString filterFilePath = PUSER_APP_DIR + XLS_SUBDIR + BOOKMARK_XSLT;
-//
-//        recentItemSource1.setCustomPluginInfo(STREAM_FILTER_FILESOURCE,filterFilePath);
-//        recentItemSource1.setLabel(STREAM_SOURCE_PATH);
-//        recentItemSource1.setLabel(FILE_CATALOG_PLUGIN_STR);
-//        recentItemSource1.setRequestUrl(QDir::homePath() + XBEL_HISTORY_NAME1);
-//        recentItemSource1.setExternalWeight(MAX_MAX_EXTERNAL_WEIGHT,me);
-//        recentItemSource1.setSourceWeight(MAX_MAX_EXTERNAL_WEIGHT,me);
-//        recentItemSource1.setTagLevel(CatItem::INTERNAL_SOURCE);
-//        recentItemSource1.setIsUpdatableSource(true);
-//        items->append(recentItemSource1);
-//
-//        CatItem recentItemSource2(XMEL_BOOKMARKS_PATH2);
-//        QString oldFilterFilePath = PUSER_APP_DIR + XLS_SUBDIR + OLD_STYLE_BOOKMARK_XSLT;
-//        recentItemSource2.setCustomPluginInfo(STREAM_FILTER_FILESOURCE,oldFilterFilePath);
-//        recentItemSource2.setLabel(STREAM_SOURCE_PATH);
-//        recentItemSource2.setLabel(FILE_CATALOG_PLUGIN_STR);
-//        recentItemSource2.setRequestUrl(QDir::homePath() + XBEL_HISTORY_NAME2);
-//        recentItemSource2.setExternalWeight(MAX_EXTERNAL_WEIGHT,me);
-//        recentItemSource2.setSourceWeight(MAX_EXTERNAL_WEIGHT, me);
-//        recentItemSource2.setTagLevel(CatItem::INTERNAL_SOURCE);
-//        recentItemSource2.setIsUpdatableSource(true);
-//        items->append(recentItemSource2);
-//    }
     set->setValue(GET_MENU_ITEMS_KEY, getMenuItems);
     set->setValue(ADD_RECENT_ITEMS_SOURCE_KEY, addRecentItem);
     set->endGroup();

@@ -308,6 +308,8 @@ public:
 
     bool shouldProcessControlKey(QKeyEvent* key);
 
+    void fillBuilderInfo(CatBuilder* builder);
+
 
 public slots:
     void previewWindowGainedFocus();
@@ -316,6 +318,8 @@ public slots:
     void choiceListKeyEvent(QKeyEvent*);
     void rebuildCatalog();
     void extendCatalog();
+    void deleteAndZeroCatBuilder();
+    void deleteAndZeroCatSearch();
 
     void keyPressEvent(QKeyEvent*);
 
@@ -334,8 +338,8 @@ public slots:
     void mousePressEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
     void mouseReleaseEvent(QMouseEvent *e);
-    void catalogBuilt();
-    void backgroundSearchDone(QString searchString);
+    void catalogBuilt(CatBuilder*);
+    void backgroundSearchDone(CatBuilder* searcher, QString searchString);
 
     void rectangleResizing();
     void miniIconClicked(ListItem, bool);

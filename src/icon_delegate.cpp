@@ -202,8 +202,13 @@ IconDelegate::IconDelegate(QObject *parent, CatItem parItem): QAbstractItemDeleg
     m_glow_arrow_icon = makeGlow(m_arrow_icon);
     m_plus_icon = QIcon::fromTheme(PLUS_ICON_NAME);
     m_pin_icon = QIcon::fromTheme(PIN_ICON_NAME);
-    m_pinned_already_icon = grayIfy(m_pin_icon,-90);
-    m_pin_icon= grayIfy(m_pin_icon);
+    if(m_pin_icon.isNull()){
+        m_pinned_already_icon = QIcon::fromTheme("emblem-shared");
+        m_pin_icon = QIcon::fromTheme("emblem-readonly");
+    } else {
+        m_pinned_already_icon = grayIfy(m_pin_icon,-90);
+        m_pin_icon= grayIfy(m_pin_icon);
+    }
     m_depricate_icon = QIcon::fromTheme(DEPRICATE_ICON_NAME);
 }
 

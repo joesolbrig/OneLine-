@@ -30,21 +30,26 @@ public:
 private:
 
     static PluginHandler* plugins_ptr;
-    static CatalogRefreshMode refreshMode;
     static Catalog* cat;
     int runningSubthreads;
 
 public:
-    QList<CatItem> m_userItems;
+    QList<CatItem>* mp_userItems;
     QString m_userKeys;
     QStringList m_keywords;
-    QList<CatItem> m_extension_results;
-    QList<CatItem> m_timelyItems;
+    QList<CatItem>* mp_extension_results;
+    QList<CatItem>* mp_timelyItems;
     UserEvent::LoadType m_extensionType;
     bool m_extendDefaultSources;
 
-    CatBuilder(CatalogRefreshMode mode, QHash<QString, QList<QString> > dirs, bool forceDropCatalog=false);
-    void clear(CatalogRefreshMode mode, QHash<QString, QList<QString> > dirs, bool forceDropCatalog=false);
+    CatBuilder(UserEvent::LoadType mode, QHash<QString, QList<QString> > dirs, bool forThread=true);
+    ~CatBuilder();
+    //Everything from the main thread
+    void clearLists(){
+        mp_userItems->clear();
+        m_keywords.clear();
+    }
+    void clear(QHash<QString, QList<QString> > dirs, bool forceDropCatalog=false);
     static Catalog* createCatalog(QHash<QString, QList<QString> > dirs);
     static Catalog* getOrCreateCatalog(QHash<QString, QList<QString> > dirs);
     static Catalog* getCatalog();
@@ -85,20 +90,20 @@ public:
     static CatItem getItemById(int itemId);
     static void storeCatalog();
     static QList<CatItem> getMainApps(){ return cat->getMainApps();}
-    void catalogTask(CatalogRefreshMode );
     void run();
-    //Subthread method(s)
+
     void doExtension(QList<CatItem>* outList, QList<CatItem>* inList=0);
-    void subThreadEndRoutine();
+
 
 public slots:
+    void catalogTask();
     static QList<CatItem> indexItemList(QList<CatItem>* items);
 
 signals:
-    void catalogFinished();
+    void catalogFinished(CatBuilder*);
     void catalogExtended();
     void catalogIncrement(float);
-    void backgroundSearchDone(QString );
+    void backgroundSearchDone(CatBuilder*,QString);
 };
 
 

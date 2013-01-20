@@ -1549,7 +1549,7 @@ CatItem Cat_Store::addItemProtected(CatItem itemToAdd, int recur){
         && (appGlobalTime() - itemToAdd.getSourceUpdateTime()) < UPDATE_PERIOD*3){
         m_toUpdate.removeAll(itemToAdd);
     }
-    Q_ASSERT(!item_index.getValue(itemToAdd.getPath()).isEmpty());
+    //Q_ASSERT(!item_index.getValue(itemToAdd.getPath()).isEmpty());
     itemToAdd.setMatchType(matchType);
     itemToAdd.setMatchIndex(matchIndex);;
     return itemToAdd;

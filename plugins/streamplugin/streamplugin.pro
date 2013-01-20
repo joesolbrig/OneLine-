@@ -29,6 +29,8 @@ QT += xmlpatternslibcrypto
 QT += webkit
 QT += network
 QT += xml
+QT += xmlpatterns
+
 FORMS = 
 HEADERS = streamplugin.h \
     feed_reader.h \

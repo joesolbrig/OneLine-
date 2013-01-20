@@ -270,13 +270,24 @@ class UserEvent {
         enum LoadType{
             IGNORE=0,
             JUST_FOUND=1,
-            STANDARD_UPDATE=2,
-            BECOMING_VISIBLE=3,
-            SEEN=4,
-            SELECTED=5,
-            PREVIEW=6,
-            CHOSEN=7
+            BECOMING_VISIBLE=2,
+            SEEN=3,
+            SELECTED=4,
+            PREVIEW=5,
+            CHOSEN=6,
+            STANDARD_UPDATE=7,
+            BACKGROUND_SEARCH=8,
+            CATALOGUE_EXTEND=9,
+            CATALOGUE_LOAD=10,
+            CATALOGUE_SAVE=11
         };
+//        enum CatalogRefreshMode {
+//            LOAD,
+//            REFRESH,
+//            EXTEND,
+//            SEARCH,
+//            SAVE
+//        };
 
         UserEvent(EventType evt=CHOICE){
             event_type = evt;

@@ -113,8 +113,18 @@ QString getBaseDir(QApplication * app){
     return DEFAULT_APP_DIR;
 }
 
-
 int main(int argc, char *argv[]) {
+
+signal(SIGPIPE, SIG_IGN);
+
+
+//I want to do something like this in "user land"
+//#include <linux/sched.h>
+//struct task_struct * t;
+//for (t = next_thread(current); t != current; t = next_thread(t)) {
+//    // do the stuff
+//}
+
 
 //This is done because of the order in which QT and Gnome need to be loaded.
 #ifdef Q_WS_WIN
@@ -172,7 +182,7 @@ int main(int argc, char *argv[]) {
     app->quit();
     qDebug() << "quiting";
 #else
-    //Don't do times threads and timers unless not testing...
+    //Don't do timer threads and timers unless not testing...
     gMainWidget->startTasks();
     gMainWidget->show();
     app->exec();

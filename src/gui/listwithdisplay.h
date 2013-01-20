@@ -61,7 +61,6 @@ class ListWithDisplay : public QWidget {
     ListWithFrame * m_newFrame;
     QPropertyAnimation * m_upDownAnimation;
 
-
     //Size stuff....
     bool m_isTopOriented;
     QPoint m_base;

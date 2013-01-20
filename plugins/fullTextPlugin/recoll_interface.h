@@ -74,10 +74,13 @@ static void sigcleanup(int)
 }
 
 
-class Recoll_Interface{
+class Recoll_Interface {
     QSet<QString> m_visitedPath;
     public:
-        Recoll_Interface(QString dbPathName=""){ //:m_fileProcessor(0)
+        Recoll_Interface(QString dbPathName=""){
+            m_rclconfig=0;
+            m_rcldb=0;
+            //:m_fileProcessor(0)
             DebugLog::getdbl()->setloglevel(DEBDEB3);
             DebugLog::setfilename("/home/hansj/recol_test_err.txt");
             if(!dbPathName.isEmpty()){
@@ -133,9 +136,13 @@ class Recoll_Interface{
         bool createDB(QString& dbPathName, QString& error){
             string reason;
             string a_config = dbPathName.toStdString();
-            if(!m_rclconfig){
-                m_rclconfig = recollinit(recollCleanup, sigcleanup, reason, &a_config);
-                rclconfig = m_rclconfig;
+            if(m_rclconfig==0){
+                if(rclconfig!=0){
+                    m_rclconfig = rclconfig;
+                } else {
+                    m_rclconfig = recollinit(recollCleanup, sigcleanup, reason, &a_config);
+                    rclconfig = m_rclconfig;
+                }
             }
             if (!m_rclconfig || !m_rclconfig->ok()) {
                 error = reason.c_str();

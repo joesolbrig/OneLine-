@@ -110,15 +110,15 @@ int Recoll_Interface::getMatches(QString queryStr,  QString searchDir, QList<Rec
 
     Rcl::SClType qt;
     if(exclusive){
-        qt = SCLT_OR;
+        qt = SCLT_AND;
     } else {
         qt = SCLT_OR;
     }
 
     string stemlang("english");
     //sdata->setStemlang(stemlang);
-    Rcl::SearchData * sdata = new Rcl::SearchData(Rcl::SCLT_OR, stemlang);
-    Rcl::SearchDataClause* clp = new Rcl::SearchDataClauseSimple(Rcl::SCLT_OR,u8);
+    Rcl::SearchData * sdata = new Rcl::SearchData(qt, stemlang);
+    Rcl::SearchDataClause* clp = new Rcl::SearchDataClauseSimple(qt,u8);
     sdata->addClause(clp);
     if(!searchDir.isEmpty())
         { sdata->addDirSpec(searchDir.toStdString()); }
@@ -341,6 +341,19 @@ bool Recoll_Interface::getDocForPreview(CatItem& it){
 bool Recoll_Interface::processInternalFile(FileInterner& interner, CatItem& parentIt, CatItem& returnedItemIt,
         string charset,
         string& ipath){
+    sigset_t sset;
+    sigset_t old_sset;
+    sigemptyset(&sset);
+    sigemptyset(&old_sset);
+    sigaddset(&sset, SIGPIPE);
+    pthread_sigmask(SIG_BLOCK, &sset, &old_sset);
+    if ( 0 != sigismember( & old_sset, SIGPIPE) ) {
+        qDebug() << "Old set blocking signal:SIGPIPE";
+    }
+    if ( 0 != sigismember( & sset, SIGPIPE) ){
+        qDebug() << "NEW set blocking signal:SIGPIPE";
+    }
+
     qDebug() << "interning" << parentIt.getPath()  << " : " << returnedItemIt.getPath();
     
 

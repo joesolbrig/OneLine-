@@ -11,21 +11,117 @@
 #include "util/mmap_file/btree_impl.h"
 
 Catalog* CatBuilder::cat=0;
-CatBuilder::CatalogRefreshMode CatBuilder::refreshMode = REFRESH;
 
-CatBuilder::CatBuilder(CatalogRefreshMode mode, QHash<QString, QList<QString> > dirs, bool forceDropCatalog)
+CatBuilder::CatBuilder(UserEvent::LoadType mode, QHash<QString, QList<QString> > dirs, bool forThread)
 {
-    refreshMode = mode;
-    m_extensionType = UserEvent::STANDARD_UPDATE;
+    m_extensionType = mode;
     m_extendDefaultSources=true;
-    if(forceDropCatalog || !cat){
+    if(!cat){
         createCatalog(dirs);
     }
+
+    if(forThread){
+        moveToThread(this);
+        connect(this, SIGNAL(started()), this, SLOT(catalogTask()));
+    }
+
 }
 
-void CatBuilder::clear(CatalogRefreshMode mode, QHash<QString, QList<QString> > dirs, bool forceDropCatalog)
+//All the important stuff should be done in the plugins...
+//This is QThread/QObject BS
+void CatBuilder::run() {
+    //move the QObject part of this to the QThread part of this
+
+
+    QThread::run();
+    qDebug() << "CatBuilder task finishing: " << (int)this;
+}
+
+void CatBuilder::catalogTask() {
+    qDebug() << "CatBuilder task starting: " << (int)this;
+    mp_userItems = new QList<CatItem>;
+    mp_extension_results = new QList<CatItem>;
+    mp_timelyItems = new QList<CatItem>;
+    gMainWidget->fillBuilderInfo(this);
+
+    Q_ASSERT(cat);
+    Q_ASSERT(plugins_ptr);
+    QList<CatItem> insertList;
+    bool success=false;
+    SearchInfo inf;
+    inf.m_extensionType = m_extensionType;
+    switch (m_extensionType){
+//        case LOAD:
+//            success = plugins_ptr->loadCatalogs(&(insertList));
+//            if(!success) {
+//                plugins_ptr->getCatalogs(&(insertList));
+//            }
+//            break;
+        case UserEvent::CATALOGUE_LOAD:
+            plugins_ptr->getCatalogs(&(insertList));
+            break;
+        case UserEvent::CATALOGUE_EXTEND: doExtension(&insertList);
+            break;
+        case UserEvent::BACKGROUND_SEARCH:
+        default:
+            {
+                inf.m_userKeys = this->m_userKeys;
+                inf.m_keyWords = this->m_keywords;
+                inf.itemListPtr = (mp_userItems);
+                plugins_ptr->backgroundSearch(&inf, &(insertList));
+            }
+            break;
+
+    }
+    QList<CatItem> mergedItems = cat->indexItemList(&insertList);
+    mp_extension_results->clear();
+    for(int i=0;i<mergedItems.count();i++){
+        CatItem it = mergedItems[i];
+        if(it.getIsTimeDependant())
+            { mp_timelyItems->append(mergedItems[i]); }
+        if(it.getMatchType() == CatItem::USER_KEYWORD){
+            setShown(it, UserEvent::KEYS_TYPE);
+            continue;
+        }
+        mp_extension_results->append(it);
+
+        //plugins_ptr->itemLoading(&it,UserEvent::JUST_FOUND);
+    }
+    QList<CatItem> res;
+    inf.itemListPtr = &mergedItems;
+    qDebug() << "give plugins another go at found items";
+    plugins_ptr->itemsLoading(&inf,&res);
+    res = cat->indexItemList(&res);
+    mergedItems.append(res);
+    mp_extension_results->clear();
+    for(int i=0;i<mergedItems.count();i++){
+        mp_extension_results->append(mergedItems[i]);
+    }
+    if(m_extensionType == UserEvent::BACKGROUND_SEARCH){
+        emit backgroundSearchDone(this,m_userKeys);
+    } else {
+        emit catalogFinished(this);
+    }
+
+    qDebug() << "run done for: " << (int)this;
+    quit();
+}
+
+
+CatBuilder::~CatBuilder(){
+    mp_extension_results->clear();
+    mp_timelyItems->clear();
+    delete mp_extension_results;
+    delete mp_timelyItems;
+    mp_extension_results= 0;
+    mp_timelyItems =0;
+
+}
+
+
+
+void CatBuilder::clear(QHash<QString, QList<QString> > dirs, bool forceDropCatalog)
 {
-    refreshMode = mode;
     m_extensionType = UserEvent::STANDARD_UPDATE;
     m_extendDefaultSources=true;
     if(forceDropCatalog || !cat){
@@ -151,74 +247,6 @@ void CatBuilder::destroyCatalog()
 }
 
 
-//All the hard stuff should be done in the plugins...
-void CatBuilder::run() {
-
-    catalogTask(refreshMode);
-    qDebug() << "CatBuilder task done: " << (int)this;
-
-    if(refreshMode == CatBuilder::SEARCH){
-        emit backgroundSearchDone(m_userKeys);
-    } else {
-        emit catalogFinished();
-    }
-}
-
-void CatBuilder::catalogTask(CatalogRefreshMode refreshState) {
-    Q_ASSERT(cat);
-    Q_ASSERT(plugins_ptr);
-    QList<CatItem> insertList;
-    bool success=false;
-    SearchInfo inf;
-    inf.m_extensionType = m_extensionType;
-    switch (refreshState){
-        case LOAD:
-            success = plugins_ptr->loadCatalogs(&(insertList));
-            if(!success) {
-                plugins_ptr->getCatalogs(&(insertList));
-            }
-            break;
-        case REFRESH: plugins_ptr->getCatalogs(&(insertList));
-            break;
-        case EXTEND: doExtension(&insertList);
-            break;
-        case SEARCH:
-            {
-                inf.m_userKeys = this->m_userKeys;
-                inf.m_keyWords = this->m_keywords;
-                inf.itemListPtr = &(m_userItems);
-                plugins_ptr->backgroundSearch(&inf, &(insertList));
-            }
-            break;
-        case SAVE:
-            //Eventually we'll just save additions...
-//            QList<CatItem> toSave = cat->getItemsForSave();
-//            plugins_ptr->saveCatalogs(&toSave);
-            break;
-
-    }
-    QList<CatItem> mergedItems = cat->indexItemList(&insertList);
-    m_extension_results.clear();
-    for(int i=0;i<mergedItems.count();i++){
-        CatItem it = mergedItems[i];
-        if(it.getIsTimeDependant())
-            { m_timelyItems.append(mergedItems[i]); }
-        if(it.getMatchType() == CatItem::USER_KEYWORD){
-            setShown(it, UserEvent::KEYS_TYPE);
-            continue;
-        }
-        m_extension_results.append(it);
-
-        //plugins_ptr->itemLoading(&it,UserEvent::JUST_FOUND);
-    }
-    QList<CatItem> res;
-    inf.itemListPtr = &mergedItems;
-    qDebug() << "give plugins another go at found items";
-    plugins_ptr->itemsLoading(&inf,&res);
-    res = cat->indexItemList(&res);
-    mergedItems.append(res);
-    m_extension_results = mergedItems;
-}
 
 //This let each plugin ask for background thread to
 //to use to get items related to the current thread.
@@ -229,17 +257,17 @@ void CatBuilder::doExtension(QList<CatItem>* outList, QList<CatItem>* inList){
     QList<CatItem> toExtend;
     if(m_extendDefaultSources){
         toExtend = cat->getSourcesForExtension();
-        m_userItems.append(toExtend);
+        mp_userItems->append(toExtend);
     }
 
 
     SearchInfo inf;
     if(inList){
-        m_userItems.append(*inList);
+        mp_userItems->append(*inList);
     }
-    for(int i=0; i< m_userItems.count(); i++){
-        if(m_userItems[i].hasLabel(EXTENSION_COMMAND_KEY)){
-            QString updateCommand = m_userItems[i].getCustomString(EXTENSION_COMMAND_KEY);
+    for(int i=0; i< mp_userItems->count(); i++){
+        if(mp_userItems->value(i).hasLabel(EXTENSION_COMMAND_KEY)){
+            QString updateCommand = mp_userItems->value(i).getCustomString(EXTENSION_COMMAND_KEY);
             updateCommand = updateCommand.simplified();
             QProcess proc;
             proc.startDetached(updateCommand);
@@ -249,7 +277,7 @@ void CatBuilder::doExtension(QList<CatItem>* outList, QList<CatItem>* inList){
     inf.m_userKeys = m_userKeys;
     inf.m_extensionType = m_extensionType;
     inf.m_keyWords = this->m_keywords;
-    inf.itemListPtr = &m_userItems;
+    inf.itemListPtr = mp_userItems;
     inf.lastUpdate = gSettings->value("GenOps/lastUpdateTime", 0).toLongLong();
     if(!m_extendDefaultSources){
         plugins_ptr->extendCatalogs(&inf, outList);
@@ -257,7 +285,7 @@ void CatBuilder::doExtension(QList<CatItem>* outList, QList<CatItem>* inList){
         plugins_ptr->doACatalogueExtension(&inf, outList);
     }
     gSettings->setValue("GenOps/lastUpdateTime", (long long)appGlobalTime());
-    m_userItems.clear();
+    mp_userItems->clear();
 }
 
 
