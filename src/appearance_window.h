@@ -73,15 +73,55 @@ QIcon makeStandardIcon(QString name);
 QIcon IconFromFile(QString name);
 bool isImageFile(QFileInfo info);
 
+// handling QThreads has been complexified see:
+// http://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
+// Yeah, this is more "object oriented", right...
+struct ThreadManager : QObject {
+    Q_OBJECT
+
+public:
+    QThread* thread;
+    CatBuilder* builder;
+    ThreadManager(){
+        builder = 0;
+        thread = 0;
+    }
+
+    ThreadManager(UserEvent::LoadType mode, QHash<QString, QList<QString> > dirs, bool forThread=true){
+        builder = new CatBuilder(mode, dirs, forThread);
+        thread = new QThread;
+
+        connect(builder, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
+        connect(thread, SIGNAL(started()), builder, SLOT(process()));
+        connect(builder, SIGNAL(finished()), thread, SLOT(quit()));
+        connect(builder, SIGNAL(finished()), builder, SLOT(deleteLater()));
+        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    }
+
+    void start(QThread::Priority p){
+        thread->start(p);
+    }
+
+    bool wait(unsigned long time = ULONG_MAX){
+        return thread->wait(time);
+    }
+
+
+
+};
+
+
 class AbstractReceiverWidget;
 
 class MainUserWindow : public AbstractReceiverWidget
 {
         Q_OBJECT
+private:
+    QMutex windowMutex;
 
 public:
 
-    MainUserWindow(QWidget *parent, PlatformBase*, bool rescue );
+    MainUserWindow(QWidget *parent, PlatformBase*);
     ~MainUserWindow();
 	//Application states
 public:
@@ -145,8 +185,8 @@ public:
     } m_itemOrigin;
 
 
-    CatBuilder* m_builder;
-    CatBuilder* m_searcher;
+    QSet<ThreadManager*> m_builders;
+    //ThreadManager* m_searcher;
 
     QRect m_listRect;
 
@@ -241,6 +281,7 @@ public:
     virtual void searchOnInput(int* beginPos=0);
     virtual void updateDisplay();
     virtual void hideItemList();
+    void setInialPos();
     QPoint setPosition(bool fromLocation=false);
     void setPositionFromSize(QSize size);
     void setAppearance();
@@ -309,6 +350,7 @@ public:
     bool shouldProcessControlKey(QKeyEvent* key);
 
     void fillBuilderInfo(CatBuilder* builder);
+    void removeBuilder(CatBuilder* builder);
 
 
 public slots:

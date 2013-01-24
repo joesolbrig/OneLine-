@@ -168,7 +168,7 @@ static CatItem walk_directory(GMenuTreeDirectory *directory, int previousWeight)
   return dirItem;
 }
 
-QList<CatItem> parseXdgMenus () {
+QList<CatItem> parseXdgMenus() {
 
   bindtextdomain ("gnome-menus", "/usr/local/share/locale");
   bind_textdomain_codeset ("gnome-menus", "UTF-8");

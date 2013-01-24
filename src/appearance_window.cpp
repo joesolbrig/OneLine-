@@ -56,11 +56,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "messageiconwidget.h"
 
 
-MainUserWindow::MainUserWindow(QWidget *parent,  PlatformBase * plat, bool rescue)
+MainUserWindow::MainUserWindow(QWidget *parent,  PlatformBase * plat)
 :  AbstractReceiverWidget(parent, Qt::FramelessWindowHint )  { //| Qt::Tool
+    m_lastTimeItemsSeen=0;
+    m_itemChoiceList=0;
     gMainWidget = this;
     gMarginWidget = (MarginWindow*)parent;
-    m_lastTimeItemsSeen=0;
 
     //nothing should use Qt::WindowType_Mask;
 
@@ -74,8 +75,8 @@ MainUserWindow::MainUserWindow(QWidget *parent,  PlatformBase * plat, bool rescu
     m_itemOrigin = FROM_SEARCH;
     m_lastExtendText="";
     m_choicesUnderstoodTimer = 0;
-    m_builder = 0;
-    m_searcher=0;
+    //m_builders = 0;
+    //m_searcher=0;
     m_rubberBander =0;
     m_contextMenu=0;
     m_inputList.setAppState(MAIN_MENU_APP_STATE);
@@ -145,7 +146,6 @@ MainUserWindow::MainUserWindow(QWidget *parent,  PlatformBase * plat, bool rescu
     connect(m_closeButton, SIGNAL(pressed()), qApp, SLOT(quit()));
     m_closeButton->raise();
 
-    bool showAppFirstTime = false;
 
     m_vOrient = UI_VERTICAL_ORIENTATION;
     m_hOrient = UI_HORIZONTAL_ORIENTATION;
@@ -153,7 +153,6 @@ MainUserWindow::MainUserWindow(QWidget *parent,  PlatformBase * plat, bool rescu
     setGeometry(m_inputDisplay->geometry());
 
     //gSetAppPos(m_vOrient,m_hOrient);
-    setPosition();
 
     // Set the general options
     setAlwaysShow(gSettings->value("GenOps/alwaysshow", false).toBool());
@@ -169,37 +168,31 @@ MainUserWindow::MainUserWindow(QWidget *parent,  PlatformBase * plat, bool rescu
     int curAction = gSettings->value("GenOps/hotkeyAction", Qt::Key_Space).toInt();
     if (!setHotkey(curMeta, curAction)) {
         QMessageBox::warning(this, tr("Oneline"), tr("The hotkey you have chosen is already in use. Please select another from preferences."));
-        rescue = true;
     }
 
-    adjustSize();
-    if (showAppFirstTime || rescue || true){
-        st_Visible = true;
-        showApp();
-    }
-    else {
-        st_Visible = false;
-        hideApp();
-    }
 
     Q_ASSERT(gMainWidget->takeAllText());
 }
 
 //
 MainUserWindow::~MainUserWindow() {
-    if(m_builder) {
-        m_builder->wait(100000);
-        if(m_builder){
-            m_builder->quit();
-        }
+    QSet<ThreadManager*>::iterator i = m_builders.begin();
+    for(; i!=m_builders.end(); i++){
+        (*(i))->wait(MAX_WAIT);
+    }
 
-    }
-    if(m_searcher){
-        m_searcher->wait(100000);
-        if(m_searcher){
-            m_searcher->quit();
-        }
-    }
+//    if(m_builders) {
+//        m_builders->wait(100000);
+//        if(m_builders){
+//            m_builders->quit();
+//        }
+//    }
+//    if(m_searcher){
+//        m_searcher->wait(100000);
+//        if(m_searcher){
+//            m_searcher->quit();
+//        }
+//    }
 
     m_itemChoiceList->clear();
 
@@ -280,6 +273,20 @@ void MainUserWindow::setAppearance(){
             file.close();
         }
     }
+}
+
+void MainUserWindow::setInialPos(){
+    setPosition();
+    adjustSize();
+    if ( true){
+        st_Visible = true;
+        showApp();
+    }
+    else {
+        st_Visible = false;
+        hideApp();
+    }
+
 }
 
 QPoint MainUserWindow::setPosition(bool fromLocation) {

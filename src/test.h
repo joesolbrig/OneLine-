@@ -15,7 +15,7 @@ class TheApplicationTester : public QObject {
         MainUserWindow* lWind;
 
         //Catalog* test_cat;
-        CatBuilder* the_test_builder;
+        ThreadManager* the_test_builder;
         InputList dummyInputList;
 
         void verifyGotResultFromKeys(QString keys, QString result);

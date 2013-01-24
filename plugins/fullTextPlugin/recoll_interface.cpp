@@ -271,15 +271,15 @@ int Recoll_Interface::addPossiblyCompoundFile(CatItem& parentIt, QList<CatItem>*
 
 }
 
-bool Recoll_Interface::getDocForPreview(CatItem& it){
+bool Recoll_Interface::getDocForPreview(CatItem& theBaseItem){
     string basePath;
     string ipath;
-    if(it.getPath().contains(ARG_SEPERATOR)){
-        QStringList parts = it.getPath().split(ARG_SEPERATOR);
+    if(theBaseItem.getPath().contains(ARG_SEPERATOR)){
+        QStringList parts = theBaseItem.getPath().split(ARG_SEPERATOR);
         basePath = parts[0].simplified().toStdString();
         ipath = parts[1].toStdString();
     } else {
-        basePath = it.getPath().toStdString();
+        basePath = theBaseItem.getPath().toStdString();
     }
     QFileInfo f(basePath.c_str());
     //Foo - TODO - crashing on zips for me
@@ -288,7 +288,7 @@ bool Recoll_Interface::getDocForPreview(CatItem& it){
         return false; 
     }
     if(!f.exists()){
-        qDebug() << "base path file doesn't exist: " << it.getPath();
+        qDebug() << "base path file doesn't exist: " << theBaseItem.getPath();
         return false;
     }
 
@@ -313,14 +313,20 @@ bool Recoll_Interface::getDocForPreview(CatItem& it){
         if (ret == FileInterner::FIDone || ret == FileInterner::FIAgain) {
             // FIAgain is actually not nice here. It means that the record
             // for the *file* of a multidoc was selected.
-            CatItem baseIt(basePath.c_str());
-            it = makeCatItem(outDoc,baseIt);
+            QString modPath(basePath.c_str());
+            while(!modPath.isEmpty() && modPath.simplified().endsWith(ARG_SEPERATOR)){
+                modPath.chop(1);
+            }
+            if(modPath.contains(ARG_SEPERATOR)){
+            }
+            CatItem baseIt(modPath);
+            theBaseItem = makeCatItem(outDoc,baseIt);
             if (!interner.get_html().empty()) {
                 QString preview = interner.get_html().c_str();
                 preview.detach();
-                it.setPreviewHtml(preview);
-            } else if(it.getLongText().isEmpty()){
-                qDebug() << "getDocForPreview - don't have preview str for: " << it.getPath();
+                theBaseItem.setPreviewHtml(preview);
+            } else if(theBaseItem.getLongText().isEmpty()){
+                qDebug() << "getDocForPreview - don't have preview str for: " << theBaseItem.getPath();
                 return false;
             }
         } else {
@@ -328,7 +334,7 @@ bool Recoll_Interface::getDocForPreview(CatItem& it){
             FIMissingStore fim;
             interner.getMissingExternal(&fim, missing);
             qDebug() << "getDocForPreview - can't get preview. Err: "
-                    << missing.c_str() << "ret:" << ret << " path: " << it.getPath();
+                    << missing.c_str() << "ret:" << ret << " path: " << theBaseItem.getPath();
             return false;
         }
     } catch (...) {
@@ -541,8 +547,11 @@ CatItem Recoll_Interface::makeCatItem(Rcl::Doc doc, CatItem& parentIt){
         body.detach();
     }
     string mgsid("msgid");
+    QString iPath = doc.ipath.c_str();
+    if(iPath.simplified().length()==0){ return parentIt; }
     QString localPath = parentIt.getPath()
             + ARG_SEPERATOR + QString(doc.ipath.c_str());
+    Q_ASSERT(!localPath.endsWith(ARG_SEPERATOR));
     if(!(doc.meta.find(string(mgsid)) !=doc.meta.end())){
         CatItem res(localPath);
         if(!doc.mimetype.empty()){
@@ -551,7 +560,7 @@ CatItem Recoll_Interface::makeCatItem(Rcl::Doc doc, CatItem& parentIt){
         res.setLongText(body);
         if(!doc.fmtime.empty()){
             time_t numeric_time = rfc2822DateToUxTime(doc.fmtime);
-            if(((int)numeric_time) > 0){
+            if(((int)numeric_time) > 0){//base path file doesn't exista
                 //marking time explicitly matters...
                 res.setCreationTime(numeric_time,true);
                 CatItem sourceParent(addPrefix(ACTION_TYPE_PREFIX,EMAIL_ADDRESS_NAME));

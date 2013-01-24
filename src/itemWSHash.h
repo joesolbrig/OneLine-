@@ -181,7 +181,6 @@ public:
         d = new InnerItem();
 
         setPath(full);
-        Q_ASSERT(!full.isEmpty());
         d->m_creation_time = appGlobalTime();
     }
 
@@ -189,7 +188,6 @@ public:
         d = new InnerItem();
         setName(shortN);
         setPath(full);
-        Q_ASSERT(!full.isEmpty());
         d->m_creation_time = appGlobalTime();
     }
 
@@ -198,7 +196,6 @@ public:
         setPath(full);
         setName(shortN);
         setPluginId((i_d));
-        Q_ASSERT(!full.isEmpty());
         d->m_creation_time = appGlobalTime();
     }
 
@@ -215,6 +212,7 @@ public:
         setPluginId((i_d));
         setIcon(iconPath);
         Q_ASSERT(!full.isEmpty());
+        Q_ASSERT(!full.endsWith(ARG_SEPERATOR));
         d->m_creation_time = appGlobalTime();
     }
 
@@ -534,6 +532,11 @@ public:
         QString mType = getActionParentType();
         if(mType.isEmpty()){
             mType = getCustomString(REAL_MIMETYPE_KEY);
+        }
+        if(mType.isEmpty() || mType == DEFAULT_TEXT_MIME_TYPE){
+            if(getPath().endsWith(".html") || getPath().endsWith(".htm")){
+                mType = DEFAULT_HTML_MIME_TYPE;
+            }
         }
         return mType;
 

@@ -1428,10 +1428,10 @@ int Cat_Store::restoreRelationByIndex(CatItem& it, QString index, int depth){
         child_index.get_range(itemId, it.getItemId()+1, index);
 
     for(unsigned int i=0;i<childRs.size();i++){
-        //Type-parents only for db...
-        if(hasPrefix(childRs[i].getParentPath(),TYPE_PREFIX)){
-            continue;
-        }
+        //Huh?
+        //if(hasPrefix(childRs[i].getParentPath(),TYPE_PREFIX)){
+        //  continue;
+        //}
 
         if(childRs[i].getChildRelType() == BaseChildRelation::SUBSTITUTE
            && it.getPath()!=childRs[i].getParentPath()){

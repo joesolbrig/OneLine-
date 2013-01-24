@@ -44,10 +44,10 @@ HEADERS = platform_base.h \
     platform_base_hottrigger.h \
     platform_gnome_util.h \
     platform_x11_hotkey.h \
-    ../unix/platform_unix_util.h \
     ../../src/itemarglist.h \
     ../../src/inputLanguage.h \
-    gnomeSignalReceiver.h
+    gnomeSignalReceiver.h \
+    ../unix/platform_unix_util.h
 CONFIG -= embed_manifest_dll
 CONFIG += link_pkgconfig
 PKGCONFIG += gtk+-2.2 \

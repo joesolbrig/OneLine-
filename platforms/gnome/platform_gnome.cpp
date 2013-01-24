@@ -32,12 +32,12 @@ CatItem createActionChild(GAppInfo *app_info){
 
     const char *command_line_path = g_app_info_get_executable(app_info);
     if(!command_line_path ){
-        qDebug() << "failed to get command line for extra app" ;
+        qDebug() << "Error failed to get command line for extra app" ;
         return CatItem();
     }
     QString cmd = QString((command_line_path));
     if(cmd.isEmpty()){
-        qDebug() << "empty command line for extra app ";
+        qDebug() << "err empty command line for extra app ";
         return CatItem();
     }
 
@@ -156,7 +156,7 @@ QApplication* PlatformGnome::init(int& argc, char** argv)
     if(gtkStyle){
         app->setStyle(gtkStyle);
     } else {
-        qDebug() << "style PlatformGnome::init" << styleName << " not found";
+        qDebug() << "error style PlatformGnome::init" << styleName << " not found";
     }
 
     if(!icons){
@@ -243,7 +243,7 @@ CatItem PlatformGnome::alterItem(CatItem* item, bool addIcon) {
         const char* desktop_item_name = dtName.toLatin1();
         GAppInfo* app_info = (GAppInfo*)g_desktop_app_info_new_from_filename(desktop_item_name);
         if(!app_info){
-            qDebug() << "failed to get App Info for verb: " << desktop_item_name;
+            qDebug() << "error, failed to get App Info for verb: " << desktop_item_name;
             gdk_threads_leave();
             return CatItem();
         }
@@ -266,6 +266,7 @@ CatItem PlatformGnome::alterItem(CatItem* item, bool addIcon) {
 
     if(!item->getActionParentType().isEmpty()) {
         gdk_threads_leave();
+        qDebug() << "error item has type parent already: " << item->getPath();
         return CatItem();
     }
     QString mimeTypeString;
@@ -275,14 +276,12 @@ CatItem PlatformGnome::alterItem(CatItem* item, bool addIcon) {
         content_type = g_content_type_from_mime_type(mime_type_chars);
     } else {
         mimeTypeString = gnome_vfs_get_mime_type_for_name(item->getPath().toLatin1());
-
-
         if(!mimeTypeString.isEmpty()){
             item->setCustomPluginInfo(REAL_MIMETYPE_KEY,mimeTypeString);
         }
         GFile *file = g_file_new_for_path(item->getPath().toLatin1());
         if(!file){
-            qDebug() << "failed to create file info: " << item->getPath().toLatin1();
+            qDebug() << "error failed to create GFILE object: " << item->getPath().toLatin1();
             gdk_threads_leave();
             return CatItem();
         }
@@ -291,7 +290,7 @@ CatItem PlatformGnome::alterItem(CatItem* item, bool addIcon) {
         if(file_info && !error){
             content_type = g_file_info_get_content_type(file_info);
         } else {
-            qDebug() << "failed to create file info: " << item->getPath().toLatin1();
+            qDebug() << "error failed to create file info: " << item->getPath().toLatin1();
             gdk_threads_leave();
             return CatItem();
 
@@ -301,12 +300,12 @@ CatItem PlatformGnome::alterItem(CatItem* item, bool addIcon) {
     CatItem mimeType;
     QString description;
     if(!content_type){
-        qDebug() << "failed to get content type for: " << item->getPath().toLatin1();
+        qDebug() << "error failed to get content type for: " << item->getPath().toLatin1();
 //        if (error) { g_error_free(error);}
 //        gdk_threads_leave();
 //        return CatItem();
     } else if(QString(content_type) == "mime/mime.cache"){
-        qDebug() << "got some bogus generic value for: " << item->getPath().toLatin1();
+        qDebug() << "error got some bogus generic value for: " << item->getPath().toLatin1();
 //        if (error) { g_error_free(error);}
 //        gdk_threads_leave();
 //        return CatItem();
@@ -329,6 +328,9 @@ CatItem PlatformGnome::alterItem(CatItem* item, bool addIcon) {
         item->addParent(mimeType,FILE_CATALOG_PLUGIN_STR,
                         BaseChildRelation::DATA_CATEGORY_PARENT);
         //Q_ASSERT(item->getTypeParent(CatItem::ACTION_TYPE) ==mimeType);
+    } else {
+        qDebug() << "error item has empty mime type: " << item->getPath();
+
     }
 
     item->setCustomPluginValue(ITEM_EXTENSION_LEVEL_KEY,0);
@@ -336,17 +338,17 @@ CatItem PlatformGnome::alterItem(CatItem* item, bool addIcon) {
     return mimeType;
 }
 
-CatItem PlatformGnome::alterActionTypeItem(CatItem* item, bool addIcon){
+CatItem PlatformGnome::alterActionTypeItem(CatItem* actionTypeItem, bool addIcon){
 
-    Q_ASSERT(item->getItemType() == CatItem::ACTION_TYPE);
-    QString actionType = item->getName();
+    Q_ASSERT(actionTypeItem->getItemType() == CatItem::ACTION_TYPE);
+    QString actionType = actionTypeItem->getName();
     QByteArray ba = actionType.toLocal8Bit();
     char* content_type = ba.data();
     GError *error=0;
     GAppInfo* app_info = g_app_info_get_default_for_type(
                                 content_type, FALSE);
     if(!app_info){
-        qDebug() << "failed to get App Info for: " << QString(content_type) << item->getPath();
+        qDebug() << "failed to get App Info for: " << QString(content_type) << actionTypeItem->getPath();
         if(error){
             qDebug() << "error: " << error->message;
         }
@@ -355,6 +357,7 @@ CatItem PlatformGnome::alterActionTypeItem(CatItem* item, bool addIcon){
         return CatItem();
     }
     CatItem action = createActionChild(app_info);
+
 
 
     GList* gl;
@@ -388,27 +391,26 @@ CatItem PlatformGnome::alterActionTypeItem(CatItem* item, bool addIcon){
         if(addIcon){
             addPixBuff(&extraAction,(GAppInfo*)gl->data);
         }
-        item->addChild(extraAction,
+        actionTypeItem->addChild(extraAction,
                           FILE_CATALOG_PLUGIN_STR,
                           BaseChildRelation::OPTIONAL_ACTION_CHILD);
     }
 
-
-
     if(addIcon){
         QIcon ic = addPixBuff(&action,app_info);
         QVariant icVar(ic);
-        item->setCustomPluginVariant(REAL_ICON_KEY, icVar);
+        actionTypeItem->setCustomPluginVariant(REAL_ICON_KEY, icVar);
     }
-    item->addChild(action,
+    actionTypeItem->addChild(action,
                        FILE_CATALOG_PLUGIN_STR,
                        BaseChildRelation::MAYBE_DEFAULT_ACTION_CHILD);
-    Q_ASSERT(item->getActionTypeChild() == action);
+    //qDebug() << "added action type: " << action->getPath() << " for " << actionTypeItem->getPath();
+    Q_ASSERT(actionTypeItem->getActionTypeChild() == action);
 
     if (error) { g_error_free(error); }
     gdk_threads_leave();
 
-    item->setStub(false);
+    actionTypeItem->setStub(false);
     return action;
 }
 

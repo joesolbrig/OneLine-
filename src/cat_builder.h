@@ -15,7 +15,7 @@ class Catalog;
 
 
 
-class CatBuilder : public QThread
+class CatBuilder : public QObject
 {
     Q_OBJECT
 public:
@@ -90,16 +90,17 @@ public:
     static CatItem getItemById(int itemId);
     static void storeCatalog();
     static QList<CatItem> getMainApps(){ return cat->getMainApps();}
-    void run();
 
     void doExtension(QList<CatItem>* outList, QList<CatItem>* inList=0);
 
 
 public slots:
+    void process();
     void catalogTask();
     static QList<CatItem> indexItemList(QList<CatItem>* items);
 
 signals:
+    void finished();
     void catalogFinished(CatBuilder*);
     void catalogExtended();
     void catalogIncrement(float);

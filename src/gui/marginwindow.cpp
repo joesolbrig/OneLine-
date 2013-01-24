@@ -3,8 +3,8 @@
 #include "appearance_window.h"
 #include "main.h"
 
-MarginWindow::MarginWindow(QWidget *, PlatformBase* plat, bool rescue):
-        QWidget(0,Qt::FramelessWindowHint), m_mainWindow(this,plat,rescue),
+MarginWindow::MarginWindow(QWidget *, PlatformBase* plat):
+        QWidget(0,Qt::FramelessWindowHint), m_mainWindow(this,plat),
         m_backgroundImage(UI_BORDER_TEXTURE_FILE)
 {
     gMarginWidget = this;

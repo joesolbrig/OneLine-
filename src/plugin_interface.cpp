@@ -91,6 +91,10 @@ QString htmlize(QString str){
 
 QString htmlizeFile(QString path){
     QString res;
+    while(!path.isEmpty() && path.simplified().endsWith(ARG_SEPERATOR)){
+        path.chop(1);
+    }
+
 
     QFile f(path);
     if(f.open(QIODevice::ReadOnly)){
@@ -581,6 +585,8 @@ void CatItem::setName(QString rawName){
 }
 
 void CatItem::setPath(QString rawPath){
+    Q_ASSERT(!rawPath.simplified().endsWith(ARG_SEPERATOR));
+    Q_ASSERT(!rawPath.isEmpty());
     QString p;
 
     //A trailing slash seems to be alway serpufluous

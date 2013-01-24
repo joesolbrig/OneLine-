@@ -30,7 +30,7 @@ protected:
     void resizeEvent(QResizeEvent * /* event */);
     QSize  sizeHint();
 public:
-    MarginWindow(QWidget *parent, PlatformBase*, bool rescue);
+    MarginWindow(QWidget *parent, PlatformBase*);
     ~MarginWindow() { QApplication::instance()->quit();}
     void gSetAppPos(int vOrient=-1, int hOrient=-1);
     void createPreviewArrow(QRect previewRect);

@@ -82,7 +82,7 @@ void FilecatalogPlugin::getCatalog(QList<CatItem>* items){
         QString fp = adjustFilePath(memDirs[i].name);
         QFileInfo fileInfo(fp);
         if(!fileInfo.exists()){
-            qDebug() << "base file: " << memDirs[i].name << " does not exist!";
+            qDebug() << "error base file: " << memDirs[i].name << " does not exist!";
             continue;
         }
         CatItem dirParent(fileInfo.absoluteFilePath());

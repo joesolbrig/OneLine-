@@ -56,6 +56,9 @@ class PreviewPane : public QWebView
         //QWebView* createWindow (QWebPage::WebWindowType ){ return 0;}
 
         explicit PreviewPane(QWidget *parent=0);
+        ~PreviewPane(){
+            qDebug() << "PreviewPane deleted";
+        }
 
         void paintEvent ( QPaintEvent * event );
 

@@ -74,15 +74,17 @@ class ListWithDisplay : public QWidget {
     QString m_bottomMessage;
 
     FormDisplayer* m_multiInputDisplayer;
-    QMutex m_previewMutex;
 
 public:
+    QMutex m_previewMutex;
     ListWithFrame * m_previewFrame;
 
     void setGeometry(QRect r=QRect());
     void setFullGeometry(QRect r=QRect());
 
-    bool showingSidePreview() {return (m_previewFrame!=0);}
+    bool showingSidePreview() {
+        return (m_previewFrame!=0);
+    }
 
     ListWithFramePtr& currentViewRef() {
         Q_ASSERT(m_viewStack.count()> 0);
@@ -333,12 +335,7 @@ signals:
 
 
 public slots:
-    void raise(){
-        QWidget::raise();
-        if(m_newFrame!=0){
-            m_newFrame->raise();
-        }
-    }
+    void raise();
     void iconBarAnimateDone(){
         Q_ASSERT(m_miniIconAnimation);
         delete m_miniIconAnimation;

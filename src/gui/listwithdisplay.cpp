@@ -58,6 +58,17 @@ ListWithDisplay::~ListWithDisplay(){
         delete m_miniIconBar;
     }
 }
+
+void ListWithDisplay::raise(){
+    if(!isVisible()){ return;}
+
+    QWidget::raise();
+    if(m_newFrame!=0){
+        m_newFrame->raise();
+    }
+}
+
+
 void ListWithDisplay::addMessage(QString msg){
     m_bottomMessage = msg;
     if(m_miniIconBar){
@@ -413,14 +424,16 @@ void ListWithDisplay::trySetPreviewItem(ListItem contextItem, QList<ListItem> il
 
 
 void ListWithDisplay::addSidePreview(ListItem it){
-    if(m_previewFrame){
+    {
         QMutexLocker locker(&m_previewMutex);
-        m_previewFrame->hide();
-        m_previewFrame->lower();
-        m_previewFrame->deleteLater();
-        m_previewFrame= 0;
+        if(m_previewFrame){
+            m_previewFrame->hide();
+            m_previewFrame->lower();
+            m_previewFrame->deleteLater();
+            m_previewFrame= 0;
+        }
+        m_previewFrame = new ListWithFrame();
     }
-    m_previewFrame = new ListWithFrame();
 
     //Must be done first...
     QRect g = currentViewRef()->geometry();
@@ -444,12 +457,14 @@ void ListWithDisplay::addSidePreview(ListItem it){
 
 
 void ListWithDisplay::addSidePreview(ListItem contextItem, QList<ListItem> il){
-    if(m_previewFrame){
+    {
         QMutexLocker locker(&m_previewMutex);
-        m_previewFrame->deleteLater();
-        m_previewFrame=0;
+        if(m_previewFrame){
+            m_previewFrame->deleteLater();
+            m_previewFrame=0;
+        }
+        m_previewFrame = new ListWithFrame(0, contextItem);
     }
-    m_previewFrame = new ListWithFrame(0, contextItem);
 
     QRect g = currentViewRef()->geometry();
     QRect gm = this->geometry();
@@ -475,7 +490,6 @@ void ListWithDisplay::setPreviewSearch(QString searchStr){
 }
 
 void ListWithDisplay::previewLoaded(){
-    QMutexLocker locker(&m_previewMutex);
     if(m_previewFrame){
         m_previewFrame->setVisible(true);
         m_previewFrame->fadeIn();

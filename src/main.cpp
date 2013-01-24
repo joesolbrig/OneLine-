@@ -155,7 +155,6 @@ signal(SIGPIPE, SIG_IGN);
     qDebug() << "config dir: " << theDirs.value("config")[0];
     gDirs = &theDirs;
     app->setQuitOnLastWindowClosed(false);
-    bool rescue = false;
 
     if (plat->isAlreadyRunning()) {
         qDebug() << "application already running, exiting";
@@ -167,7 +166,7 @@ signal(SIGPIPE, SIG_IGN);
     translator.load(QString("tr/online_" + locale));
     app->installTranslator(&translator);
 
-    BASE_WINDOW_TYPE baseWin(NULL, gPlatform, rescue);
+    BASE_WINDOW_TYPE baseWin(NULL, gPlatform);
     KeyRouter kr;
     QCoreApplication* apinst =  QCoreApplication::instance();
     Q_ASSERT(apinst);
@@ -185,6 +184,7 @@ signal(SIGPIPE, SIG_IGN);
     //Don't do timer threads and timers unless not testing...
     gMainWidget->startTasks();
     gMainWidget->show();
+    gMainWidget->setInialPos();
     app->exec();
 
 #endif

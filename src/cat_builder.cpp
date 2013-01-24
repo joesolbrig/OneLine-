@@ -21,19 +21,30 @@ CatBuilder::CatBuilder(UserEvent::LoadType mode, QHash<QString, QList<QString> >
     }
 
     if(forThread){
-        moveToThread(this);
+        //moveToThread(this);
         connect(this, SIGNAL(started()), this, SLOT(catalogTask()));
     }
 
 }
 
+CatBuilder::~CatBuilder(){
+    qDebug() << "deleting  CatBuilder: " << (int)this;
+    mp_extension_results->clear();
+    mp_timelyItems->clear();
+    delete mp_extension_results;
+    delete mp_timelyItems;
+    mp_extension_results= 0;
+    mp_timelyItems =0;
+    qDebug() << "done deleting  CatBuilder: " << (int)this;
+
+}
 //All the important stuff should be done in the plugins...
 //This is QThread/QObject BS
-void CatBuilder::run() {
+void CatBuilder::process() {
     //move the QObject part of this to the QThread part of this
+    catalogTask();
 
-
-    QThread::run();
+    //QThread::run();
     qDebug() << "CatBuilder task finishing: " << (int)this;
 }
 
@@ -47,7 +58,7 @@ void CatBuilder::catalogTask() {
     Q_ASSERT(cat);
     Q_ASSERT(plugins_ptr);
     QList<CatItem> insertList;
-    bool success=false;
+    //bool success=false;
     SearchInfo inf;
     inf.m_extensionType = m_extensionType;
     switch (m_extensionType){
@@ -97,26 +108,27 @@ void CatBuilder::catalogTask() {
     for(int i=0;i<mergedItems.count();i++){
         mp_extension_results->append(mergedItems[i]);
     }
-    if(m_extensionType == UserEvent::BACKGROUND_SEARCH){
-        emit backgroundSearchDone(this,m_userKeys);
-    } else {
-        emit catalogFinished(this);
+
+    if(UserEvent::BACKGROUND_SEARCH == m_extensionType){
+        //emit backgroundSearchDone(this,m_userKeys);
+        gMainWidget->backgroundSearchDone(this,m_userKeys);
+
+        qDebug() << "search done for: " << (int)this;
+    } else if( UserEvent::STANDARD_UPDATE== m_extensionType ||
+               UserEvent::CATALOGUE_EXTEND== m_extensionType ||
+               UserEvent::CATALOGUE_LOAD== m_extensionType ||
+               UserEvent::CATALOGUE_SAVE== m_extensionType ) {
+        //emit catalogFinished(this);
+        gMainWidget->catalogBuilt(this);
+        qDebug() << "catabuilt for: " << (int)this;
     }
-
     qDebug() << "run done for: " << (int)this;
-    quit();
-}
-
-
-CatBuilder::~CatBuilder(){
-    mp_extension_results->clear();
-    mp_timelyItems->clear();
-    delete mp_extension_results;
-    delete mp_timelyItems;
-    mp_extension_results= 0;
-    mp_timelyItems =0;
+    emit finished();
 
 }
+
+
+
 
 
 

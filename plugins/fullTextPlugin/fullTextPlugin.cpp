@@ -213,7 +213,7 @@ void FullTextPlugin::itemsLoaded(SearchInfo* inf, QList<CatItem>* res){
             if((int)inf->m_extensionType >= (int)UserEvent::SELECTED){
                 m_recoll_interface->getDocForPreview(it);
                 QString path = it.getPath().simplified();
-                while(!path.isEmpty() && path.endsWith(ARG_SEPERATOR)){
+                while(!path.isEmpty() && path.simplified().endsWith(ARG_SEPERATOR)){
                     path.chop(1);
                     //path = path.left(path.length()-2);
                 }

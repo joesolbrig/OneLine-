@@ -222,9 +222,9 @@ void TheApplicationTester::testMultiPartJson(){
     //Refresh since you'll edit the download file
     if(the_test_builder==0){
         CatBuilder::destroyCatalog();
-        the_test_builder = new CatBuilder(UserEvent::CATALOGUE_LOAD, *gDirs);
+        the_test_builder = new ThreadManager(UserEvent::CATALOGUE_LOAD, *gDirs);
     }
-    the_test_builder->catalogTask();
+    the_test_builder->builder->catalogTask();
 
     // http://www.rawstory.com/rs/2012/01/02/cantor-refuses-to-admit-reagan-raised-taxes/
     CatItem it("http://www.popsci.com/science/article/2012-01/new-material-can-pull-carbon-dioxide-right-out-air-unprecedented-rates");
@@ -370,15 +370,15 @@ void TheApplicationTester::testInputListAsHash(){
 
 void TheApplicationTester::extensionCycler(QList<CatItem> inList, QList<CatItem>* outList){
     if(!the_test_builder)
-        { the_test_builder = new CatBuilder(UserEvent::CATALOGUE_EXTEND, *gDirs); }
+        { the_test_builder = new ThreadManager(UserEvent::CATALOGUE_EXTEND, *gDirs); }
 
     int pluginCount = CatBuilder::getPluginHandle()->getPlugins().count();
     for(int i=0; i< pluginCount; i++){
         gTime_offset_for_testing += 1000*1000;
-        *(the_test_builder->mp_userItems) = inList;
+        *(the_test_builder->builder->mp_userItems) = inList;
         the_test_builder->start(QThread::NormalPriority);
         the_test_builder->wait(100000000);
-        QList<CatItem> list = *(the_test_builder->mp_extension_results);
+        QList<CatItem> list = *(the_test_builder->builder->mp_extension_results);
         outList->append(list);
     }
 
@@ -734,32 +734,32 @@ void TheApplicationTester::testXslPlugin2(){
 
     if(!the_test_builder){
         CatBuilder::destroyCatalog();
-        the_test_builder = new CatBuilder(UserEvent::CATALOGUE_LOAD, *gDirs);
+        the_test_builder = new ThreadManager(UserEvent::CATALOGUE_LOAD, *gDirs);
     }
-    the_test_builder->catalogTask();
+    the_test_builder->builder->catalogTask();
 
 
-    CatItem extendIt1 = the_test_builder->getItem(XMEL_BOOKMARKS_PATH1);
+    CatItem extendIt1 = the_test_builder->builder->getItem(XMEL_BOOKMARKS_PATH1);
     Q_ASSERT(!extendIt1.isEmpty());
     Q_ASSERT(extendIt1.isCategorizingSource());
     Q_ASSERT(extendIt1.getRequestUrl() =="/home/hansj/.recently-used.xbel");
     Q_ASSERT(extendIt1.isCategorizingSource());
-    CatItem extendIt2 = the_test_builder->getItem(XMEL_BOOKMARKS_PATH2);
+    CatItem extendIt2 = the_test_builder->builder->getItem(XMEL_BOOKMARKS_PATH2);
     Q_ASSERT(!extendIt2.isEmpty());
     Q_ASSERT(extendIt2.isCategorizingSource());
     Q_ASSERT(extendIt2.getRequestUrl() =="/home/hansj/.recently-used");
-    the_test_builder->getCatalog()->reweightItem(extendIt1);
-    the_test_builder->getCatalog()->reweightItem(extendIt2);
+    the_test_builder->builder->getCatalog()->reweightItem(extendIt1);
+    the_test_builder->builder->getCatalog()->reweightItem(extendIt2);
 
 
-    extendIt1 = the_test_builder->getItem(XMEL_BOOKMARKS_PATH1);
+    extendIt1 = the_test_builder->builder->getItem(XMEL_BOOKMARKS_PATH1);
     extendIt1.getFullWeight();
     extendIt2.getFullWeight();
     Q_ASSERT(!extendIt1.isEmpty());
-    extendIt2 = the_test_builder->getItem(XMEL_BOOKMARKS_PATH2);
+    extendIt2 = the_test_builder->builder->getItem(XMEL_BOOKMARKS_PATH2);
     Q_ASSERT(!extendIt2.isEmpty());
 
-    QList<CatItem> extenSrc = the_test_builder->getCatalog()->getSourcesForExtension();
+    QList<CatItem> extenSrc = the_test_builder->builder->getCatalog()->getSourcesForExtension();
     Q_ASSERT(listContainsPath(extenSrc,extendIt1) || listContainsPath(extenSrc,extendIt2));
 
     SearchInfo search_info;
@@ -777,7 +777,7 @@ void TheApplicationTester::testXslPlugin2(){
     //Give time for extension to cycle to proper plugin
 //    for(int j=0; j< 15; j++){
 //        gTime_offset_for_testing += 1000*100;
-//        the_test_builder->catalogTask(CatBuilder::EXTEND);
+//        the_test_builder->builder->catalogTask(CatBuilder::EXTEND);
 //    }
 
 //    CatItem final;
@@ -788,26 +788,26 @@ void TheApplicationTester::testXslPlugin2(){
 //    //-- System specific file names!
 //    //-- fill-in in values from YOUR ".recently-used" and ".recently-used.xbel" file
 //
-//    final = the_test_builder->getItem("/home/hansj/Documents/Political/Laptop Diary3.odt");
+//    final = the_test_builder->builder->getItem("/home/hansj/Documents/Political/Laptop Diary3.odt");
 //    Q_ASSERT(!final.isEmpty());
 //    Q_ASSERT(final.getPath() == "file:///home/hansj/Documents/Political/Laptop%20Diary3.odt");
 //    Q_ASSERT(final.getName() == "Laptop%20Diary3.odt");
 //    userKs = "Laptop";
 //    il.setUserKeys(userKs);
-//    ls = the_test_builder->getCatalog()->cat_store.getItemsByKey(
+//    ls = the_test_builder->builder->getCatalog()->cat_store.getItemsByKey(
 //            userKs,&il, 30);
 //    Q_ASSERT(listContainsPath(ls,final));
 //    Q_ASSERT(listContainsPath(ls,"file:///home/hansj/Documents/Political/Laptop%20Diary3.odt"));
 
 
-//    final = the_test_builder->getItem("file:///home/hansj/downloads/img-vqbqn792dcynaypi33.jpg");
+//    final = the_test_builder->builder->getItem("file:///home/hansj/downloads/img-vqbqn792dcynaypi33.jpg");
 //    Q_ASSERT(!final.isEmpty());
 //    Q_ASSERT(final.getPath() == "file:///home/hansj/downloads/img-vqbqn792dcynaypi33.jpg");
 //    Q_ASSERT(final.getName() == "img-vqbqn792dcynaypi33.jpg");
     //Extra optional for keystroke match testing...
 //    userKs = "dcnpp";
 //    il.setUserKeys(userKs);
-//    ls = the_test_builder->getCatalog()->cat_store.getItemsByKey(
+//    ls = the_test_builder->builder->getCatalog()->cat_store.getItemsByKey(
 //            userKs,&il, 30);
 //    Q_ASSERT(listContainsPath(ls,final));
 //    Q_ASSERT(listContainsPath(ls,"file:///home/hansj/downloads/img-vqbqn792dcynaypi33.jpg"));
@@ -2094,10 +2094,10 @@ void TheApplicationTester::testFileFind(){
     li.append(i3);
     li.append(i4);
     if(!the_test_builder)
-        { the_test_builder = new CatBuilder(UserEvent::CATALOGUE_LOAD, *gDirs); }
-    *(the_test_builder->mp_userItems) = li;
+        { the_test_builder = new ThreadManager(UserEvent::CATALOGUE_LOAD, *gDirs); }
+    *(the_test_builder->builder->mp_userItems) = li;
     QList<CatItem> ol;
-    the_test_builder->doExtension(&ol);
+    the_test_builder->builder->doExtension(&ol);
 
     QString q("bbaattcch ffouou");
 //    InputList il;
@@ -2395,9 +2395,9 @@ void TheApplicationTester::verifyChildItem(QString keys, QString result){
 void TheApplicationTester::testFilePlugin(){
     if(the_test_builder==0){
         CatBuilder::destroyCatalog();
-        the_test_builder = new CatBuilder(UserEvent::CATALOGUE_LOAD, *gDirs);
+        the_test_builder = new ThreadManager(UserEvent::CATALOGUE_LOAD, *gDirs);
     }
-    the_test_builder->catalogTask();
+    the_test_builder->builder->catalogTask();
     // Duplicates the mode argument above 'cause we're calling a otherwise-private function
     // to avoid starting a new thread
     bool s = verifyCatHasItemName(QString("testFilePluginFile.txt"));
@@ -2848,9 +2848,9 @@ void TheApplicationTester::testGui(){
 
     if(!the_test_builder){
         CatBuilder::destroyCatalog();
-        the_test_builder = new CatBuilder(UserEvent::CATALOGUE_LOAD, *gDirs);
+        the_test_builder = new ThreadManager(UserEvent::CATALOGUE_LOAD, *gDirs);
     }
-    the_test_builder->catalogTask();
+    the_test_builder->builder->catalogTask();
     Q_ASSERT(CatBuilder::getCatalog());
     //Mostly so as to profile without loading test plugin
     loopForProfiling();

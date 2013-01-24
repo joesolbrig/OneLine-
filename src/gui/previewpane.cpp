@@ -7,9 +7,6 @@
 
 //#define TEST_WEBPREVIEW 1
 
-
-
-
 QWebInspector* PreviewPane::mp_inspectorPage=0;
 
 PreviewPane::PreviewPane(QWidget *parent) : QWebView(parent), m_item() {
@@ -23,7 +20,10 @@ PreviewPane::PreviewPane(QWidget *parent) : QWebView(parent), m_item() {
     if(gMainWidget){
         hookHover(gMainWidget);
     }
-
+    settings()->setAttribute(QWebSettings::LocalContentCanAccessRemoteUrls,true);
+    settings()->setAttribute(QWebSettings::LocalContentCanAccessFileUrls,true);
+    settings()->setAttribute(QWebSettings::LocalStorageEnabled,true);
+    settings()->setAttribute(QWebSettings::AutoLoadImages,true);
 //#ifdef TEST_WEBPREVIEW
 //    if(!mp_inspectorPage){ mp_inspectorPage= new QWebInspector;}
 //    settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled,true);
@@ -119,18 +119,6 @@ bool PreviewPane::setItem(CatItem it, bool justTesting) {
             connect(this, SIGNAL(loadProgress(int)),this, SLOT(progressLoading(int)));
         }
         return true;
-    } else if(it.getMimeType() == DEFAULT_TEXT_MIME_TYPE &&
-              it.hasLabel(FILE_CATALOG_PLUGIN_STR)){
-        if(!justTesting){
-            QString pathStr = it.getPath();
-            qDebug() << "loading pathStr: " << pathStr;
-            QString h = htmlizeFile(pathStr);
-            qDebug() << "html str: " << h;
-            m_loadType = CUSTOM_HTML;
-            setHtml(h);
-            readyToShow();
-        }
-        return true;
     } else if(it.getMimeType() == DEFAULT_HTML_MIME_TYPE &&
               it.hasLabel(FILE_CATALOG_PLUGIN_STR)){
         if(!justTesting){
@@ -145,6 +133,19 @@ bool PreviewPane::setItem(CatItem it, bool justTesting) {
             }
         }
         return true;
+    } else if(it.getMimeType() == DEFAULT_TEXT_MIME_TYPE &&
+              it.hasLabel(FILE_CATALOG_PLUGIN_STR)){
+        if(!justTesting){
+            QString pathStr = it.getPath();
+            qDebug() << "loading pathStr: " << pathStr;
+            QString h = htmlizeFile(pathStr);
+            //qDebug() << "html str: " << h;
+            m_loadType = CUSTOM_HTML;
+            setHtml(h);
+            readyToShow();
+        }
+        return true;
+
     } else if(!it.getPreviewHtml().isEmpty()){
         if(!justTesting){
             m_loadType = CUSTOM_HTML;
@@ -331,12 +332,15 @@ void PreviewPane::finishLoading(bool success){
 }
 
 void PreviewPane::readyToShow(){
+
+    QMutexLocker locker(&gMainWidget->m_itemChoiceList->m_previewMutex);
     setVisible(true);
-    if(gMainWidget->m_itemChoiceList && gMainWidget &&
-       gMainWidget->m_itemChoiceList->m_previewFrame){
+    if(gMainWidget && gMainWidget->m_itemChoiceList &&
+       gMainWidget->m_itemChoiceList->showingSidePreview()){
         gMainWidget->m_itemChoiceList->m_previewFrame->show();
         gMainWidget->m_itemChoiceList->previewLoaded();
     }
+
 }
 
 void PreviewPane::loadingStart(){

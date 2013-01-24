@@ -130,7 +130,7 @@ QIcon GnomeIconProvider::getGnomeicon(const QFileInfo& info) const
 
     Q_ASSERT(fileType);
     if(QString(fileType) == "gnome-fs-regular" || QString(fileType) == "gnome-fs-directory"){
-        qDebug() << "got some bullshit type, returning null ";
+        qDebug() << "got a apparently bogus type, returning null ";
         //gdk_threads_leave();
         return QIcon();
     }
