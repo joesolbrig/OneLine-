@@ -69,6 +69,17 @@ static CatItem process_entry(GMenuTreeEntry *entry, int impliedWeight)
       if(execParts[0].length()>0){
           QString itemPath = addPrefix(SHELL_VERB_PREFIX,execParts[0]);
           childItem.setPath(itemPath);
+          QString finalPath;
+          //If I slick, I'd parse the "%U" codes
+          //but they mean nearly nothing so why bother?
+          for(int i=0; i< execParts.count();i++){
+              if(execParts[i].startsWith("%")){
+                  continue;
+              }
+              finalPath+= execParts[i] + " ";
+          }
+          childItem.setCustomCommandLine(finalPath);
+      } else {
           childItem.setCustomCommandLine(execChars);
       }
   }
@@ -118,6 +129,8 @@ static CatItem walk_directory(GMenuTreeDirectory *directory, int previousWeight)
   }
   if(gmenu_tree_directory_get_icon(directory)){
       dirItem.setIcon(gmenu_tree_directory_get_icon(directory));
+  } else {
+      dirItem.setIcon(FILE_TYPE_ICON);
   }
 
   //CatItem gm(BASE_GNOME_MENU_PATH);
@@ -185,8 +198,17 @@ QList<CatItem> parseXdgMenus() {
 
   QList<CatItem> childs = dirParent.getChildren();
 
-  for(int i=0; i< childs.count();i++){
-      childs[i].setPinned("");
+  if(childs.count()<4){
+      for(int i=0; i< childs.count();i++){
+          childs[i].setPinned("");
+          childs[i].setIsDefaultable();
+      }
+      return childs;
+  } else {
+      dirParent.setPinned("");
+      dirParent.setIsDefaultable();
+      return dirParent;
   }
-  return childs;
+
+
 }

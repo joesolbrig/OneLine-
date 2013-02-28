@@ -426,11 +426,11 @@ CatItem FullTextPlugin::CreateFullTextItem(RecollQueryItem recolItem, QList<CatI
     }
 
 
-    QFileInfo fi(path);
+    QFileInfo fileInfo(path);
     CatItem res;
     qDebug() << "CreateFullTextItem with path:" << path;
-    if(fi.exists()){
-        QString containingDir = fi.dir().path();
+    if(fileInfo.exists()){
+        QString containingDir = fileInfo.dir().path();
         if(containingDir == CatItem::itemCacheDir()){
             QFile cacheFile(path);
             if(cacheFile.open(QIODevice::WriteOnly |QIODevice::Text)){
@@ -456,7 +456,7 @@ CatItem FullTextPlugin::CreateFullTextItem(RecollQueryItem recolItem, QList<CatI
         CatItem parent(containingDir);
         QSet<QString> dummySet;
         res = CatItem::createFileItem(dummySet,
-                                      fi,
+                                      fileInfo,
                                       parent,
                                       2,
                                       UserEvent::IGNORE,thePlatform,
@@ -476,10 +476,10 @@ CatItem FullTextPlugin::CreateFullTextItem(RecollQueryItem recolItem, QList<CatI
     }
 
     QString abstractStr = recolItem.abstractText.simplified();
-    res.setName(fi.baseName());
+    res.setName(fileInfo.fileName());
     if(!abstractStr.isEmpty()){
-        res.setName(abstractStr);
-        res.setTemporaryDescription(abstractStr);
+        res.setTemporaryName(abstractStr);
+        //res.setTemporaryDescription(abstractStr);
         //res.setUseDescription(true);
     }
     res.setMatchType(CatItem::USER_WORDS);

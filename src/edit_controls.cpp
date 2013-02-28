@@ -281,7 +281,7 @@ void MyListWidget::mousePressEvent( QMouseEvent * event  ) {
     }
 
     QRect childRect = IconDelegate::getChildArrowRect(containingRect);
-    if(childRect.contains(pos)){
+    if(childRect.contains(localPos)){
         listWidgetItem->setSelected(true);
         setCurrentRow(index.row());
         CatItem clickItem(addPrefix(OPERATION_PREFIX,GOTO_CHILD_OPERATION));

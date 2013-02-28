@@ -653,11 +653,20 @@ public:
         if(d->m_data.contains((maybeLabel))){
             return true;
         }
+        const QString sep("://");
 
         QStringList sl = d->m_path.split("://");
         QString& name = sl[0] ;
+
+
         if(name == maybeLabel)
             {return true;}
+        if(maybeLabel.endsWith(sep)){
+            QStringRef ref(&maybeLabel,0,maybeLabel.length()- (sep.length()));
+            if(ref == name){
+                return true;
+            }
+        }
 //        if((sl.length() == 1 || (d->m_path[0]==QChar('/'))) && s == FILE_CATALOG_PLUGIN_STR)
 //            { return true; }
         if(name == FILE_NAME && maybeLabel == FILE_CATALOG_PLUGIN_STR)
@@ -1810,10 +1819,6 @@ public:
         return n;
     }
 
-    void setTemporaryName(QString v){
-        Q_ASSERT(!v.isEmpty());
-        setCustomPluginInfo(TEMPORARY_NAME_KEY_STR,v);
-    }
 
     QString getPrefixName(){
         if(!d->m_data.contains(PREFIX_NAME_KEY_STR)){
@@ -1827,10 +1832,15 @@ public:
 
     void setPrefixName(QString v){
         Q_ASSERT(!v.isEmpty());
+        setCustomPluginInfo(PREFIX_NAME_KEY_STR,v);
+    }
+
+    void setTemporaryName(QString v){
+        Q_ASSERT(!v.isEmpty());
         setCustomPluginInfo(TEMPORARY_NAME_KEY_STR,v);
     }
 
-    QString getTemporaryDescription(){
+    QString getTemporaryDescription() const {
         if(!d->m_data.contains(TEMPORARY_DESCRIPTION_KEY_STR)){return "";}
         return d->m_data[TEMPORARY_DESCRIPTION_KEY_STR];
     }
@@ -1855,8 +1865,9 @@ public:
     }
 
     bool getUseDescription() const {
-        if(getItemType() == CatItem::VERB &&
-           !getDescription().isEmpty()){
+        if((getItemType() == CatItem::VERB &&
+           !getDescription().isEmpty())||
+            !getTemporaryDescription().isEmpty()){
             return true;
         }
         if(getIsAction()){
@@ -2370,6 +2381,17 @@ public:
 
     void setUnpinned(){
         d->m_data.remove(ITEM_PIN_KEY);
+        d->m_data.remove(IS_DEFAUTABLE_KEY);
+    }
+
+    void setIsDefaultable(bool it=true){
+        (setCustomPluginValue(IS_DEFAUTABLE_KEY,(int)it));
+    }
+
+    bool getIsDefaultable(){
+        if(isPinned() && getPinnedString().isEmpty()){return true;}
+
+        return (bool)getCustomValue(IS_DEFAUTABLE_KEY, (int)false);
     }
 
     bool getIsDepricated(){

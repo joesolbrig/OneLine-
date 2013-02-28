@@ -451,12 +451,17 @@ QList<CatItem> Cat_Store::getHighestSourceParents(ItemFilter* filter){
     return resultTypes;
 }
 
-QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* intialPos){
+QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* initialPos){
     QMutexLocker locker(&catalogMutex);
     m_returnedPaths.clear();
+    Q_ASSERT(filter);
+
+    if(filter->getOrganizeingType()==CatItem::MIN_TYPE) {
+        QList<CatItem> cl = getHighestTypeProtected(filter, limit, I_BY_FINALWEIGHT, false, initialPos);
+        return cl;
+    }
 
     QList<QList<CatItem> > priorityItems;
-
     QList<CatItem> types = getHighestSourceParents(filter);
     QList<CatItem> sourceItems;
     int totalItems=0;
@@ -465,7 +470,7 @@ QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* 
         QList<CatItem> subTypes = type.getOrganizingTypeItems();
         for(int j=0; j< subTypes.count();j++){
             QList<CatItem> typeRes = getItemChildrenProtected(
-                    filter,subTypes[j], limit, intialPos);
+                    filter,subTypes[j], limit, initialPos);
             if(!typeRes.isEmpty()){
                 sourceItems.append(subTypes[j]);
                 priorityItems.append(typeRes);
@@ -499,6 +504,8 @@ QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* 
 //            long long modWeight = item.getPositiveTotalWeight() *
 //                              source.getSourceWeight();
             long long modWeight = (totalItems - j*log(source.getSourceWeight()+2));
+            if(filter->getOrganizeingType()==CatItem::MIN_TYPE && !item.getIsDefaultable() )
+                { continue; }
 
             if(!item.isEmpty()){
                 itemSorter.insertMulti(modWeight, item);
@@ -508,7 +515,7 @@ QList<CatItem> Cat_Store::getInitialItems(ItemFilter* filter, long limit , int* 
 
     QList<CatItem> res = itemSorter.values();
     qDebug() << "Cat_Store::getInitialItems got: " <<  res.count() << " items";
-    if(intialPos) { *intialPos += MAX(res.length(),limit); }
+    if(initialPos) { *initialPos += MAX(res.length(),limit); }
     return res;
 
 
@@ -998,10 +1005,13 @@ CatItem Cat_Store::setItemExecuted(InputList* inputList){
     }
 
     QList<CatItem> simpleItems = inputList->nounList();
+    CatItem verb = inputList->getVerb();
+    if(!verb.isEmpty()){ simpleItems.append(verb);}
     for(int i=0; i < simpleItems.count(); i++){
         simpleItems[i].setLabel(SPECIFICALLY_CHOSEN_KEY);
         simpleItems[i].setLabel(EXECUTED_KEY);
         simpleItems[i].setSeen();
+        simpleItems[i].setIsDefaultable();
         if(simpleItems[i].isTimelyMessage()){
             simpleItems[i].clearExternalWeight();
         }
@@ -1014,9 +1024,11 @@ CatItem Cat_Store::setItemExecuted(InputList* inputList){
         }
     }
 
+    it.setIsDefaultable();
     reweightItemsProtected();
     reweightItemProtected(it);
     pruneVisibilityList();
+    addItemEntryProtected(it);
     return outItem;
 }
 
@@ -1305,7 +1317,11 @@ void Cat_Store::reweightItemProtected(CatItem& it){
     Q_ASSERT(it.getFullWeight()== newFullWeight);
 
     it.clearRelations();
-    item_index.addEntry(newFullWeight, it, I_BY_FINALWEIGHT);
+    if(it.getIsDefaultable()){
+        item_index.addEntry(newFullWeight, it, I_BY_FINALWEIGHT);
+    } else {
+        item_index.removeEntry(it, I_BY_FINALWEIGHT);
+    }
 
     if(it.isUnseenItem()){
         Tuple t((int)it.getItemType(), tl);
@@ -1480,10 +1496,6 @@ int Cat_Store::restoreRelationByIndex(CatItem& it, QString index, int depth){
 }
 
 CatItem Cat_Store::addItemProtected(CatItem itemToAdd, int recur){
-//    if(itemToAdd.isASource()){
-//        //qDebug() << "got source: " << itemToAdd.getPath();
-//
-//    }
     if(m_insertedPaths.contains(itemToAdd.getPath())){
         CatItem re = item_index.getValue(itemToAdd.getPath());
         if(recur > 0 || itemToAdd.getName() ==re.getName()){
@@ -1541,7 +1553,7 @@ CatItem Cat_Store::addItemProtected(CatItem itemToAdd, int recur){
 
     addRelationsToDBProtected(itemToAdd, recur);//must be before reweigh to give access to external weight
     if(!oldItem.isEmpty()){ itemToAdd = oldItem; }
-    if(!sameWeight){ reweightItemProtected(itemToAdd); }
+    if(!sameWeight || itemToAdd.getIsDefaultable()){ reweightItemProtected(itemToAdd); }
     addItemEntryProtected(itemToAdd);
     //Todo much could change to do below...
 
@@ -1556,7 +1568,7 @@ CatItem Cat_Store::addItemProtected(CatItem itemToAdd, int recur){
 }
 
 void Cat_Store::addRelationsToDBProtected(CatItem& item, int recur){
-    item.clearTempInformation();
+    //item.clearTempInformation();
     item.addArgumentsToRelations();
     addTypePseudoRelationsToItem(item);
     QList<DetachedChildRelation> relations = item.getRelations();

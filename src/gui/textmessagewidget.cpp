@@ -136,8 +136,8 @@ void TextBarItem::updateText(){
     QString text;
     if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){
         text = m_item.getName();
-        if(text.length()> charsAllowed-5)
-        text = QString("...") + text.right(charsAllowed-8);
+        if(text.length()> charsAllowed+2)
+        text = DOTS_CHARS + text.right(charsAllowed-8);
     } else  if(altDn ){
         text = m_item.formattedName(false,charsAllowed);
     } else {
@@ -181,6 +181,9 @@ QRectF TextBarItem::baseBoundingRect() const{
     qreal maxW=0;
     if(m_item.getFilterRole() == CatItem::MESSAGE_ELEMENT){
         maxW = gMarginWidget->listWindowRect().width()/(1.2)-4;
+        if(this->m_parent->getItemCount()==1){
+            w =maxW;
+        }
     } else {
         maxW = gMarginWidget->listWindowRect().width()/4-2;
     }
@@ -359,6 +362,7 @@ int TextMessageBar::getMessageSpaceAvailable(){
     int length = m_view->geometry().width();
     int buttonWidth=0;
     for(int i=0; i < m_textButtons.length(); i++){
+        if(m_textButtons[i]->getItemName().isEmpty()){ continue;}
         buttonWidth += m_textButtons[i]->minimumRect().width(); //+ (m_vertPadding/4)
     }
     length -=buttonWidth;

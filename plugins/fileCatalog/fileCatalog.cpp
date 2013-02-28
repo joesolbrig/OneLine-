@@ -22,9 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <QRegExp>
 #include <QTextCodec>
 
-//#include <magic.h>
-//#include <QMimeData>
-//#include <kfileitem.h>
 
 #ifdef Q_WS_WIN
 #include <windows.h>
@@ -85,15 +82,14 @@ void FilecatalogPlugin::getCatalog(QList<CatItem>* items){
             qDebug() << "error base file: " << memDirs[i].name << " does not exist!";
             continue;
         }
-        CatItem dirParent(fileInfo.absoluteFilePath());
         int depth = MIN(memDirs[i].depth, MAX_DIR_SEARCH_DEPTH);
-        dirParent = CatItem::createFileItem(extendedTypes, fileInfo, dummy, depth,UserEvent::IGNORE,thePlatform,getPluginRep());
+        CatItem dirParent = CatItem::createFileItem(extendedTypes, fileInfo, dummy, depth,UserEvent::IGNORE,thePlatform,getPluginRep());
         dirParent.setCustomPluginInfo(FILE_DIRECTORY_PLUGIN_STR,memDirs[i].toString());
         indexDirectory(depth, extendedTypes, dirParent, items);
         if(memDirs[i].baseWeight>0){
             dirParent.setUpdatingSourceWeight(memDirs[i].baseWeight,getPluginRep());
         }
-
+        dirParent.setIsDefaultable();
         items->append(dirParent);
     }
 }

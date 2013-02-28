@@ -90,7 +90,7 @@ void JsonReader::parseTransformedStream(QByteArray response){
 Does a whole extra song-and-dance... to get "token" from "code"
 */
 QString FacebookReader::tokenGetter(QString code){
-    qDebug() << "OauthCode: " << code;
+    qDebug() << "tokenGetter OauthCode: " << code;
     QString urlPartial =confirmToken_uri + ("?client_id=" + QString(FB_App_ID) + "&redirect_uri=" + redirect_uri
                                             +"&client_secret="+FB_App_Secret+"&code=");
     qDebug() << "Facebook partial url: " << urlPartial;
@@ -118,7 +118,7 @@ https://graph.facebook.com/oauth/access_token?
 Does a whole other extra song-and-dance... to get "extraToken" from "token"
 */
 QString FacebookReader::extraTokenGetter(QString code){
-    qDebug() << "code: " << code;
+    qDebug() << "extraTokenGetter code: " << code;
     QString urlPartial =confirmToken_uri + ("?client_id=" + QString(FB_App_ID)
                                             +"&client_secret="+FB_App_Secret
                                             +"&grant_type=fb_exchange_token"

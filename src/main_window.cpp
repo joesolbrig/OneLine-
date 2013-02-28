@@ -1056,16 +1056,15 @@ void MainUserWindow::setPathMessage(){
 
     QString msg = m_inputList.getPathText(spaceAvailable);
     msg = msg.simplified();
-    if(!msg.isEmpty() && !m_inputList.getUserKeys().isEmpty())
-        { msg += QString(" ") + (UI_SEPARATOR_STRING) + " "; }
-    msg +=  m_inputList.getUserKeys();
+    if(!m_inputList.isExpanded()){
+        if(!msg.isEmpty() && !m_inputList.getUserKeys().isEmpty())
+            { msg += QString(" ") + (UI_SEPARATOR_STRING) + " "; }
+        msg +=  m_inputList.getUserKeys();
 
-    if(msg.length()>spaceAvailable-10){
-        msg = DOTS_CHARS + msg.right(spaceAvailable-3);
+        if(msg.length()>spaceAvailable-10){
+            msg = DOTS_CHARS + msg.right(spaceAvailable-3);
+        }
     }
-//    if(msg.isEmpty())
-//        { msg += UI_HIGHEST_RATED_MESSAGE; }
-
     m_itemChoiceList->addMessage(msg);
 }
 
